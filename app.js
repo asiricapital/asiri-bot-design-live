@@ -1,5 +1,5 @@
 /* ============================================================
-   Asiri Obsidian Command v26 - Full Application JavaScript
+   Asiri Obsidian Command v26 - Full Application JavaScript (FIXED)
    ============================================================ */
 
 // ── Configuration ──
@@ -17,6 +17,7 @@ const CONFIG = {
 let appState = {
   currentPage: 'home-page',
   charts: {},
+  chartsInitialized: false,
   data: {
     portfolio: {
       total: 125842.69,
@@ -27,17 +28,28 @@ let appState = {
 };
 
 // ── DOM Elements ──
-const pages = document.querySelectorAll('.page');
-const navItems = document.querySelectorAll('.nav-item');
-const decisionOrb = document.getElementById('decisionOrb');
-const orbDecision = document.querySelector('.orb-decision');
-const orbConfidence = document.querySelector('.orb-confidence');
+let pages = [];
+let navItems = [];
+let decisionOrb = null;
+let orbDecision = null;
+let orbConfidence = null;
 
 // ── Initialize ──
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('✅ DOM Content Loaded');
+  
+  // Get DOM elements after page loads
+  pages = document.querySelectorAll('.page');
+  navItems = document.querySelectorAll('.nav-item');
+  decisionOrb = document.getElementById('decisionOrb');
+  orbDecision = document.querySelector('.orb-decision');
+  orbConfidence = document.querySelector('.orb-confidence');
+  
+  console.log('📍 Found', pages.length, 'pages');
+  console.log('📍 Found', navItems.length, 'nav items');
+  
   initializeApp();
   setupEventListeners();
-  initializeCharts();
   startLiveUpdates();
 });
 
@@ -45,15 +57,23 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeApp() {
   console.log('🚀 Asiri Obsidian Command v26 - Full Application');
   navigateToPage('home-page');
+  
+  // Initialize charts after a short delay
+  setTimeout(() => {
+    initializeCharts();
+  }, 500);
 }
 
 // ── Setup Event Listeners ──
 function setupEventListeners() {
+  console.log('🔗 Setting up event listeners...');
+  
   // Navigation
-  navItems.forEach(item => {
+  navItems.forEach((item, index) => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const pageName = item.getAttribute('data-page');
+      console.log('📄 Navigating to:', pageName);
       navigateToPage(pageName);
       updateActiveNav(item);
     });
@@ -62,6 +82,7 @@ function setupEventListeners() {
   // Decision Orb
   if (decisionOrb) {
     decisionOrb.addEventListener('click', cycleDecision);
+    console.log('✅ Decision Orb click listener added');
   }
 
   // Keyboard shortcuts
@@ -70,6 +91,7 @@ function setupEventListeners() {
       e.preventDefault();
       cycleDecision();
     }
+    
     // Number keys for quick navigation
     const pageMap = {
       '1': 'home-page',
@@ -79,14 +101,20 @@ function setupEventListeners() {
       '5': 'alerts-page',
       '6': 'settings-page'
     };
+    
     if (pageMap[e.key]) {
       navigateToPage(pageMap[e.key]);
+      updateActiveNavByPageName(pageMap[e.key]);
     }
   });
+  
+  console.log('✅ Event listeners setup complete');
 }
 
 // ── Navigate to Page ──
 function navigateToPage(pageName) {
+  console.log('🔄 Navigating to page:', pageName);
+  
   // Hide all pages
   pages.forEach(page => {
     page.classList.remove('active');
@@ -97,13 +125,16 @@ function navigateToPage(pageName) {
   if (selectedPage) {
     selectedPage.classList.add('active');
     appState.currentPage = pageName;
+    console.log('✅ Page activated:', pageName);
     
     // Initialize page-specific content
     if (pageName === 'portfolio-page') {
-      initializePortfolioChart();
+      setTimeout(() => initializePortfolioChart(), 100);
     } else if (pageName === 'markets-page') {
-      initializeMarketCharts();
+      setTimeout(() => initializeMarketCharts(), 100);
     }
+  } else {
+    console.error('❌ Page not found:', pageName);
   }
 }
 
@@ -113,6 +144,16 @@ function updateActiveNav(activeItem) {
     item.classList.remove('active');
   });
   activeItem.classList.add('active');
+}
+
+function updateActiveNavByPageName(pageName) {
+  navItems.forEach(item => {
+    if (item.getAttribute('data-page') === pageName) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
 }
 
 // ── Decision Orb Logic ──
@@ -146,7 +187,7 @@ const DECISION_STATES = {
 let currentDecision = DECISION_STATES.WAIT;
 
 function updateDecisionOrb(decision) {
-  if (!decisionOrb) return;
+  if (!decisionOrb || !orbDecision || !orbConfidence) return;
 
   // Remove old classes
   Object.values(DECISION_STATES).forEach(state => {
@@ -156,11 +197,19 @@ function updateDecisionOrb(decision) {
   // Add new class
   decisionOrb.classList.add(decision.class);
 
-  // Update content
-  orbDecision.textContent = decision.text;
-  orbConfidence.textContent = `${decision.confidence}%`;
+  // Update content with animation
+  orbDecision.style.opacity = '0.5';
+  orbConfidence.style.opacity = '0.5';
+  
+  setTimeout(() => {
+    orbDecision.textContent = decision.text;
+    orbConfidence.textContent = `${decision.confidence}%`;
+    orbDecision.style.opacity = '1';
+    orbConfidence.style.opacity = '1';
+  }, 150);
 
   currentDecision = decision;
+  console.log('✅ Decision updated to:', decision.text);
 }
 
 function cycleDecision() {
@@ -173,71 +222,102 @@ function cycleDecision() {
 // ── Charts Initialization ──
 function initializeCharts() {
   console.log('📊 Initializing charts...');
+  
+  if (appState.chartsInitialized) {
+    console.log('⏭️  Charts already initialized');
+    return;
+  }
+  
+  // Initialize portfolio chart if on that page
+  if (appState.currentPage === 'portfolio-page') {
+    initializePortfolioChart();
+  }
+  
+  // Initialize market charts if on that page
+  if (appState.currentPage === 'markets-page') {
+    initializeMarketCharts();
+  }
+  
+  appState.chartsInitialized = true;
 }
 
 function initializePortfolioChart() {
   const canvas = document.getElementById('portfolioChart');
-  if (!canvas || appState.charts.portfolio) return;
-
-  const ctx = canvas.getContext('2d');
+  if (!canvas) {
+    console.log('⚠️  Portfolio chart canvas not found');
+    return;
+  }
   
-  // Sample data - replace with real data
-  const data = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [{
-      label: 'Portfolio Value',
-      data: [110000, 115000, 112000, 120000, 125000, 125842.69],
-      borderColor: 'rgba(38, 230, 161, 0.8)',
-      backgroundColor: 'rgba(38, 230, 161, 0.1)',
-      borderWidth: 2,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 4,
-      pointBackgroundColor: 'rgba(38, 230, 161, 1)',
-      pointBorderColor: '#05080D',
-      pointBorderWidth: 2
-    }];
-  };
+  if (appState.charts.portfolio) {
+    console.log('⏭️  Portfolio chart already initialized');
+    return;
+  }
 
-  appState.charts.portfolio = new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: false,
-          grid: {
-            color: 'rgba(75, 184, 255, 0.1)',
-            drawBorder: false
-          },
-          ticks: {
-            color: 'rgba(160, 176, 192, 0.8)',
-            font: {
-              size: 11
-            }
+  try {
+    const ctx = canvas.getContext('2d');
+    
+    // Sample data
+    const data = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Portfolio Value',
+        data: [110000, 115000, 112000, 120000, 125000, 125842.69],
+        borderColor: 'rgba(38, 230, 161, 0.8)',
+        backgroundColor: 'rgba(38, 230, 161, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: 'rgba(38, 230, 161, 1)',
+        pointBorderColor: '#05080D',
+        pointBorderWidth: 2
+      }];
+    };
+
+    appState.charts.portfolio = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
           }
         },
-        x: {
-          grid: {
-            display: false
+        scales: {
+          y: {
+            beginAtZero: false,
+            grid: {
+              color: 'rgba(75, 184, 255, 0.1)',
+              drawBorder: false
+            },
+            ticks: {
+              color: 'rgba(160, 176, 192, 0.8)',
+              font: {
+                size: 11
+              }
+            }
           },
-          ticks: {
-            color: 'rgba(160, 176, 192, 0.8)',
-            font: {
-              size: 11
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: 'rgba(160, 176, 192, 0.8)',
+              font: {
+                size: 11
+              }
             }
           }
         }
       }
-    }
-  });
+    });
+    
+    console.log('✅ Portfolio chart initialized');
+  } catch (error) {
+    console.error('❌ Error initializing portfolio chart:', error);
+  }
 }
 
 function initializeMarketCharts() {
@@ -251,49 +331,60 @@ function initializeMarketCharts() {
   ];
 
   markets.forEach(market => {
-    const canvas = document.getElementById(market.id);
-    if (!canvas) return;
+    try {
+      const canvas = document.getElementById(market.id);
+      if (!canvas) {
+        console.log('⚠️  Canvas not found for:', market.id);
+        return;
+      }
 
-    const ctx = canvas.getContext('2d');
-    const isUp = market.data[market.data.length - 1] > market.data[0];
+      const ctx = canvas.getContext('2d');
+      const isUp = market.data[market.data.length - 1] > market.data[0];
 
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['', '', '', '', ''],
-        datasets: [{
-          data: market.data,
-          borderColor: isUp ? CONFIG.CHART_COLORS.up : CONFIG.CHART_COLORS.down,
-          backgroundColor: isUp ? 'rgba(38, 230, 161, 0.1)' : 'rgba(255, 94, 115, 0.1)',
-          borderWidth: 1.5,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 0,
-          pointHoverRadius: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: false }
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['', '', '', '', ''],
+          datasets: [{
+            data: market.data,
+            borderColor: isUp ? CONFIG.CHART_COLORS.up : CONFIG.CHART_COLORS.down,
+            backgroundColor: isUp ? 'rgba(38, 230, 161, 0.1)' : 'rgba(255, 94, 115, 0.1)',
+            borderWidth: 1.5,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4
+          }]
         },
-        scales: {
-          y: {
-            display: false,
-            beginAtZero: false
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false }
           },
-          x: {
-            display: false
+          scales: {
+            y: {
+              display: false,
+              beginAtZero: false
+            },
+            x: {
+              display: false
+            }
           }
         }
-      }
-    });
+      });
+      
+      console.log('✅ Chart initialized for:', market.label);
+    } catch (error) {
+      console.error('❌ Error initializing chart for', market.id, ':', error);
+    }
   });
 }
 
 // ── Live Updates ──
 function startLiveUpdates() {
+  console.log('⏱️  Starting live updates...');
+  
   // Update time every second
   setInterval(updateTime, 1000);
 
@@ -332,11 +423,13 @@ function updateMarketPrices() {
     const newPrice = (currentPrice * (1 + changePercent / 100)).toFixed(2);
 
     // Animate
+    value.style.transition = 'opacity 0.3s ease';
     value.style.opacity = '0.5';
+    
     setTimeout(() => {
       value.textContent = newPrice;
       value.style.opacity = '1';
-    }, 100);
+    }, 150);
 
     // Update change
     if (changePercent > 0) {
@@ -352,12 +445,14 @@ function updateMarketPrices() {
 }
 
 function simulateDecisionChange() {
-  // Randomly change decision for demo
-  const decisions = Object.values(DECISION_STATES);
-  const randomDecision = decisions[Math.floor(Math.random() * decisions.length)];
+  // Randomly change decision for demo (but not too often)
+  if (Math.random() > 0.7) {
+    const decisions = Object.values(DECISION_STATES);
+    const randomDecision = decisions[Math.floor(Math.random() * decisions.length)];
 
-  if (randomDecision !== currentDecision) {
-    updateDecisionOrb(randomDecision);
+    if (randomDecision !== currentDecision) {
+      updateDecisionOrb(randomDecision);
+    }
   }
 }
 
@@ -376,6 +471,12 @@ function getStatusColor(status) {
   return colors[status] || '#A0B0C0';
 }
 
+// ── Console Messages ──
+console.log('%c🎯 Asiri Obsidian Command v26', 'color: #4BB8FF; font-size: 16px; font-weight: bold;');
+console.log('%cClick the Decision Orb to cycle through decisions', 'color: #26E6A1; font-size: 12px;');
+console.log('%cPress SPACE to change decision', 'color: #FFBF47; font-size: 12px;');
+console.log('%cPress 1-6 for quick navigation', 'color: #A78BFA; font-size: 12px;');
+
 // ── Export for testing ──
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -385,9 +486,3 @@ if (typeof module !== 'undefined' && module.exports) {
     DECISION_STATES
   };
 }
-
-// ── Console Messages ──
-console.log('%c🎯 Asiri Obsidian Command v26', 'color: #4BB8FF; font-size: 16px; font-weight: bold;');
-console.log('%cClick the Decision Orb to cycle through decisions', 'color: #26E6A1; font-size: 12px;');
-console.log('%cPress SPACE to change decision', 'color: #FFBF47; font-size: 12px;');
-console.log('%cPress 1-6 for quick navigation', 'color: #A78BFA; font-size: 12px;');
