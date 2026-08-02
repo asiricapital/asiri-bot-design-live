@@ -1,0 +1,7 @@
+Standardized brand name to: Asiri Capital
+
+server.js: أسيري كابيتال=7, ASIRI CAPITAL=0, Asiri capital=0
+app.js: أسيري كابيتال=1, ASIRI CAPITAL=1, Asiri capital=0
+index.html: أسيري كابيتال=2, ASIRI CAPITAL=1, Asiri capital=0
+
+Syntax checks: {"server.js": {"ok": true, "stderr": ""}, "app.js": {"ok": true, "stderr": ""}}

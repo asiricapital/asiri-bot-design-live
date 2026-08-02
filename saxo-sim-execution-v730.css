@@ -1,0 +1,379 @@
+/* Asiri Capital — Saxo SIM Confirmed Execution v7.3.0 */
+#saxoExecutionV730.sx730-desk {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(93, 157, 255, .34);
+  background:
+    radial-gradient(circle at 88% 4%, rgba(57, 211, 148, .08), transparent 28%),
+    linear-gradient(155deg, rgba(12, 34, 54, .98), rgba(7, 22, 37, .98));
+}
+
+#saxoExecutionV730.sx730-desk::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, #5d9dff, #39d394, #f5bf55);
+}
+
+.sx730-head {
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.sx730-state-stack {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sx730-ready {
+  border-color: rgba(57, 211, 148, .42) !important;
+  background: rgba(57, 211, 148, .10) !important;
+  color: #7be6b6 !important;
+}
+
+.sx730-locked,
+.sx730-live-lock {
+  border-color: rgba(255, 113, 129, .38) !important;
+  background: rgba(255, 113, 129, .08) !important;
+  color: #ff9aa5 !important;
+}
+
+.sx730-blockers {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 18px;
+}
+
+.sx730-blockers > div {
+  padding: 11px 13px;
+  border: 1px solid rgba(245, 191, 85, .28);
+  border-radius: 13px;
+  background: rgba(245, 191, 85, .06);
+  color: #e9c779;
+  font-size: .86rem;
+  line-height: 1.65;
+}
+
+.sx730-blockers .sx730-ok {
+  border-color: rgba(57, 211, 148, .28);
+  background: rgba(57, 211, 148, .06);
+  color: #82dfb7;
+}
+
+.sx730-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sx730-form-grid label {
+  display: grid;
+  gap: 7px;
+}
+
+.sx730-form-grid label > span {
+  color: #9eb3c4;
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.sx730-form-grid input,
+.sx730-form-grid select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid rgba(126, 169, 201, .25);
+  border-radius: 13px;
+  background: rgba(4, 17, 29, .72);
+  color: #f2f7fb;
+  outline: none;
+}
+
+.sx730-form-grid input:focus,
+.sx730-form-grid select:focus {
+  border-color: rgba(93, 157, 255, .68);
+  box-shadow: 0 0 0 3px rgba(93, 157, 255, .10);
+}
+
+.sx730-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.sx730-actions button {
+  min-height: 44px;
+}
+
+.sx730-status {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(126, 169, 201, .18);
+  border-radius: 13px;
+  background: rgba(4, 17, 29, .55);
+}
+
+.sx730-result {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.sx730-result > div {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid rgba(93, 157, 255, .24);
+  border-radius: 14px;
+  background: rgba(5, 20, 34, .66);
+}
+
+.sx730-result span,
+.sx730-result b {
+  display: block;
+}
+
+.sx730-result span {
+  margin-bottom: 6px;
+  color: #93a9bb;
+  font-size: .74rem;
+}
+
+.sx730-result b {
+  overflow-wrap: anywhere;
+  color: #edf6ff;
+  font-family: Inter, 'IBM Plex Sans Arabic', sans-serif;
+}
+
+.sx730-preview {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(57, 211, 148, .32);
+  border-radius: 18px;
+  background: rgba(7, 30, 38, .72);
+}
+
+.sx730-preview-head {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, minmax(0, .75fr));
+  gap: 10px;
+}
+
+.sx730-preview-head > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(126, 169, 201, .16);
+  border-radius: 13px;
+  background: rgba(4, 17, 29, .54);
+}
+
+.sx730-preview-head span,
+.sx730-preview-head b {
+  display: block;
+}
+
+.sx730-preview-head span {
+  margin-bottom: 5px;
+  color: #93a9bb;
+  font-size: .72rem;
+}
+
+.sx730-preview-head b {
+  overflow-wrap: anywhere;
+  color: #f2f7fb;
+  font-size: .92rem;
+}
+
+.sx730-checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sx730-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid rgba(126, 169, 201, .16);
+  border-radius: 12px;
+  background: rgba(4, 17, 29, .48);
+}
+
+.sx730-check i {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 50%;
+  font-style: normal;
+  font-size: .76rem;
+}
+
+.sx730-check.ok i {
+  background: rgba(57, 211, 148, .14);
+  color: #72e0ae;
+}
+
+.sx730-check.fail i {
+  background: rgba(255, 113, 129, .14);
+  color: #ff8c98;
+}
+
+.sx730-check span,
+.sx730-check b,
+.sx730-check small {
+  display: block;
+}
+
+.sx730-check b {
+  color: #dce9f3;
+  font-size: .78rem;
+}
+
+.sx730-check small {
+  margin-top: 3px;
+  color: #92a9ba;
+  line-height: 1.5;
+}
+
+.sx730-precheck-ok {
+  margin-top: 11px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(57, 211, 148, .08);
+  color: #7be6b6;
+  font-size: .84rem;
+}
+
+.sx730-confirm-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 12px;
+  padding: 13px;
+  border: 1px solid rgba(245, 191, 85, .35);
+  border-radius: 13px;
+  background: rgba(245, 191, 85, .07);
+  color: #ead6a4;
+  cursor: pointer;
+}
+
+.sx730-confirm-row input {
+  width: 19px;
+  height: 19px;
+  margin-top: 2px;
+  accent-color: #39d394;
+}
+
+.sx730-confirm-button {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(57, 211, 148, .55);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #178c61, #24b67e);
+  color: white;
+  font-weight: 700;
+}
+
+.sx730-confirm-button:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+}
+
+.sx730-receipt {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid rgba(57, 211, 148, .34);
+  border-radius: 16px;
+  background: rgba(57, 211, 148, .07);
+}
+
+.sx730-receipt-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 50%;
+  background: rgba(57, 211, 148, .16);
+  color: #73e2af;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.sx730-receipt span,
+.sx730-receipt b,
+.sx730-receipt small {
+  display: block;
+}
+
+.sx730-receipt span {
+  color: #82dfb7;
+  font-size: .78rem;
+}
+
+.sx730-receipt b {
+  margin: 3px 0;
+  color: #f2f7fb;
+}
+
+.sx730-receipt small {
+  color: #9db2c2;
+  overflow-wrap: anywhere;
+}
+
+.sx730-orders-panel {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(126, 169, 201, .17);
+}
+
+.sx730-order {
+  border-color: rgba(126, 169, 201, .18) !important;
+}
+
+.sx730-hidden {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .sx730-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sx730-preview-head {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .sx730-head,
+  .sx730-state-stack {
+    display: block;
+  }
+  .sx730-state-stack .broker-v2-badge {
+    margin: 8px 5px 0 0;
+  }
+  .sx730-form-grid,
+  .sx730-result,
+  .sx730-preview-head,
+  .sx730-checks {
+    grid-template-columns: 1fr;
+  }
+  .sx730-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .sx730-actions button {
+    width: 100%;
+  }
+}

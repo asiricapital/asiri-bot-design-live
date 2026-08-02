@@ -1,0 +1,61 @@
+#investmentcommittee .di720-panel{margin-top:14px;border:1px solid rgba(91,202,255,.2);background:linear-gradient(145deg,rgba(10,27,47,.97),rgba(7,18,33,.96));box-shadow:0 22px 58px rgba(0,0,0,.24);overflow:hidden}
+#investmentcommittee .di720-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+#investmentcommittee .di720-head h3{margin:5px 0 4px;font-size:1.18rem}
+#investmentcommittee .di720-head p{margin:0;line-height:1.65;max-width:760px}
+#investmentcommittee .di720-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#investmentcommittee .di720-storage{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.2);background:rgba(148,163,184,.07);color:#aebed2;font-size:.68rem;font-weight:850;white-space:nowrap}
+#investmentcommittee .di720-storage.connected{color:#77efca;border-color:rgba(45,212,167,.28);background:rgba(45,212,167,.08)}
+#investmentcommittee .di720-storage.local{color:#f6d77a;border-color:rgba(251,191,36,.28);background:rgba(251,191,36,.08)}
+#investmentcommittee .di720-notice{margin-top:14px;padding:11px 13px;border:1px solid rgba(145,169,201,.14);border-radius:13px;background:rgba(255,255,255,.018);color:#91a5bd;font-size:.75rem;line-height:1.6}
+#investmentcommittee .di720-notice.success{color:#7deecb;border-color:rgba(45,212,167,.22);background:rgba(45,212,167,.055)}
+#investmentcommittee .di720-notice.warning{color:#f7d779;border-color:rgba(251,191,36,.23);background:rgba(251,191,36,.055)}
+#investmentcommittee .di720-notice.loading{color:#9be9ff;border-color:rgba(70,217,255,.24);background:rgba(70,217,255,.055)}
+#investmentcommittee .di720-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin-top:14px}
+#investmentcommittee .di720-kpis article{padding:12px;border:1px solid rgba(145,169,201,.13);border-radius:14px;background:rgba(255,255,255,.018);min-width:0}
+#investmentcommittee .di720-kpis span,#investmentcommittee .di720-kpis strong,#investmentcommittee .di720-kpis small{display:block}
+#investmentcommittee .di720-kpis span{color:#8fa4bc;font-size:.65rem;line-height:1.45}
+#investmentcommittee .di720-kpis strong{font-size:1.35rem;margin-top:6px;direction:ltr;unicode-bidi:isolate;text-align:right}
+#investmentcommittee .di720-kpis small{color:#6f829a;font-size:.58rem;margin-top:4px}
+#investmentcommittee .di720-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
+#investmentcommittee .di720-subpanel{padding:14px;border:1px solid rgba(145,169,201,.13);border-radius:16px;background:rgba(255,255,255,.015);min-width:0}
+#investmentcommittee .di720-subhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#investmentcommittee .di720-subhead h4{margin:4px 0 0;font-size:.92rem}
+#investmentcommittee .di720-calibration-head{display:grid;grid-template-columns:72px 1fr 1fr;gap:8px;margin-top:13px;color:#8094ac;font-size:.6rem}
+#investmentcommittee .di720-calibration-head span:first-child{grid-column:2}
+#investmentcommittee .di720-calibration{display:grid;gap:8px;margin-top:7px}
+#investmentcommittee .di720-calibration-row{display:grid;grid-template-columns:62px 1fr 1fr;gap:8px;align-items:center}
+#investmentcommittee .di720-calibration-row>b{font-size:.65rem;color:#a8bad0;text-align:left;direction:ltr}
+#investmentcommittee .di720-cal-cell{position:relative;height:28px;border:1px solid rgba(145,169,201,.12);border-radius:9px;background:rgba(255,255,255,.018);overflow:hidden}
+#investmentcommittee .di720-cal-cell>span{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,rgba(70,217,255,.18),rgba(70,217,255,.55))}
+#investmentcommittee .di720-cal-cell.execution>span{background:linear-gradient(90deg,rgba(45,212,167,.18),rgba(45,212,167,.52))}
+#investmentcommittee .di720-cal-cell em{position:relative;z-index:1;height:100%;display:grid;place-items:center;font-style:normal;font-size:.6rem;color:#d8e4f3;direction:ltr;unicode-bidi:isolate}
+#investmentcommittee .di720-gates{display:grid;gap:8px;margin-top:12px}
+#investmentcommittee .di720-gate-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 10px;border:1px solid rgba(145,169,201,.12);border-radius:11px;background:rgba(255,255,255,.018)}
+#investmentcommittee .di720-gate-row strong,#investmentcommittee .di720-gate-row small{display:block}
+#investmentcommittee .di720-gate-row strong{font-size:.68rem;line-height:1.5}
+#investmentcommittee .di720-gate-row small{font-size:.56rem;color:#7488a0;margin-top:3px}
+#investmentcommittee .di720-gate-row>b{font-size:.75rem;direction:ltr;unicode-bidi:isolate}
+#investmentcommittee .di720-gate-row.positive>b{color:#63e5bb}
+#investmentcommittee .di720-gate-row.negative>b{color:#ff8b9b}
+#investmentcommittee .di720-recent-panel{margin-top:12px}
+#investmentcommittee .di720-recent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+#investmentcommittee .di720-decision-card{padding:12px;border:1px solid rgba(145,169,201,.13);border-radius:14px;background:rgba(255,255,255,.017);min-width:0}
+#investmentcommittee .di720-decision-main{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+#investmentcommittee .di720-decision-main strong,#investmentcommittee .di720-decision-main small{display:block}
+#investmentcommittee .di720-decision-main strong{font-size:.95rem}
+#investmentcommittee .di720-decision-main small{color:#8ea2ba;font-size:.62rem;margin-top:3px;line-height:1.45}
+#investmentcommittee .di720-decision-main time{color:#657b94;font-size:.55rem;white-space:nowrap}
+#investmentcommittee .di720-decision-scores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
+#investmentcommittee .di720-decision-scores span{padding:7px;border-radius:9px;background:rgba(255,255,255,.018);color:#7f93aa;font-size:.58rem}
+#investmentcommittee .di720-decision-scores b{display:block;color:#e7f1fc;font-size:.68rem;margin-top:3px}
+#investmentcommittee .di720-outcome-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
+#investmentcommittee .di720-outcome-grid>div{padding:7px;border:1px solid rgba(145,169,201,.1);border-radius:9px;background:rgba(2,8,15,.24)}
+#investmentcommittee .di720-outcome-grid label,#investmentcommittee .di720-outcome-grid span,#investmentcommittee .di720-outcome-grid small{display:block}
+#investmentcommittee .di720-outcome-grid label{font-size:.53rem;color:#6f8299}
+#investmentcommittee .di720-outcome-grid span{font-size:.67rem;font-weight:850;margin-top:4px;direction:ltr;unicode-bidi:isolate}
+#investmentcommittee .di720-outcome-grid small{font-size:.48rem;color:#73879d;margin-top:2px}
+#investmentcommittee .di720-pending{color:#8ea2ba!important;direction:rtl!important;font-weight:600!important}
+#investmentcommittee .di720-safety{margin:12px 0 0;color:#6e8298;font-size:.62rem;line-height:1.65}
+@media(max-width:1080px){#investmentcommittee .di720-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}#investmentcommittee .di720-grid{grid-template-columns:1fr}#investmentcommittee .di720-recent{grid-template-columns:1fr}}
+@media(max-width:760px){#investmentcommittee .di720-panel{padding:14px;scroll-margin-top:210px}#investmentcommittee .di720-head{flex-direction:column}#investmentcommittee .di720-actions{width:100%;justify-content:stretch}#investmentcommittee .di720-actions button{flex:1}#investmentcommittee .di720-storage{justify-content:center;flex:1}#investmentcommittee .di720-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}#investmentcommittee .di720-kpis article:first-child{grid-column:1/-1}#investmentcommittee .di720-calibration-head{grid-template-columns:55px 1fr 1fr}#investmentcommittee .di720-calibration-row{grid-template-columns:48px 1fr 1fr;gap:5px}#investmentcommittee .di720-decision-main{flex-direction:column}#investmentcommittee .di720-decision-scores,#investmentcommittee .di720-outcome-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:390px){#investmentcommittee .di720-kpis{grid-template-columns:1fr 1fr}#investmentcommittee .di720-calibration-head{font-size:.52rem}#investmentcommittee .di720-calibration-row{grid-template-columns:42px 1fr 1fr}#investmentcommittee .di720-decision-scores{grid-template-columns:1fr}#investmentcommittee .di720-outcome-grid{grid-template-columns:1fr 1fr 1fr}}

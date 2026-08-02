@@ -1,0 +1,91 @@
+/* Asiri Capital v6.6.0 — Mobile Foundation */
+@media (max-width: 900px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip !important;
+    scroll-padding-top: 0 !important;
+  }
+
+  body {
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .topbar {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    z-index: 4 !important;
+  }
+
+  .app-shell {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  html body .app-shell > .main-nav,
+  body .main-nav,
+  .main-nav {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 5 !important;
+    transform: none !important;
+    translate: none !important;
+    min-height: auto !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-self: auto !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .main-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .main-nav button {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+  }
+
+  main,
+  .page,
+  .page.active,
+  #brokergateway,
+  #brokergateway .broker62-shell,
+  #recon656Center {
+    position: relative !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-top: 18px !important;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #brokergateway {
+    padding-top: 0 !important;
+    scroll-margin-top: 0 !important;
+  }
+
+  #brokergateway > .page-title {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+}

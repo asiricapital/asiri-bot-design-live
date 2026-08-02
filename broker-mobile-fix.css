@@ -1,0 +1,45 @@
+/* Asiri Capital v6.5.9 — definitive mobile navigation fix */
+@media (max-width: 900px) {
+  html,
+  body {
+    scroll-padding-top: 0 !important;
+    overflow-x: hidden;
+  }
+
+  .topbar {
+    position: relative !important;
+    top: auto !important;
+  }
+
+  .main-nav {
+    position: relative !important;
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    inset: auto !important;
+    z-index: 10 !important;
+    transform: none !important;
+    min-height: auto !important;
+    align-self: auto !important;
+  }
+
+  .app-shell,
+  main,
+  .page,
+  #brokergateway,
+  #brokergateway .broker62-shell {
+    overflow: visible !important;
+  }
+
+  #brokergateway {
+    padding-top: 18px !important;
+    scroll-margin-top: 0 !important;
+  }
+
+  #brokergateway > .page-title {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+}

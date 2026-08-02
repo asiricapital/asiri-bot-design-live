@@ -1,0 +1,6 @@
+[
+  {"symbol":"AMPL","quantity":56.59,"averageCost":8.80,"stopLoss":8.35,"target1":9.80,"target2":10.50,"strategy":"احتفاظ/نمو"},
+  {"symbol":"ADMA","quantity":32,"averageCost":9.145,"stopLoss":8.75,"target1":9.80,"target2":10.50,"strategy":"نمو"},
+  {"symbol":"RKLB","quantity":3,"averageCost":83.94,"stopLoss":74.50,"target1":92.00,"target2":100.00,"strategy":"نمو/فضاء"},
+  {"symbol":"RDW","quantity":27,"averageCost":10.63,"stopLoss":9.45,"target1":11.50,"target2":12.50,"strategy":"نمو/فضاء"}
+]

@@ -1,0 +1,4 @@
+Force Render deployment for Asiri Capital v6.7.1
+Target commit before trigger: a2fbfaaf93e1e73250b49ecc454a1cb0d68fa131
+Expected UI marker: Asiri Verified Feed
+Expected startup: startup-v671.js

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#151d28">
+  <title>Asiri Stock Watch Lab v2.0</title>
+  <style>
+    :root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;background:#111821;color:#f4f7f9}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#151e2a,#0a1018)}
+    .wrap{max-width:1020px;margin:auto;padding:18px 12px 70px}.head,.panel,.card{background:#1b2532;border:1px solid #314052;border-radius:20px}.head,.panel{padding:18px}.panel{margin-top:14px}
+    .eyebrow{color:#f6c64d;font-size:.74rem;font-weight:900;letter-spacing:.12em}.head h1{margin:7px 0;font-size:1.5rem}.head p,.muted{color:#9aaabb;line-height:1.65}
+    .status,.actions,.watch-actions,.chips{display:flex;gap:8px;flex-wrap:wrap}.status{margin-top:13px}.actions{margin:14px 0}.watch-actions>*{min-height:46px}
+    .pill,.chip{padding:7px 11px;border-radius:999px;background:#293646;color:#cad5df;font-size:.78rem}.pill.good{background:#123f35;color:#5de4b8}.pill.bad{background:#4c202b;color:#ff91a3}.pill.wait{background:#46381d;color:#ffd270}
+    button{border:0;border-radius:13px;padding:12px 16px;font:inherit;font-weight:850;background:#f4bc31;color:#151a20}button.secondary{background:#2a3747;color:#edf2f6}button.danger{background:#482630;color:#ffacb8}button:disabled{opacity:.55}
+    input{flex:1;min-width:170px;border:1px solid #3a4a5e;border-radius:13px;background:#111925;color:#fff;padding:12px 14px;font:inherit;text-transform:uppercase;direction:ltr;text-align:left}
+    .chips{margin-top:12px}.chip{display:inline-flex;align-items:center;gap:7px;direction:ltr}.chip button{padding:0;background:transparent;color:#ff93a5;font-size:1rem}
+    .notice{color:#f4ca64;font-size:.83rem;line-height:1.65}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{padding:15px;min-height:225px}.card.fresh{border-color:rgba(54,218,158,.55)}.card.reference{border-color:rgba(247,193,77,.42)}.card.error{border-color:rgba(255,92,118,.48)}
+    .card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.identity strong{display:block;font-size:1.3rem}.identity small{display:block;color:#8497a9;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+    .badge{padding:5px 8px;border-radius:999px;font-size:.7rem;font-weight:850;background:#303d4c;color:#cbd5df}.badge.fresh{background:#123f35;color:#5de4b8}.badge.reference{background:#46381d;color:#ffd270}.badge.error{background:#4c202b;color:#ff91a3}
+    .price-row{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-top:15px}.usd{font-size:2rem;font-weight:950}.sar{font-size:.95rem;color:#aebdca}.move{font-size:1rem;font-weight:900}.move.up{color:#5de4b8}.move.down{color:#ff879b}
+    .metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:13px}.metrics span{padding:8px;border-radius:10px;background:#253140;color:#8fa2b4;font-size:.73rem}.metrics b{display:block;color:#edf3f7;margin-top:3px;overflow-wrap:anywhere}
+    .ltr,.usd,.sar,.move,.metrics b,.ticker{direction:ltr;unicode-bidi:isolate;text-align:left;font-variant-numeric:tabular-nums}
+    .source{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:#73899c;font-size:.7rem}.log{white-space:pre-wrap;direction:ltr;text-align:left;background:#0b1119;color:#adbdcc;border-radius:13px;padding:12px;max-height:230px;overflow:auto;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}.foot{color:#738799;font-size:.74rem;line-height:1.6;margin-top:14px}
+    @media(max-width:680px){.grid{grid-template-columns:1fr}.wrap{padding:12px 9px 45px}.head h1{font-size:1.33rem}.watch-actions>*{width:100%}.identity small{max-width:210px}.usd{font-size:1.8rem}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="wrap">
+  <section class="head">
+    <div class="eyebrow">ASIRI STOCK WATCH LAB · v2.0 · READ ONLY</div>
+    <h1>متابعة أسهمك بتحديث مستمر</h1>
+    <p>هذه المحاولة تقرأ السهم الأمريكي نفسه من محرك Asiri Market، ولا تبحث عن عقد رقمي يحمل اسمًا مشابهًا. الأسعار بالدولار مع تحويل تقديري للريال.</p>
+    <div class="status">
+      <span id="watchStatus" class="pill wait">القائمة: جارٍ التحميل</span>
+      <span id="accountStatus" class="pill wait">Asiri: جارٍ الفحص</span>
+      <span id="feedStatus" class="pill wait">المصدر: لم يبدأ</span>
+      <span id="refreshStatus" class="pill">التحديث التالي: —</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="watch-actions">
+      <input id="symbolInput" maxlength="12" placeholder="مثال: NVDA أو AMPL" autocomplete="off">
+      <button id="addSymbol">إضافة السهم</button>
+      <button id="importAsiri" class="secondary">استيراد من Asiri</button>
+      <button id="resetWatch" class="danger">القائمة الأساسية</button>
+    </div>
+    <div id="chips" class="chips"></div>
+  </section>
+
+  <div class="actions">
+    <button id="refreshNow">تحديث الآن</button>
+    <button id="pause" class="secondary">إيقاف التحديث</button>
+    <button id="copy" class="secondary">نسخ التقرير</button>
+  </div>
+
+  <section class="panel"><div class="notice">المصدر الحالي مرجعي عبر Asiri Market Engine / Yahoo Finance بتحديث كل 10 ثوانٍ. لا تظهر عبارة «جلسة نشطة» إلا عندما تكون جلسة السوق مفتوحة والبيانات حديثة. السعر بالريال = الدولار × 3.75.</div></section>
+  <section class="panel"><div id="cards" class="grid"></div></section>
+  <section class="panel"><h3>سجل القراءة</h3><div id="log" class="log">جارٍ بدء المحرك…</div></section>
+  <p class="foot">لا يتم تنفيذ صفقات ولا استخدام API Key لـBinance. هذه الصفحة مختبر قراءة مستقل قبل إدخال أي تعديل إلى موقع Asiri Capital الرئيسي.</p>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const WATCH_KEY='asiri_stock_watchlist_v20';
+  const LEGACY_KEY='asiri_binance_watchlist_v12';
+  const BASE=['AMPL','CRDL'];
+  const MAX=40;
+  const POLL_MS=10000;
+  const state={tickers:[],rows:{},running:true,loading:false,nextAt:0,timer:null,clock:null,supabase:null,lastResponse:null};
+  const $=id=>document.getElementById(id);
+  const clean=value=>String(value||'').trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,'').slice(0,12);
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const number=(value,digits=2)=>Number.isFinite(Number(value))?Number(value).toLocaleString('en-US',{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—';
+  const percent=value=>Number.isFinite(Number(value))?`${Number(value)>=0?'+':''}${number(value,2)}%`:'—';
+  const time=value=>value&&!Number.isNaN(new Date(value).getTime())?new Date(value).toLocaleTimeString('ar-SA'):'—';
+  const age=value=>{if(!value)return '—';const seconds=Math.max(0,Math.round((Date.now()-new Date(value).getTime())/1000));return seconds<60?`${seconds}ث`:`${Math.floor(seconds/60)}د`};
+  function log(message,data){$('log').textContent+=`\n[${new Date().toLocaleTimeString()}] ${message}${data!==undefined?' '+JSON.stringify(data):''}`;$('log').scrollTop=$('log').scrollHeight}
+  function pill(id,text,mode='wait'){const node=$(id);node.textContent=text;node.className=`pill ${mode}`}
+  function load(){let saved=[];try{saved=JSON.parse(localStorage.getItem(WATCH_KEY)||localStorage.getItem(LEGACY_KEY)||'[]')}catch{}state.tickers=[...new Set((Array.isArray(saved)?saved:[]).map(clean).filter(Boolean))].slice(0,MAX);if(!state.tickers.length)state.tickers=[...BASE]}
+  function save(){localStorage.setItem(WATCH_KEY,JSON.stringify(state.tickers));pill('watchStatus',`القائمة: ${state.tickers.length} سهم`,'good')}
+  function renderChips(){$('chips').innerHTML=state.tickers.map(t=>`<span class="chip"><bdi>${esc(t)}</bdi><button data-remove="${esc(t)}" aria-label="حذف ${esc(t)}">×</button></span>`).join('');$('chips').querySelectorAll('[data-remove]').forEach(button=>button.onclick=()=>remove(button.dataset.remove))}
+  function rowState(row){if(!row)return {mode:'reference',label:'بانتظار'};if(row.error||row.ok===false)return {mode:'error',label:'تعذر'};if(row.isLiveSession&&row.isFresh)return {mode:'fresh',label:'جلسة نشطة'};return {mode:'reference',label:row.sessionLabel||'سعر مرجعي'}}
+  function render(){
+    $('cards').innerHTML=state.tickers.map(symbol=>{
+      const row=state.rows[symbol];const status=rowState(row);const move=Number(row?.changePercent);const moveClass=move>0?'up':move<0?'down':'';
+      return `<article class="card ${status.mode}"><div class="card-head"><div class="identity"><strong class="ticker">${esc(symbol)}</strong><small>${esc(row?.name||'بانتظار قراءة السهم')}</small></div><span class="badge ${status.mode}">${esc(status.label)}</span></div><div class="price-row"><div><div class="usd">${row?.price!=null?'$'+number(row.price,2):'—'}</div><div class="sar">${row?.sarPrice!=null?number(row.sarPrice,2)+' ر.س':'—'}</div></div><div class="move ${moveClass}">${percent(row?.changePercent)}</div></div><div class="metrics"><span>التغير بالدولار<b>${row?.change!=null?`${Number(row.change)>=0?'+':''}$${number(row.change,2)}`:'—'}</b></span><span>الجلسة<b>${esc(row?.sessionLabel||'—')}</b></span><span>السوق<b>${esc(row?.exchange||'—')}</b></span><span>حالة السوق<b>${esc(row?.marketState||'—')}</b></span><span>وقت السعر<b>${time(row?.updatedAt)}</b></span><span>عمر القراءة<b data-age="${esc(symbol)}">${age(row?.updatedAt||row?.observedAt)}</b></span></div><div class="source"><span>${esc(row?.source||row?.error||'Asiri Market Engine')}</span><time>${time(row?.observedAt)}</time></div></article>`
+    }).join('')
+  }
+  function sync(){save();renderChips();render()}
+  function add(value){const symbol=clean(value);if(!symbol)return;if(!state.tickers.includes(symbol)){state.tickers=[...state.tickers,symbol].slice(0,MAX);sync();log('تمت إضافة سهم',symbol);refresh()}$('symbolInput').value=''}
+  function remove(symbol){state.tickers=state.tickers.filter(item=>item!==symbol);if(!state.tickers.length)state.tickers=[...BASE];delete state.rows[symbol];sync();log('تم حذف سهم',symbol);refresh()}
+  function reset(){state.tickers=[...BASE];state.rows={};sync();log('تمت إعادة القائمة الأساسية',BASE);refresh()}
+  async function importAsiri({silent=false}={}){
+    try{
+      if(!window.supabase?.createClient)throw new Error('مكتبة Supabase غير متاحة');
+      const configResponse=await fetch('/api/config?stockwatch=20',{cache:'no-store'});const config=await configResponse.json();
+      if(!configResponse.ok||!config.supabase?.enabled)throw new Error('Supabase غير مفعّل');
+      if(!state.supabase)state.supabase=window.supabase.createClient(config.supabase.url,config.supabase.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+      const {data:{session}}=await state.supabase.auth.getSession();if(!session)throw new Error('لا توجد جلسة Asiri في هذا المتصفح');
+      const results=await Promise.allSettled([state.supabase.from('portfolio').select('symbol'),state.supabase.from('watchlist').select('symbol')]);
+      const imported=[];for(const result of results){if(result.status==='fulfilled'&&!result.value.error)for(const row of result.value.data||[]){const symbol=clean(row.symbol);if(symbol)imported.push(symbol)}}
+      const before=state.tickers.length;state.tickers=[...new Set([...state.tickers,...imported])].slice(0,MAX);sync();const added=state.tickers.length-before;
+      pill('accountStatus',`Asiri: متصل · أضيف ${added}`,'good');if(!silent)log('استيراد Asiri نجح',{added,imported});if(added)refresh();return true;
+    }catch(error){pill('accountStatus','Asiri: القائمة المحلية',silent?'wait':'bad');if(!silent)log('تعذر استيراد Asiri',error.message);return false}
+  }
+  async function refresh(){
+    if(state.loading||!state.tickers.length)return;state.loading=true;pill('feedStatus','المصدر: جارٍ القراءة','wait');
+    try{
+      const response=await fetch(`/api/binance-lab/stock-quotes?symbols=${encodeURIComponent(state.tickers.join(','))}&t=${Date.now()}`,{cache:'no-store'});
+      const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||`HTTP ${response.status}`);
+      state.lastResponse=data;for(const row of data.rows||[])state.rows[row.symbol]=row;
+      const success=(data.rows||[]).filter(row=>row.ok).length;const failures=(data.rows||[]).length-success;
+      pill('feedStatus',`Asiri Market: ${success} ناجح${failures?` · ${failures} متعذر`:''}`,success?'good':'bad');
+      state.nextAt=Date.now()+Number(data.pollingMs||POLL_MS);render();log('اكتمل تحديث الأسهم',{success,failures,observedAt:data.observedAt});
+    }catch(error){pill('feedStatus','المصدر: تعذر الاتصال','bad');log('خطأ قراءة الأسهم',error.message)}finally{state.loading=false}
+  }
+  function start(){state.running=true;$('pause').textContent='إيقاف التحديث';clearInterval(state.timer);state.timer=setInterval(()=>{if(state.running&&Date.now()>=state.nextAt)refresh()},1000);refresh()}
+  function toggle(){state.running=!state.running;$('pause').textContent=state.running?'إيقاف التحديث':'استئناف التحديث';pill('refreshStatus',state.running?'التحديث مستمر':'التحديث متوقف',state.running?'good':'wait');if(state.running){state.nextAt=0;refresh()}}
+  function updateClock(){if(!state.running)return;const left=Math.max(0,Math.ceil((state.nextAt-Date.now())/1000));pill('refreshStatus',state.loading?'جارٍ التحديث…':`التحديث التالي: ${left}ث`,state.loading?'wait':'good');document.querySelectorAll('[data-age]').forEach(node=>{const row=state.rows[node.dataset.age];node.textContent=age(row?.updatedAt||row?.observedAt)})}
+  function report(){return{testedAt:new Date().toISOString(),watchlist:state.tickers,source:state.lastResponse?.source||'Asiri Market Engine / Yahoo Finance',pollingMs:state.lastResponse?.pollingMs||POLL_MS,rows:state.tickers.map(symbol=>state.rows[symbol]||{symbol,ok:false,error:'no data'}),readOnly:true,tradingEnabled:false}}
+  async function copy(){const text=JSON.stringify(report(),null,2);try{await navigator.clipboard.writeText(text);alert('تم نسخ التقرير.')}catch{prompt('انسخ التقرير:',text)}}
+  $('addSymbol').onclick=()=>add($('symbolInput').value);$('symbolInput').addEventListener('keydown',event=>{if(event.key==='Enter')add(event.currentTarget.value)});$('importAsiri').onclick=()=>importAsiri();$('resetWatch').onclick=reset;$('refreshNow').onclick=refresh;$('pause').onclick=toggle;$('copy').onclick=copy;
+  async function boot(){load();sync();$('log').textContent='تم تحميل قائمة المتابعة.';await importAsiri({silent:true});state.clock=setInterval(updateClock,1000);start()}boot();
+})();
+</script>
+</body>
+</html>

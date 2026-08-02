@@ -1,0 +1,36 @@
+/* Asiri Capital — Opportunity Sections v7.2.3 */
+.opportunity-v723-page{max-width:100%;overflow-x:hidden}
+.opportunity-v723-section{margin-top:18px}
+.opportunity-v723-section .section-head{align-items:flex-start}
+.opportunity-v723-badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 11px;border-radius:999px;border:1px solid rgba(121,157,188,.28);background:rgba(121,157,188,.08);color:#b8c9d8;font-size:.76rem;font-weight:800;white-space:nowrap}
+.opportunity-v723-badge.golden{border-color:rgba(250,190,70,.38);background:rgba(250,190,70,.1);color:#ffd36e}
+.opportunity-v723-badge.new{border-color:rgba(83,154,255,.38);background:rgba(83,154,255,.1);color:#8cc0ff}
+.opportunity-v723-badge.watch{border-color:rgba(151,163,175,.32);background:rgba(151,163,175,.09);color:#c2ccd5}
+.opportunity-v723-counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+.opportunity-v723-counts span{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid rgba(151,173,191,.12);color:#91a9bc;font-size:.78rem}
+.opportunity-v723-counts b{color:#eef6fb;font-size:1rem}
+.opportunity-v723-card{position:relative;overflow:hidden}
+.opportunity-v723-card[data-v723-kind="holding"]{border-color:rgba(95,203,180,.24)}
+.opportunity-v723-card[data-v723-kind="golden"]{border-color:rgba(250,190,70,.46);box-shadow:inset 0 0 0 1px rgba(250,190,70,.06)}
+.opportunity-v723-card[data-v723-kind="new"]{border-color:rgba(83,154,255,.32)}
+.opportunity-v723-label{display:inline-flex;margin:10px 0 2px;padding:6px 9px;border-radius:999px;font-size:.72rem;font-weight:800;border:1px solid rgba(151,173,191,.18);color:#b7c7d5;background:rgba(151,173,191,.07)}
+.opportunity-v723-label.holding{color:#73e6bf;border-color:rgba(85,222,177,.28);background:rgba(85,222,177,.09)}
+.opportunity-v723-label.golden{color:#ffd36e;border-color:rgba(250,190,70,.35);background:rgba(250,190,70,.1)}
+.opportunity-v723-label.new{color:#90c2ff;border-color:rgba(83,154,255,.35);background:rgba(83,154,255,.1)}
+.opportunity-v723-label.watch{color:#c2ccd5}
+.opportunity-v723-empty{grid-column:1/-1;padding:22px;border:1px dashed rgba(151,173,191,.22);border-radius:16px;background:rgba(1,13,24,.28);text-align:center}
+.opportunity-v723-empty b{display:block;color:#eef6fb;margin-bottom:6px}
+.opportunity-v723-empty p{margin:0;color:#8da4b6;line-height:1.75}
+#goldenResults[hidden]{display:none!important}
+@media(max-width:760px){
+  .opportunity-v723-page .page-title{align-items:stretch}
+  .opportunity-v723-page .page-title>button{width:100%}
+  .opportunity-v723-section .section-head{gap:10px}
+  .opportunity-v723-counts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .opportunity-v723-page .golden-grid{grid-template-columns:1fr}
+  .opportunity-v723-card{min-width:0;width:100%;max-width:100%}
+}
+@media(max-width:420px){
+  .opportunity-v723-counts{grid-template-columns:1fr}
+  .opportunity-v723-badge{font-size:.7rem}
+}

@@ -1,0 +1,10 @@
+await import('./patch-broker-v652.js');
+await import('./patch-broker-v653.js');
+await import('./patch-broker-v656.js');
+await import('./patch-mobile-foundation-v660.js');
+await import('./patch-portfolio-center-v661.js');
+await import('./patch-live-prices-v662.js');
+await import('./patch-live-prices-v663.js');
+await import('./patch-live-prices-v664.js');
+await import('./patch-live-prices-v665.js');
+await import('./bootstrap-v65.js');

@@ -1,0 +1,28 @@
+/* Asiri Capital v6.7.0 — verified price diagnostics */
+.price-diagnostics670{border-color:rgba(74,211,154,.42)!important;background:linear-gradient(145deg,rgba(7,35,51,.96),rgba(10,28,43,.96))!important}
+.price-diagnostics670-head{align-items:flex-start!important;gap:16px!important}
+.price-diagnostics670-head h3{margin:.35rem 0!important}
+.price-diagnostics670-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.price-diagnostics670-summary>div{padding:15px;border:1px solid rgba(118,173,207,.22);border-radius:16px;background:rgba(8,29,44,.72)}
+.price-diagnostics670-summary span,.price-diagnostics670-summary small{display:block;color:#91a8b9}
+.price-diagnostics670-summary b{display:block;margin:7px 0;font-size:1.08rem}
+.price-diagnostics670-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.price-diagnostic670-card{padding:16px;border:1px solid rgba(122,174,208,.24);border-radius:17px;background:rgba(7,27,42,.76)}
+.price-diagnostic670-card.live{border-color:rgba(63,213,145,.5)}
+.price-diagnostic670-card.delayed,.price-diagnostic670-card.reference{border-color:rgba(233,188,85,.52)}
+.price-diagnostic670-card.fallback{border-color:rgba(92,174,255,.5)}
+.price-diagnostic670-card.unavailable{border-color:rgba(255,91,111,.48)}
+.price-diagnostic670-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.price-diagnostic670-top b{font-size:1.25rem}.price-diagnostic670-top small{display:block;color:#91a8b9;margin-top:4px}
+.price-diagnostic670-badge,.price-source670{display:block;width:max-content;margin-top:5px;padding:4px 8px;border-radius:999px;font-size:.72rem;letter-spacing:.04em;border:1px solid currentColor}
+.price-diagnostic670-badge.live,.price-source670.live{color:#42d392}
+.price-diagnostic670-badge.delayed,.price-source670.delayed,.price-diagnostic670-badge.reference,.price-source670.reference{color:#e9bc55}
+.price-diagnostic670-badge.fallback,.price-source670.fallback{color:#7ec1ff}
+.price-diagnostic670-badge.unavailable,.price-source670.unavailable{color:#ff6377}
+.price-diagnostic670-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.price-diagnostic670-grid span{padding:9px;border-radius:11px;background:rgba(22,56,72,.56);color:#93a8b7;font-size:.82rem}
+.price-diagnostic670-grid b{display:block;margin-top:5px;color:#f2f7fa;font-size:.9rem;overflow-wrap:anywhere}
+.price-diagnostic670-error{margin:12px 0 0;color:#ff8b99;font-size:.85rem}
+.price-source670{margin-inline:auto}
+@media(max-width:900px){.price-diagnostics670-summary{grid-template-columns:1fr 1fr}.price-diagnostics670-rows{grid-template-columns:1fr}.price-diagnostic670-grid{grid-template-columns:1fr 1fr}.price-diagnostics670-head{display:grid!important}.price-diagnostics670-head button{width:100%}}
+@media(max-width:480px){.price-diagnostics670-summary{grid-template-columns:1fr}.price-diagnostic670-grid{grid-template-columns:1fr 1fr}}

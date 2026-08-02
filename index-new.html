@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asiri Capital - Mission Control</title>
+  <link rel="stylesheet" href="style-new.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <span class="market-status">
+          <span class="status-dot"></span>
+          U.S. MARKET OPEN
+        </span>
+      </div>
+      <div class="header-center">
+        <h1>ASIRI CAPITAL INTELLIGENCE OS</h1>
+      </div>
+      <div class="header-right">
+        <span class="online-status">ONLINE</span>
+        <button class="menu-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Title -->
+      <div class="page-header">
+        <h2>Mission Control</h2>
+        <div class="page-meta">
+          <span><i class="far fa-calendar"></i> Saturday, August 1, 2026</span>
+          <span><i class="far fa-clock"></i> 12:44 PM (GMT+3)</span>
+          <button class="btn-secondary">تحديث البيانات</button>
+        </div>
+      </div>
+
+      <!-- Market Ticker -->
+      <section class="market-ticker">
+        <div class="ticker-item">
+          <div class="ticker-symbol">SPY</div>
+          <div class="ticker-price">642.81</div>
+          <div class="ticker-change up">▲ 0.63%</div>
+          <div class="ticker-chart"></div>
+        </div>
+        <div class="ticker-item">
+          <div class="ticker-symbol">QQQ</div>
+          <div class="ticker-price">553.22</div>
+          <div class="ticker-change up">▲ 0.73%</div>
+          <div class="ticker-chart"></div>
+        </div>
+        <div class="ticker-item">
+          <div class="ticker-symbol">VIX</div>
+          <div class="ticker-price">17.10</div>
+          <div class="ticker-change down">▼ -1.35%</div>
+          <div class="ticker-chart"></div>
+        </div>
+        <div class="ticker-item">
+          <div class="ticker-symbol">BTCUSD</div>
+          <div class="ticker-price">66,842</div>
+          <div class="ticker-change up">▲ 1.81%</div>
+          <div class="ticker-chart"></div>
+        </div>
+        <div class="ticker-item">
+          <div class="ticker-symbol">GOLD</div>
+          <div class="ticker-price">2,437.90</div>
+          <div class="ticker-change down">▼ -0.42%</div>
+          <div class="ticker-chart"></div>
+        </div>
+        <div class="ticker-item">
+          <div class="ticker-symbol">DXY</div>
+          <div class="ticker-price">104.21</div>
+          <div class="ticker-change up">▲ 0.21%</div>
+          <div class="ticker-chart"></div>
+        </div>
+      </section>
+
+      <!-- Mission Status -->
+      <section class="mission-status">
+        <h3>MISSION STATUS</h3>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-icon healthy">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="status-label">System</div>
+            <div class="status-value">Healthy</div>
+          </div>
+          <div class="status-item">
+            <div class="status-icon online">
+              <i class="fas fa-circle"></i>
+            </div>
+            <div class="status-label">AI Copilot</div>
+            <div class="status-value">ONLINE</div>
+          </div>
+          <div class="status-item">
+            <div class="status-icon online">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="status-label">Scanner</div>
+            <div class="status-value">ONLINE</div>
+          </div>
+          <div class="status-item">
+            <div class="status-icon ready">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="status-label">Broker</div>
+            <div class="status-value">READY</div>
+          </div>
+          <div class="status-item">
+            <div class="status-icon live">
+              <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="status-label">News</div>
+            <div class="status-value">LIVE</div>
+          </div>
+          <div class="status-item">
+            <div class="status-icon live">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="status-label">Market</div>
+            <div class="status-value">LIVE</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+        <!-- Market Overview -->
+        <section class="card market-overview">
+          <div class="card-header">
+            <h3>MARKET OVERVIEW</h3>
+            <select class="market-select">
+              <option>U.S. Market</option>
+              <option>Global Market</option>
+            </select>
+          </div>
+          <div class="card-body">
+            <div class="market-main">
+              <div class="market-symbol">S&P 500 (SPY)</div>
+              <div class="market-price">642.81</div>
+              <div class="market-change up">▲ 0.63% (4.02)</div>
+            </div>
+            <div class="market-chart">
+              <svg viewBox="0 0 200 100" class="sparkline">
+                <polyline points="0,80 10,70 20,75 30,60 40,50 50,55 60,40 70,45 80,30 90,35 100,20 110,25 120,15 130,20 140,10 150,15 160,5 170,10 180,0 190,5 200,0" />
+              </svg>
+            </div>
+            <div class="market-stats">
+              <div class="stat">
+                <span>Day High</span>
+                <strong>644.12</strong>
+              </div>
+              <div class="stat">
+                <span>Day Low</span>
+                <strong>638.21</strong>
+              </div>
+              <div class="stat">
+                <span>Volume</span>
+                <strong>48.6M</strong>
+              </div>
+              <div class="stat">
+                <span>Advancers</span>
+                <strong>72%</strong>
+              </div>
+              <div class="stat">
+                <span>Decliners</span>
+                <strong>28%</strong>
+              </div>
+              <div class="stat">
+                <span>Market Trend</span>
+                <strong class="bullish">BULLISH</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- AI Copilot -->
+        <section class="card ai-copilot">
+          <div class="card-header">
+            <h3>AI COPILOT</h3>
+            <button class="btn-icon">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="mission-title">Today's Mission</div>
+            <div class="mission-tasks">
+              <div class="task">
+                <i class="fas fa-check-circle"></i>
+                <span>استثمر أول 20 دقيقة لاتخاذ البدء</span>
+              </div>
+              <div class="task">
+                <i class="fas fa-check-circle"></i>
+                <span>السوق لديه زخم شراء قوي جداً</span>
+              </div>
+            </div>
+            <div class="opportunity-card">
+              <div class="opportunity-header">
+                <span>أفضل فرصة الآن</span>
+              </div>
+              <div class="opportunity-main">
+                <div class="opportunity-icon">
+                  <i class="fas fa-rocket"></i>
+                </div>
+                <div class="opportunity-info">
+                  <div class="opportunity-symbol">RKLB</div>
+                  <div class="opportunity-name">Rocket Lab USA</div>
+                </div>
+                <div class="opportunity-score">95/100</div>
+              </div>
+              <div class="opportunity-details">
+                <div class="detail">
+                  <span>Momentum</span>
+                  <strong>STRONG</strong>
+                </div>
+                <div class="detail">
+                  <span>Risk</span>
+                  <strong>LOW</strong>
+                </div>
+                <div class="detail">
+                  <span>Volatility</span>
+                  <strong>MEDIUM</strong>
+                </div>
+              </div>
+              <button class="btn-ready">✓ READY</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Portfolio Summary -->
+        <section class="card portfolio-summary">
+          <div class="card-header">
+            <h3>PORTFOLIO SUMMARY</h3>
+            <button class="btn-icon">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="portfolio-total">
+              <span>إجمالي المحفظة</span>
+              <div class="portfolio-value">$125,842.69</div>
+              <div class="portfolio-change up">▲ 2.41% (24h)</div>
+            </div>
+            <div class="portfolio-chart">
+              <svg viewBox="0 0 200 80" class="area-chart">
+                <polyline points="0,60 20,50 40,55 60,40 80,45 100,30 120,35 140,25 160,30 180,20 200,25" />
+              </svg>
+            </div>
+            <div class="portfolio-stats">
+              <div class="stat">
+                <span>Today P/L</span>
+                <strong class="positive">+$2,958.21</strong>
+              </div>
+              <div class="stat">
+                <span>Total Gain</span>
+                <strong class="positive">+$18,342.11</strong>
+              </div>
+              <div class="stat">
+                <span>Cash</span>
+                <strong>$22,135.43</strong>
+              </div>
+            </div>
+            <a href="#" class="link-more">عرض التفاصيل الكاملة <i class="fas fa-arrow-left"></i></a>
+          </div>
+        </section>
+
+        <!-- Top Opportunities -->
+        <section class="card top-opportunities">
+          <div class="card-header">
+            <h3>TOP OPPORTUNITIES</h3>
+            <a href="#" class="link-more">عرض الكل</a>
+          </div>
+          <div class="card-body">
+            <div class="opportunities-list">
+              <div class="opportunity-row">
+                <div class="rank">1</div>
+                <div class="opportunity-info">
+                  <div class="icon"><i class="fas fa-rocket"></i></div>
+                  <div class="details">
+                    <div class="symbol">RKLB</div>
+                    <div class="name">Rocket Lab USA</div>
+                  </div>
+                </div>
+                <div class="score">95</div>
+                <button class="btn-action buy">BUY</button>
+                <div class="price">$8.42</div>
+              </div>
+              <div class="opportunity-row">
+                <div class="rank">2</div>
+                <div class="opportunity-info">
+                  <div class="icon"><i class="fas fa-plug"></i></div>
+                  <div class="details">
+                    <div class="symbol">PLUG</div>
+                    <div class="name">Plug Power Inc.</div>
+                  </div>
+                </div>
+                <div class="score">88</div>
+                <button class="btn-action buy">BUY</button>
+                <div class="price">$2.31</div>
+              </div>
+              <div class="opportunity-row">
+                <div class="rank">3</div>
+                <div class="opportunity-info">
+                  <div class="icon"><i class="fas fa-cube"></i></div>
+                  <div class="details">
+                    <div class="symbol">IONQ</div>
+                    <div class="name">IonQ Inc.</div>
+                  </div>
+                </div>
+                <div class="score">82</div>
+                <button class="btn-action watch">WATCH</button>
+                <div class="price">$0.18</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- News Intelligence -->
+        <section class="card news-intelligence">
+          <div class="card-header">
+            <h3>NEWS INTELLIGENCE</h3>
+            <a href="#" class="link-more">عرض الكل</a>
+          </div>
+          <div class="card-body">
+            <div class="news-list">
+              <div class="news-item positive">
+                <div class="news-time">12:42 PM</div>
+                <div class="news-icon"><i class="fas fa-rocket"></i></div>
+                <div class="news-content">
+                  <div class="news-title">Rocket Lab secures new launch contract with NASA</div>
+                </div>
+                <div class="news-badge positive">Positive</div>
+              </div>
+              <div class="news-item positive">
+                <div class="news-time">12:37 PM</div>
+                <div class="news-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="news-content">
+                  <div class="news-title">Markets open higher as tech leads gains</div>
+                </div>
+                <div class="news-badge positive">Positive</div>
+              </div>
+              <div class="news-item neutral">
+                <div class="news-time">12:30 PM</div>
+                <div class="news-icon"><i class="fas fa-percent"></i></div>
+                <div class="news-content">
+                  <div class="news-title">Fed holds rates steady, signals cautious outlook</div>
+                </div>
+                <div class="news-badge neutral">Neutral</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Alerts Center -->
+        <section class="card alerts-center">
+          <div class="card-header">
+            <h3>ALERTS CENTER</h3>
+            <a href="#" class="link-more">جميع التنبيهات</a>
+          </div>
+          <div class="card-body">
+            <div class="alerts-list">
+              <div class="alert-item success">
+                <div class="alert-time">12:44 PM</div>
+                <div class="alert-symbol">RKLB</div>
+                <div class="alert-message">
+                  <span class="alert-label">اشتراء قوي</span>
+                  <span class="alert-score">Score: 95</span>
+                </div>
+              </div>
+              <div class="alert-item warning">
+                <div class="alert-time">12:41 PM</div>
+                <div class="alert-symbol">SPY</div>
+                <div class="alert-message">
+                  <span class="alert-label">اقتراب من مستوى مقاومة</span>
+                  <span class="alert-price">645.00</span>
+                </div>
+              </div>
+              <div class="alert-item info">
+                <div class="alert-time">12:30 PM</div>
+                <div class="alert-symbol">Portfolio</div>
+                <div class="alert-message">
+                  <span class="alert-label">تحقيق هدف يومي +2%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Activity Console -->
+        <section class="card activity-console full-width">
+          <div class="card-header">
+            <h3>ACTIVITY CONSOLE</h3>
+            <span class="live-indicator">● LIVE</span>
+          </div>
+          <div class="card-body">
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-time">12:44:28</div>
+                <div class="activity-tag scanner">[SCANNER]</div>
+                <div class="activity-message">Found opportunity: RKLB Score: 95 Momentum: STRONG</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-time">12:44:15</div>
+                <div class="activity-tag news">[NEWS]</div>
+                <div class="activity-message">Positive news detected (NASA contract)</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-time">12:42:02</div>
+                <div class="activity-tag copilot">[COPILOT]</div>
+                <div class="activity-message">Market sentiment: BULLISH Risk Level: LOW</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-time">12:43:51</div>
+                <div class="activity-tag portfolio">[PORTFOLIO]</div>
+                <div class="activity-message">Daily target +2% achieved ✓</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-time">12:43:30</div>
+                <div class="activity-tag system">[SYSTEM]</div>
+                <div class="activity-message">All systems operational</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active">
+        <i class="fas fa-home"></i>
+        <span>الرئيسية</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-briefcase"></i>
+        <span>المحفظة</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-brain"></i>
+        <span>الذكاء</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-chart-bar"></i>
+        <span>الأسواق</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-bell"></i>
+        <span>التنبيهات</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fas fa-cog"></i>
+        <span>الإعدادات</span>
+      </a>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+#dashboard[data-layout-version="7.0.4"]:not(.active){display:none!important}
+#dashboard[data-layout-version="7.0.4"].active{display:block}
+#dashboard .dash702-commandbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;margin-bottom:14px;border:1px solid rgba(95,207,255,.18);border-radius:18px;background:linear-gradient(135deg,rgba(7,28,45,.96),rgba(8,21,35,.92));box-shadow:0 12px 34px rgba(0,0,0,.18)}
+#dashboard .dash702-commandbar h2{margin:4px 0 2px;font-size:1.28rem}
+#dashboard .dash702-commandbar p{margin:0;color:#90a5b6;line-height:1.5}
+#dashboard .dash702-commandbar .eyebrow{color:#f2c867}
+#dashboard .dash702-commandbar #refreshAll{white-space:nowrap}
+#dashboard .dash702-executive-first{position:relative;overflow:hidden;margin:0 0 16px;border:1px solid rgba(84,235,184,.44);background:linear-gradient(145deg,rgba(7,37,43,.97),rgba(6,24,38,.96));box-shadow:0 16px 42px rgba(0,0,0,.24),inset 0 0 0 1px rgba(84,235,184,.05)}
+#dashboard .dash702-executive-first::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#59e6b7,#56b8ff)}
+#dashboard .dash702-executive-first .section-head{align-items:flex-start}
+#dashboard .dash702-executive-first h3{font-size:1.32rem;margin-bottom:4px}
+#dashboard .dash702-executive-first .eyebrow{color:#65edbd}
+#dashboard .dash702-executive-note{margin:6px 0 0;color:#9fb4c3;font-size:.82rem;line-height:1.55}
+#dashboard .dash702-executive-first .mi-filters{padding:4px;border-radius:12px;background:rgba(255,255,255,.025)}
+#dashboard .dash702-portfolio-history{margin-top:22px;border-style:dashed;background:rgba(11,24,36,.76);box-shadow:none}
+#dashboard .dash702-portfolio-history .eyebrow{color:#8295a5}
+#dashboard .dash702-portfolio-history h3{color:#d7e0e7}
+#dashboard .dash702-history-note{margin:5px 0 0;color:#7e92a2;font-size:.78rem;line-height:1.5}
+#dashboard .dashboard-disclaimer{margin-top:12px}
+@media(max-width:760px){#dashboard .dash702-commandbar{align-items:stretch;flex-direction:column;padding:13px 14px}#dashboard .dash702-commandbar #refreshAll{width:100%}#dashboard .dash702-executive-first{margin-top:0}#dashboard .dash702-executive-first .section-head{gap:12px}#dashboard .dash702-executive-first .mi-filters{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#dashboard .dash702-executive-first .mi-filters button{width:100%}}
