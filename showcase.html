@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asiri Obsidian Command v26 - عرض توضيحي</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --obsidian-black: #05080D;
+      --obsidian-navy: #07111E;
+      --obsidian-graphite: #0B1624;
+      --obsidian-surface: #101E30;
+      --asiri-cyan: #4BB8FF;
+      --signal-green: #26E6A1;
+      --risk-red: #FF5E73;
+      --warning-amber: #FFBF47;
+      --text-primary: #F5F8FB;
+      --text-secondary: #B0BCC9;
+      --text-muted: #6B7A8F;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--obsidian-black) 0%, var(--obsidian-navy) 100%);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      background: rgba(5, 8, 13, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(75, 184, 255, 0.1);
+      z-index: 1000;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--asiri-cyan);
+      letter-spacing: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a:hover {
+      color: var(--asiri-cyan);
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, var(--asiri-cyan), #2E9FD8);
+      color: var(--obsidian-black);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(75, 184, 255, 0.3);
+    }
+
+    /* ── Hero Section ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      margin-top: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(75, 184, 255, 0.1), transparent);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -50%); }
+      50% { transform: translate(-50%, -60%); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 800px;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--asiri-cyan), var(--signal-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+
+    .hero p {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--asiri-cyan), #2E9FD8);
+      color: var(--obsidian-black);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(75, 184, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--asiri-cyan);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: 2px solid var(--asiri-cyan);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(75, 184, 255, 0.1);
+      transform: translateY(-4px);
+    }
+
+    /* ── Features Section ── */
+    .features {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--text-primary);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: linear-gradient(135deg, var(--obsidian-graphite), var(--obsidian-surface));
+      border: 1px solid rgba(75, 184, 255, 0.1);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--asiri-cyan), var(--signal-green));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--asiri-cyan);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(75, 184, 255, 0.2);
+    }
+
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      color: var(--asiri-cyan);
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* ── Design System Section ── */
+    .design-system {
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, rgba(11, 22, 36, 0.5), rgba(16, 30, 48, 0.5));
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .colors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .color-box {
+      border-radius: 8px;
+      padding: 2rem 1rem;
+      text-align: center;
+      border: 1px solid rgba(75, 184, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .color-box:hover {
+      transform: scale(1.05);
+      border-color: var(--asiri-cyan);
+    }
+
+    .color-name {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+    }
+
+    .color-code {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    /* ── Preview Section ── */
+    .preview-section {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .preview-container {
+      background: linear-gradient(135deg, var(--obsidian-graphite), var(--obsidian-surface));
+      border: 1px solid rgba(75, 184, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(75, 184, 255, 0.1);
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: rgba(5, 8, 13, 0.5);
+      border-bottom: 1px solid rgba(75, 184, 255, 0.1);
+    }
+
+    .preview-title {
+      font-size: 0.9rem;
+      color: var(--asiri-cyan);
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .preview-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .preview-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(75, 184, 255, 0.2);
+      border: 1px solid rgba(75, 184, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .preview-btn:hover {
+      background: rgba(75, 184, 255, 0.4);
+    }
+
+    .preview-content {
+      padding: 2rem;
+      min-height: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 8px;
+      background: var(--obsidian-black);
+    }
+
+    /* ── Stats Section ── */
+    .stats {
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, rgba(75, 184, 255, 0.05), rgba(38, 230, 161, 0.05));
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--obsidian-graphite), var(--obsidian-surface));
+      border: 1px solid rgba(75, 184, 255, 0.1);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--asiri-cyan);
+      transform: translateY(-4px);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--asiri-cyan);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* ── CTA Section ── */
+    .cta-section {
+      padding: 4rem 2rem;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .cta-section h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .cta-section p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(75, 184, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+      }
+    }
+
+    /* ── Animations ── */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .feature-card {
+      animation: slideInUp 0.6s ease-out;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.2s; }
+    .feature-card:nth-child(3) { animation-delay: 0.3s; }
+    .feature-card:nth-child(4) { animation-delay: 0.4s; }
+    .feature-card:nth-child(5) { animation-delay: 0.5s; }
+    .feature-card:nth-child(6) { animation-delay: 0.6s; }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">ASIRI</div>
+    <ul class="nav-links">
+      <li><a href="#features">الميزات</a></li>
+      <li><a href="#design">التصميم</a></li>
+      <li><a href="#preview">معاينة</a></li>
+      <li><a href="#stats">الإحصائيات</a></li>
+    </ul>
+    <a href="index.html" class="cta-button">الدخول للتطبيق</a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Asiri Obsidian Command v26</h1>
+      <p>منصة ذكية لتحليل الأسواق المالية واتخاذ القرارات الاستثمارية بثقة</p>
+      <div class="hero-buttons">
+        <a href="index.html" class="btn-primary">
+          <i class="fas fa-rocket"></i> جرّب الآن
+        </a>
+        <button class="btn-secondary" onclick="document.getElementById('preview').scrollIntoView()">
+          <i class="fas fa-eye"></i> شاهد المعاينة
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <h2 class="section-title">الميزات الرئيسية</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-circle"></i></div>
+        <h3>Decision Orb</h3>
+        <p>دائرة قرار تفاعلية تعرض القرار الحالي مع مستوى الثقة والمخاطرة في الوقت الفعلي</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+        <h3>Market Pulse</h3>
+        <p>تحديثات حية لأسعار الأسواق العالمية مع مؤشرات الحركة والتغيرات</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-star"></i></div>
+        <h3>Golden Opportunities</h3>
+        <p>تحديد أفضل الفرص الاستثمارية مع درجات ثقة عالية وتحليل شامل</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-palette"></i></div>
+        <h3>Obsidian Design</h3>
+        <p>تصميم احترافي مستوحى من أفضل المنصات العالمية مع ألوان دلالية</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+        <h3>Responsive Design</h3>
+        <p>يعمل بشكل مثالي على جميع الأجهزة والشاشات من الموبايل إلى الديسكتوب</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-keyboard"></i></div>
+        <h3>Keyboard Shortcuts</h3>
+        <p>اختصارات لوحة مفاتيح سريعة للتنقل والتحكم بسهولة</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Design System Section -->
+  <section class="design-system" id="design">
+    <h2 class="section-title">نظام التصميم</h2>
+    
+    <h3 style="color: var(--asiri-cyan); margin-bottom: 1.5rem;">الألوان الأساسية</h3>
+    <div class="colors-grid">
+      <div class="color-box" style="background: #05080D; border: 1px solid rgba(75, 184, 255, 0.3);">
+        <div style="height: 40px;"></div>
+        <div class="color-name">Obsidian Black</div>
+        <div class="color-code">#05080D</div>
+      </div>
+      <div class="color-box" style="background: #4BB8FF;">
+        <div style="height: 40px;"></div>
+        <div class="color-name">Asiri Cyan</div>
+        <div class="color-code">#4BB8FF</div>
+      </div>
+      <div class="color-box" style="background: #26E6A1;">
+        <div style="height: 40px;"></div>
+        <div class="color-name">Signal Green</div>
+        <div class="color-code">#26E6A1</div>
+      </div>
+      <div class="color-box" style="background: #FF5E73;">
+        <div style="height: 40px;"></div>
+        <div class="color-name">Risk Red</div>
+        <div class="color-code">#FF5E73</div>
+      </div>
+      <div class="color-box" style="background: #FFBF47;">
+        <div style="height: 40px;"></div>
+        <div class="color-name">Warning Amber</div>
+        <div class="color-code">#FFBF47</div>
+      </div>
+      <div class="color-box" style="background: #F5F8FB;">
+        <div style="height: 40px;"></div>
+        <div class="color-name">Text Primary</div>
+        <div class="color-code">#F5F8FB</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats" id="stats">
+    <h2 class="section-title">الإحصائيات</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">6</div>
+        <div class="stat-label">صفحات رئيسية</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">متجاوب</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">0ms</div>
+        <div class="stat-label">وقت التحميل</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">الإمكانيات</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Preview Section -->
+  <section class="preview-section" id="preview">
+    <h2 class="section-title">معاينة مباشرة</h2>
+    <div class="preview-container">
+      <div class="preview-header">
+        <div class="preview-title">Asiri Obsidian Command v26</div>
+        <div class="preview-buttons">
+          <div class="preview-btn"></div>
+          <div class="preview-btn"></div>
+          <div class="preview-btn"></div>
+        </div>
+      </div>
+      <div class="preview-content">
+        <iframe src="index.html" class="preview-iframe"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <h2>جاهز للبدء؟</h2>
+    <p>انضم إلى آلاف المستثمرين الذين يستخدمون Asiri لاتخاذ قرارات استثمارية ذكية</p>
+    <a href="index.html" class="btn-primary">الدخول للتطبيق الآن</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 Asiri Capital Intelligence. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <script>
+    // Smooth scroll for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Add scroll animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animation = 'slideInUp 0.6s ease-out forwards';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .stat-card').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
