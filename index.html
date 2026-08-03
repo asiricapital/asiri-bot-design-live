@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asiri Capital Intelligence OS - Mission Control</title>
+    <title>Asiri Capital Intelligence OS - Mission Control Live</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -37,7 +38,6 @@
             overflow-x: hidden;
         }
 
-        /* Header */
         .header {
             background: linear-gradient(135deg, var(--obsidian-navy) 0%, var(--obsidian-graphite) 100%);
             border-bottom: 1px solid var(--obsidian-border);
@@ -80,35 +80,13 @@
             color: var(--text-secondary);
         }
 
-        .header-right {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .refresh-btn {
-            background: var(--obsidian-surface);
-            border: 1px solid var(--obsidian-border);
-            color: var(--text-primary);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .refresh-btn:hover {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-        }
-
-        /* Main Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+            padding-bottom: 120px;
         }
 
-        /* Section Title */
         .section-title {
             font-size: 0.85rem;
             letter-spacing: 2px;
@@ -117,393 +95,101 @@
             font-weight: 600;
         }
 
-        /* Decision Orb Section */
-        .decision-section {
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stock-card {
             background: linear-gradient(135deg, var(--obsidian-navy) 0%, var(--obsidian-surface) 100%);
             border: 1px solid var(--obsidian-border);
             border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .decision-orb-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 2rem 0;
-            position: relative;
-            height: 300px;
-        }
-
-        .decision-orb {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, var(--obsidian-surface), var(--obsidian-black));
-            border: 2px solid var(--accent-gold);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
+            padding: 1.5rem;
             transition: all 0.3s ease;
-            position: relative;
-            box-shadow: 0 0 30px rgba(233, 188, 85, 0.2);
         }
 
-        .decision-orb:hover {
-            box-shadow: 0 0 50px rgba(233, 188, 85, 0.4);
-            transform: scale(1.05);
+        .stock-card:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px rgba(233, 188, 85, 0.1);
         }
 
-        .decision-orb::before {
-            content: '';
-            position: absolute;
-            width: 220px;
-            height: 220px;
-            border: 1px solid var(--accent-gold);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .decision-text {
-            position: relative;
-            z-index: 2;
-        }
-
-        .decision-label {
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .decision-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .decision-confidence {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .decision-description {
-            color: var(--text-secondary);
-            margin-top: 1.5rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--obsidian-surface);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-        }
-
-        /* AI Radar Section */
-        .radar-section {
-            background: linear-gradient(135deg, var(--obsidian-navy) 0%, var(--obsidian-surface) 100%);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .radar-circle {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 2px dashed var(--accent-blue);
-            margin: 2rem auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background: radial-gradient(circle, var(--obsidian-surface) 0%, transparent 70%);
-        }
-
-        .radar-center {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: pulse 2s infinite;
-        }
-
-        .radar-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-green);
-            position: absolute;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); opacity: 0.5; }
-            50% { transform: translate(20px, -20px); opacity: 1; }
-        }
-
-        .radar-status {
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--accent-blue);
-            margin-top: 1rem;
-        }
-
-        /* Next Action Section */
-        .action-section {
-            background: var(--obsidian-surface);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .action-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .action-item {
-            background: var(--obsidian-navy);
-            border-left: 3px solid var(--accent-gold);
-            padding: 1.5rem;
-            border-radius: 4px;
-        }
-
-        .action-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .action-text {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* War Room Section */
-        .war-room {
-            background: linear-gradient(135deg, var(--obsidian-navy) 0%, var(--obsidian-surface) 100%);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .war-room-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .war-room-item {
-            background: var(--obsidian-surface);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--obsidian-border);
-        }
-
-        .war-room-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .war-room-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-        }
-
-        /* Market Overview */
-        .market-overview {
-            background: var(--obsidian-surface);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .market-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-        }
-
-        .market-item {
-            background: var(--obsidian-navy);
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--obsidian-border);
-            text-align: center;
-        }
-
-        .market-symbol {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .market-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .market-change {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .market-change.positive {
-            color: var(--accent-green);
-        }
-
-        .market-change.negative {
-            color: var(--accent-red);
-        }
-
-        /* Opportunity Section */
-        .opportunity-section {
-            background: linear-gradient(135deg, var(--obsidian-navy) 0%, var(--obsidian-surface) 100%);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .opportunity-card {
-            background: var(--obsidian-surface);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .opportunity-header {
+        .stock-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--obsidian-border);
         }
 
-        .opportunity-symbol {
+        .stock-symbol {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--accent-blue);
         }
 
-        .opportunity-score {
-            background: var(--accent-gold);
-            color: var(--obsidian-black);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-weight: 700;
-        }
-
-        .opportunity-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-        }
-
-        .opportunity-detail {
-            background: var(--obsidian-navy);
-            padding: 1rem;
-            border-radius: 4px;
-        }
-
-        .opportunity-detail-label {
+        .stock-name {
             font-size: 0.85rem;
             color: var(--text-secondary);
+        }
+
+        .stock-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
         }
 
-        .opportunity-detail-value {
-            font-size: 1.2rem;
+        .stock-change {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stock-change.positive {
+            color: var(--accent-green);
+        }
+
+        .stock-change.negative {
+            color: var(--accent-red);
+        }
+
+        .stock-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .detail-item {
+            background: var(--obsidian-black);
+            padding: 0.75rem;
+            border-radius: 4px;
+            border: 1px solid var(--obsidian-border);
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--accent-blue);
         }
 
-        /* Buttons */
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
+        .chart-container {
+            position: relative;
+            height: 200px;
+            margin-top: 1rem;
         }
 
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: 1px solid var(--obsidian-border);
-            background: var(--obsidian-surface);
-            color: var(--text-primary);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-        }
-
-        .btn:hover {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: var(--obsidian-black);
-        }
-
-        .btn-primary {
-            background: var(--accent-gold);
-            border-color: var(--accent-gold);
-            color: var(--obsidian-black);
-        }
-
-        .btn-primary:hover {
-            background: #d4a844;
-            border-color: #d4a844;
-        }
-
-        /* Navigation */
         .nav-bottom {
             position: fixed;
             bottom: 0;
@@ -533,51 +219,45 @@
             color: var(--accent-blue);
         }
 
-        .nav-icon {
-            font-size: 1.5rem;
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
         }
 
-        .nav-label {
+        .spinner {
+            border: 3px solid var(--obsidian-border);
+            border-top: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .last-update {
             font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-top: 1rem;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
             }
 
-            .decision-orb {
-                width: 150px;
-                height: 150px;
-            }
-
-            .decision-orb::before {
-                width: 170px;
-                height: 170px;
-            }
-
-            .decision-value {
-                font-size: 1.8rem;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
+            .portfolio-grid {
+                grid-template-columns: 1fr;
             }
 
             body {
                 padding-bottom: 100px;
             }
-        }
-
-        /* Sections */
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
         }
     </style>
 </head>
@@ -588,250 +268,236 @@
             <div class="status-indicator"></div>
             <div>
                 <div class="header-title">ASIRI CAPITAL INTELLIGENCE OS</div>
-                <div class="header-status">ONLINE</div>
+                <div class="header-status">LIVE DATA</div>
             </div>
-        </div>
-        <div class="header-right">
-            <button class="refresh-btn" onclick="refreshData()">↻ تحديث البيانات</button>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="container">
-        <!-- Home Section -->
-        <div class="section active" id="home-section">
-            <!-- Decision Section -->
-            <div class="decision-section">
-                <div class="section-title">ASIRI OBSIDIAN COMMAND</div>
-                <div class="decision-orb-container">
-                    <div class="decision-orb" onclick="changeDecision()">
-                        <div class="decision-text">
-                            <div class="decision-label">DECISION NOW</div>
-                            <div class="decision-value" id="decision-value">انتظار</div>
-                            <div class="decision-confidence" id="decision-confidence">52%</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="decision-description" id="decision-description">
-                    لا توجد أفضلية مكتملة الآن. احتفظ بالسيولة وانتظر تأكيد السوق أو ظهور فرصة أقوى.
-                </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">جودة البيانات</div>
-                    <div class="stat-value">88%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">صحة النظام</div>
-                    <div class="stat-value">100%</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">التنفيذ</div>
-                    <div class="stat-value">جاهز</div>
-                </div>
-            </div>
-
-            <!-- AI Radar -->
-            <div class="radar-section">
-                <div class="section-title">AI RADAR</div>
-                <div class="radar-circle">
-                    <div class="radar-center"></div>
-                    <div class="radar-dot" style="top: 20%; right: 20%;"></div>
-                    <div class="radar-dot" style="top: 50%; right: 10%; animation-delay: 0.5s;"></div>
-                    <div class="radar-dot" style="bottom: 20%; right: 30%; animation-delay: 1s;"></div>
-                </div>
-                <div class="radar-status">SCANNING</div>
-                <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">فرص السوق تحت المراقبة</p>
-            </div>
-
-            <!-- Next Action -->
-            <div class="action-section">
-                <div class="section-title">NEXT ACTION</div>
-                <div class="action-list">
-                    <div class="action-item">
-                        <div class="action-number">1</div>
-                        <div class="action-text">انتظر تأكيد السوق أو الفرصة</div>
-                    </div>
-                    <div class="action-item">
-                        <div class="action-number">2</div>
-                        <div class="action-text">لا تطارس السعر أو الإشارات الضعيفة</div>
-                    </div>
-                    <div class="action-item">
-                        <div class="action-number">3</div>
-                        <div class="action-text">راقب الحجم والاختراق قبل القرار</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- War Room -->
-            <div class="war-room">
-                <div class="section-title">WAR ROOM</div>
-                <div class="war-room-grid">
-                    <div class="war-room-item">
-                        <div class="war-room-label">وضع السوق</div>
-                        <div class="war-room-value">متوازن</div>
-                    </div>
-                    <div class="war-room-item">
-                        <div class="war-room-label">حد المخاطرة اليومي</div>
-                        <div class="war-room-value">0.35%</div>
-                    </div>
-                    <div class="war-room-item">
-                        <div class="war-room-label">الأولوية</div>
-                        <div class="war-room-value">انتظار</div>
-                    </div>
-                    <div class="war-room-item">
-                        <div class="war-room-label">أفضل فرصة</div>
-                        <div class="war-room-value">MVIS</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Market Overview -->
-            <div class="market-overview">
-                <div class="section-title">MARKET OVERVIEW</div>
-                <div class="market-grid">
-                    <div class="market-item">
-                        <div class="market-symbol">S&P 500</div>
-                        <div class="market-price">7489.72</div>
-                        <div class="market-change positive">+0.70% ▲</div>
-                    </div>
-                    <div class="market-item">
-                        <div class="market-symbol">NASDAQ</div>
-                        <div class="market-price">18,853.47</div>
-                        <div class="market-change positive">+1.00% ▲</div>
-                    </div>
-                    <div class="market-item">
-                        <div class="market-symbol">DOW JONES</div>
-                        <div class="market-price">42,514.95</div>
-                        <div class="market-change positive">+0.53% ▲</div>
-                    </div>
-                    <div class="market-item">
-                        <div class="market-symbol">RUSSELL 2000</div>
-                        <div class="market-price">20,142.38</div>
-                        <div class="market-change negative">-0.50% ▼</div>
-                    </div>
-                    <div class="market-item">
-                        <div class="market-symbol">VIX</div>
-                        <div class="market-price">14.23</div>
-                        <div class="market-change negative">-0.25% ▼</div>
-                    </div>
-                    <div class="market-item">
-                        <div class="market-symbol">TASI</div>
-                        <div class="market-price">12,456.89</div>
-                        <div class="market-change positive">+0.91% ▲</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Opportunity -->
-            <div class="opportunity-section">
-                <div class="section-title">OPPORTUNITY COMMAND CENTER</div>
-                <div class="opportunity-card">
-                    <div class="opportunity-header">
-                        <div class="opportunity-symbol">MVIS</div>
-                        <div class="opportunity-score">0/100</div>
-                    </div>
-                    <div class="opportunity-details">
-                        <div class="opportunity-detail">
-                            <div class="opportunity-detail-label">الدخول</div>
-                            <div class="opportunity-detail-value">$3.99</div>
-                        </div>
-                        <div class="opportunity-detail">
-                            <div class="opportunity-detail-label">وقف الخسارة</div>
-                            <div class="opportunity-detail-value">—</div>
-                        </div>
-                        <div class="opportunity-detail">
-                            <div class="opportunity-detail-label">الهدف الأول</div>
-                            <div class="opportunity-detail-value">—</div>
-                        </div>
-                        <div class="opportunity-detail">
-                            <div class="opportunity-detail-label">الهدف الثاني</div>
-                            <div class="opportunity-detail-value">—</div>
-                        </div>
-                    </div>
-                    <div class="button-group">
-                        <button class="btn">فتح التقرير الكامل</button>
-                        <button class="btn btn-primary">حفظ قرار مراقبة</button>
-                    </div>
-                </div>
+        <div class="section-title">المحفظة الحية</div>
+        <div class="portfolio-grid" id="portfolio-grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>جاري تحميل البيانات الحية...</p>
             </div>
         </div>
     </div>
 
     <!-- Bottom Navigation -->
     <div class="nav-bottom">
-        <div class="nav-item active" onclick="showSection('home-section')">
-            <div class="nav-icon">⌂</div>
-            <div class="nav-label">الرئيسية</div>
+        <div class="nav-item active">
+            <div style="font-size: 1.5rem;">⌂</div>
+            <div style="font-size: 0.75rem;">المحفظة</div>
         </div>
-        <div class="nav-item" onclick="showSection('portfolio-section')">
-            <div class="nav-icon">▣</div>
-            <div class="nav-label">المحفظة</div>
+        <div class="nav-item">
+            <div style="font-size: 1.5rem;">📊</div>
+            <div style="font-size: 0.75rem;">الأسواق</div>
         </div>
-        <div class="nav-item" onclick="showSection('intelligence-section')">
-            <div class="nav-icon">🧠</div>
-            <div class="nav-label">الذكاء</div>
+        <div class="nav-item">
+            <div style="font-size: 1.5rem;">🔔</div>
+            <div style="font-size: 0.75rem;">التنبيهات</div>
         </div>
-        <div class="nav-item" onclick="showSection('markets-section')">
-            <div class="nav-icon">▥</div>
-            <div class="nav-label">الأسواق</div>
-        </div>
-        <div class="nav-item" onclick="showSection('alerts-section')">
-            <div class="nav-icon">🔔</div>
-            <div class="nav-label">التنبيهات</div>
-        </div>
-        <div class="nav-item" onclick="showSection('settings-section')">
-            <div class="nav-icon">⚙️</div>
-            <div class="nav-label">الإعدادات</div>
+        <div class="nav-item">
+            <div style="font-size: 1.5rem;">⚙️</div>
+            <div style="font-size: 0.75rem;">الإعدادات</div>
         </div>
     </div>
 
     <script>
-        const decisions = ['انتظار', 'شراء', 'بيع', 'حماية'];
-        const confidences = [52, 75, 45, 68];
-        let currentDecisionIndex = 0;
+        // Binance API Configuration
+        const BINANCE_API_KEY = 'IIT2MW6jLNq157u75AgmC91V6MKFdTUqbIbi8fyEkWRhc1Tx0wbB2yDFb9GFFecd';
+        
+        // Stocks to track
+        const STOCKS = [
+            { symbol: 'CRDL', name: 'Cardiol Therapeutics Inc', pair: 'CRDLBUSD' },
+            { symbol: 'AMPL', name: 'Amplitude, Inc', pair: 'AMPLBUSD' }
+        ];
 
-        function changeDecision() {
-            currentDecisionIndex = (currentDecisionIndex + 1) % decisions.length;
-            document.getElementById('decision-value').textContent = decisions[currentDecisionIndex];
-            document.getElementById('decision-confidence').textContent = confidences[currentDecisionIndex] + '%';
+        // Store for historical data
+        let stockData = {};
+
+        // Initialize
+        async function init() {
+            await fetchStockData();
+            setInterval(fetchStockData, 5000); // Update every 5 seconds
         }
 
-        function refreshData() {
-            console.log('تحديث البيانات...');
-            // سيتم إضافة تحديث البيانات الحقيقية هنا
+        // Fetch stock data from Binance
+        async function fetchStockData() {
+            const portfolioGrid = document.getElementById('portfolio-grid');
+            
+            try {
+                let html = '';
+                
+                for (const stock of STOCKS) {
+                    try {
+                        // Get current price
+                        const priceResponse = await fetch(
+                            `https://api.binance.com/api/v3/ticker/price?symbol=${stock.pair}`
+                        );
+                        const priceData = await priceResponse.json();
+                        const currentPrice = parseFloat(priceData.price);
+
+                        // Get 24h stats
+                        const statsResponse = await fetch(
+                            `https://api.binance.com/api/v3/ticker/24hr?symbol=${stock.pair}`
+                        );
+                        const statsData = await statsResponse.json();
+                        const change24h = parseFloat(statsData.priceChangePercent);
+                        const changeAmount = parseFloat(statsData.priceChange);
+                        const high24h = parseFloat(statsData.highPrice);
+                        const low24h = parseFloat(statsData.lowPrice);
+                        const volume = parseFloat(statsData.volume);
+
+                        // Get klines for chart
+                        const klinesResponse = await fetch(
+                            `https://api.binance.com/api/v3/klines?symbol=${stock.pair}&interval=1h&limit=24`
+                        );
+                        const klinesData = await klinesResponse.json();
+                        const prices = klinesData.map(k => parseFloat(k[4])); // Close prices
+
+                        // Store data
+                        stockData[stock.symbol] = {
+                            price: currentPrice,
+                            change: change24h,
+                            changeAmount: changeAmount,
+                            high: high24h,
+                            low: low24h,
+                            volume: volume,
+                            prices: prices
+                        };
+
+                        // Create card
+                        const isPositive = change24h >= 0;
+                        html += `
+                            <div class="stock-card">
+                                <div class="stock-header">
+                                    <div>
+                                        <div class="stock-symbol">${stock.symbol}</div>
+                                        <div class="stock-name">${stock.name}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="stock-price">$${currentPrice.toFixed(2)}</div>
+                                <div class="stock-change ${isPositive ? 'positive' : 'negative'}">
+                                    ${isPositive ? '▲' : '▼'} ${change24h.toFixed(2)}% (${changeAmount.toFixed(4)})
+                                </div>
+
+                                <div class="stock-details">
+                                    <div class="detail-item">
+                                        <div class="detail-label">أعلى 24 ساعة</div>
+                                        <div class="detail-value">$${high24h.toFixed(2)}</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">أقل 24 ساعة</div>
+                                        <div class="detail-value">$${low24h.toFixed(2)}</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">الحجم</div>
+                                        <div class="detail-value">${(volume / 1000000).toFixed(2)}M</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="detail-label">التغير</div>
+                                        <div class="detail-value" style="color: ${isPositive ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                                            ${isPositive ? '+' : ''}${change24h.toFixed(2)}%
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="chart-container">
+                                    <canvas id="chart-${stock.symbol}"></canvas>
+                                </div>
+
+                                <div class="last-update">
+                                    آخر تحديث: ${new Date().toLocaleTimeString('ar-SA')}
+                                </div>
+                            </div>
+                        `;
+                    } catch (error) {
+                        console.error(`خطأ في جلب بيانات ${stock.symbol}:`, error);
+                        html += `
+                            <div class="stock-card">
+                                <div class="stock-symbol">${stock.symbol}</div>
+                                <p style="color: var(--accent-red);">خطأ في تحميل البيانات</p>
+                            </div>
+                        `;
+                    }
+                }
+
+                portfolioGrid.innerHTML = html;
+
+                // Draw charts
+                for (const stock of STOCKS) {
+                    if (stockData[stock.symbol]) {
+                        drawChart(stock.symbol, stockData[stock.symbol].prices);
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في جلب البيانات:', error);
+                portfolioGrid.innerHTML = `
+                    <div class="loading">
+                        <p style="color: var(--accent-red);">خطأ في تحميل البيانات. يرجى المحاولة لاحقاً.</p>
+                    </div>
+                `;
+            }
         }
 
-        function showSection(sectionId) {
-            // إخفاء جميع الأقسام
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
+        // Draw chart for stock
+        function drawChart(symbol, prices) {
+            const canvas = document.getElementById(`chart-${symbol}`);
+            if (!canvas) return;
 
-            // إزالة الحالة النشطة من جميع عناصر التنقل
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            // إظهار القسم المطلوب
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.classList.add('active');
+            const ctx = canvas.getContext('2d');
+            
+            // Destroy existing chart if any
+            if (window.charts && window.charts[symbol]) {
+                window.charts[symbol].destroy();
             }
 
-            // تحديث حالة التنقل
-            event.target.closest('.nav-item').classList.add('active');
+            if (!window.charts) window.charts = {};
+
+            const isPositive = prices[prices.length - 1] >= prices[0];
+            
+            window.charts[symbol] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: prices.length}, (_, i) => `${i}h`),
+                    datasets: [{
+                        label: symbol,
+                        data: prices,
+                        borderColor: isPositive ? '#10b981' : '#ef4444',
+                        backgroundColor: isPositive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: false,
+                            beginAtZero: false
+                        },
+                        x: {
+                            display: false
+                        }
+                    }
+                }
+            });
         }
 
-        // دعم اختصارات لوحة المفاتيح
-        document.addEventListener('keydown', (e) => {
-            if (e.key === ' ') {
-                e.preventDefault();
-                changeDecision();
-            }
-        });
+        // Start
+        init();
     </script>
 </body>
 </html>
