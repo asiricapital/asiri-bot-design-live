@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asiri Capital Intelligence OS - Mission Control Live</title>
+    <title>Asiri Capital - Live Portfolio Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -13,35 +13,30 @@
         }
 
         :root {
-            --obsidian-black: #05080D;
-            --obsidian-navy: #07111E;
-            --obsidian-graphite: #0B1624;
-            --obsidian-surface: #101E30;
-            --obsidian-border: #1a2f47;
-            
-            --accent-gold: #e9bc55;
+            --bg-dark: #0a0e27;
+            --bg-darker: #050810;
+            --card-bg: #0f1429;
+            --border-color: #1a2847;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
             --accent-green: #10b981;
             --accent-red: #ef4444;
-            --accent-yellow: #f59e0b;
-            --accent-blue: #06b6d4;
-            
-            --text-primary: #f5f8fb;
-            --text-secondary: #b0bcc9;
-            --text-tertiary: #7a8999;
+            --accent-blue: #3b82f6;
+            --accent-gold: #fbbf24;
         }
 
         body {
-            background-color: var(--obsidian-black);
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
             color: var(--text-primary);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             overflow-x: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, var(--obsidian-navy) 0%, var(--obsidian-graphite) 100%);
-            border-bottom: 1px solid var(--obsidian-border);
-            padding: 1rem 2rem;
+            background: rgba(15, 20, 41, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.2rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -53,14 +48,14 @@
         .header-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.8rem;
         }
 
-        .status-indicator {
-            width: 12px;
-            height: 12px;
+        .status-dot {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background-color: var(--accent-green);
+            background: var(--accent-green);
             animation: pulse 2s infinite;
         }
 
@@ -70,64 +65,107 @@
         }
 
         .header-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            letter-spacing: 2px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .header-status {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
-            padding-bottom: 120px;
+            padding: 2rem 1.5rem;
+            padding-bottom: 100px;
         }
 
-        .section-title {
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-            color: var(--accent-blue);
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-        .portfolio-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stock-card {
-            background: linear-gradient(135deg, var(--obsidian-navy) 0%, var(--obsidian-surface) 100%);
-            border: 1px solid var(--obsidian-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .stock-card:hover {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 20px rgba(233, 188, 85, 0.1);
-        }
-
-        .stock-header {
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--obsidian-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+        }
+
+        .add-stock-btn {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
+            border: none;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-stock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .portfolio-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stock-item {
+            background: linear-gradient(135deg, rgba(15, 20, 41, 0.8) 0%, rgba(26, 40, 71, 0.4) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stock-item:hover {
+            border-color: var(--accent-blue);
+            background: linear-gradient(135deg, rgba(15, 20, 41, 0.95) 0%, rgba(26, 40, 71, 0.6) 100%);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .stock-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .stock-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .stock-info {
+            flex: 1;
         }
 
         .stock-symbol {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: var(--accent-blue);
+            margin-bottom: 0.3rem;
         }
 
         .stock-name {
@@ -135,87 +173,148 @@
             color: var(--text-secondary);
         }
 
-        .stock-price {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
+        .stock-right {
+            display: flex;
+            align-items: flex-end;
+            gap: 1.5rem;
+            text-align: right;
         }
 
-        .stock-change {
-            font-size: 1.1rem;
+        .stock-price {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .price-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .price-change {
+            font-size: 0.95rem;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: flex-end;
+            gap: 0.3rem;
         }
 
-        .stock-change.positive {
+        .price-change.positive {
             color: var(--accent-green);
         }
 
-        .stock-change.negative {
+        .price-change.negative {
             color: var(--accent-red);
         }
 
         .stock-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .detail-item {
-            background: var(--obsidian-black);
-            padding: 0.75rem;
-            border-radius: 4px;
-            border: 1px solid var(--obsidian-border);
-        }
-
-        .detail-label {
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            margin-bottom: 0.25rem;
         }
 
-        .detail-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent-blue);
+        .detail-badge {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
-        .chart-container {
-            position: relative;
-            height: 200px;
-            margin-top: 1rem;
-        }
-
-        .nav-bottom {
+        .modal {
+            display: none;
             position: fixed;
-            bottom: 0;
+            top: 0;
             left: 0;
             right: 0;
-            background: var(--obsidian-navy);
-            border-top: 1px solid var(--obsidian-border);
-            display: flex;
-            justify-content: space-around;
-            padding: 1rem 0;
-            z-index: 99;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
         }
 
-        .nav-item {
+        .modal.active {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
             color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
         }
 
-        .nav-item:hover,
-        .nav-item.active {
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-blue);
             color: var(--accent-blue);
         }
 
@@ -226,7 +325,7 @@
         }
 
         .spinner {
-            border: 3px solid var(--obsidian-border);
+            border: 3px solid rgba(59, 130, 246, 0.2);
             border-top: 3px solid var(--accent-blue);
             border-radius: 50%;
             width: 40px;
@@ -240,12 +339,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        .last-update {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-top: 1rem;
-        }
-
         .error-message {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid var(--accent-red);
@@ -256,16 +349,27 @@
         }
 
         @media (max-width: 768px) {
+            .stock-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stock-right {
+                width: 100%;
+                justify-content: space-between;
+                text-align: left;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .stock-details {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
             .container {
                 padding: 1rem;
-            }
-
-            .portfolio-grid {
-                grid-template-columns: 1fr;
-            }
-
-            body {
-                padding-bottom: 100px;
             }
         }
     </style>
@@ -274,43 +378,46 @@
     <!-- Header -->
     <div class="header">
         <div class="header-left">
-            <div class="status-indicator"></div>
+            <div class="status-dot"></div>
             <div>
-                <div class="header-title">ASIRI CAPITAL INTELLIGENCE OS</div>
-                <div class="header-status">LIVE DATA - NASDAQ/NYSE</div>
+                <div class="header-title">ASIRI CAPITAL</div>
+                <div class="header-status">LIVE PORTFOLIO</div>
             </div>
         </div>
     </div>
 
     <!-- Main Content -->
     <div class="container">
-        <div class="section-title">المحفظة الحية</div>
+        <div class="section-header">
+            <div class="section-title">📊 محفظتي</div>
+            <button class="add-stock-btn" onclick="openAddModal()">+ إضافة سهم</button>
+        </div>
+
         <div id="error-container"></div>
-        <div class="portfolio-grid" id="portfolio-grid">
+        <div class="portfolio-list" id="portfolio-list">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>جاري تحميل البيانات الحية من NASDAQ/NYSE...</p>
+                <p>جاري تحميل البيانات الحية...</p>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="nav-bottom">
-        <div class="nav-item active">
-            <div style="font-size: 1.5rem;">⌂</div>
-            <div style="font-size: 0.75rem;">المحفظة</div>
-        </div>
-        <div class="nav-item">
-            <div style="font-size: 1.5rem;">📊</div>
-            <div style="font-size: 0.75rem;">الأسواق</div>
-        </div>
-        <div class="nav-item">
-            <div style="font-size: 1.5rem;">🔔</div>
-            <div style="font-size: 0.75rem;">التنبيهات</div>
-        </div>
-        <div class="nav-item">
-            <div style="font-size: 1.5rem;">⚙️</div>
-            <div style="font-size: 0.75rem;">الإعدادات</div>
+    <!-- Add Stock Modal -->
+    <div class="modal" id="addStockModal">
+        <div class="modal-content">
+            <div class="modal-title">إضافة سهم جديد</div>
+            <div class="form-group">
+                <label class="form-label">رمز السهم (مثال: AAPL)</label>
+                <input type="text" class="form-input" id="newStockSymbol" placeholder="أدخل رمز السهم" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group">
+                <label class="form-label">اسم الشركة</label>
+                <input type="text" class="form-input" id="newStockName" placeholder="أدخل اسم الشركة">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="addNewStock()">إضافة</button>
+                <button class="btn btn-secondary" onclick="closeAddModal()">إلغاء</button>
+            </div>
         </div>
     </div>
 
@@ -318,34 +425,62 @@
         // Alpha Vantage API Configuration
         const ALPHA_VANTAGE_API_KEY = 'SR8IZVAS9PQH763P';
         const API_BASE = 'https://www.alphavantage.co/query';
-        
-        // Stocks to track
-        const STOCKS = [
-            { symbol: 'CRDL', name: 'Cardiol Therapeutics Inc' },
+
+        // Default stocks
+        let STOCKS = [
+            { symbol: 'SNAP', name: 'Snap Inc' },
+            { symbol: 'MVIS', name: 'MicroVision, Inc' },
+            { symbol: 'SG', name: 'Sweetgreen, Inc' },
+            { symbol: 'RKLB', name: 'Rocket Lab USA, Inc' },
+            { symbol: 'CHPT', name: 'ChargePoint Holdings, Inc' },
+            { symbol: 'BLNK', name: 'Blink Charging Co' },
+            { symbol: 'HUMA', name: 'Humacyte, Inc' },
+            { symbol: 'AGEN', name: 'Agenus Inc' },
+            { symbol: 'ENSC', name: 'Ensysce Biosciences, Inc' },
+            { symbol: 'TMCI', name: 'Treace Medical Concepts, Inc' },
             { symbol: 'AMPL', name: 'Amplitude, Inc' },
-            { symbol: 'RDW', name: 'Redwire Corporation' },
+            { symbol: 'OCCN', name: 'Ocugen, Inc' },
+            { symbol: 'RDW', name: 'Redwire Corp' },
+            { symbol: 'INO', name: 'Inovio Pharmaceuticals, Inc' },
+            { symbol: 'LASE', name: 'Laser Photonics Corporation' },
+            { symbol: 'PLUG', name: 'Plug Power Inc' },
+            { symbol: 'CRDL', name: 'Cardiol Therapeutics Inc' },
             { symbol: 'ADMA', name: 'ADMA Biologics, Inc' },
-            { symbol: 'RKLB', name: 'Rocket Lab USA, Inc' }
+            { symbol: 'OPTT', name: 'Ocean Power Technologies, Inc' },
+            { symbol: 'INLF', name: 'INLIF Limited' }
         ];
 
-        // Store for historical data
         let stockData = {};
+
+        // Load stocks from localStorage
+        function loadStocks() {
+            const saved = localStorage.getItem('asiri_stocks');
+            if (saved) {
+                STOCKS = JSON.parse(saved);
+            }
+        }
+
+        // Save stocks to localStorage
+        function saveStocks() {
+            localStorage.setItem('asiri_stocks', JSON.stringify(STOCKS));
+        }
 
         // Initialize
         async function init() {
-            await fetchAllStockData();
-            setInterval(fetchAllStockData, 60000);
+            loadStocks();
+            await fetchAllStocks();
+            setInterval(fetchAllStocks, 60000);
         }
 
-        // Fetch all stock data with rate limiting
-        async function fetchAllStockData() {
-            const portfolioGrid = document.getElementById('portfolio-grid');
+        // Fetch all stocks
+        async function fetchAllStocks() {
+            const portfolioList = document.getElementById('portfolio-list');
             const errorContainer = document.getElementById('error-container');
-            
+
             try {
                 let html = '';
                 errorContainer.innerHTML = '';
-                
+
                 for (let i = 0; i < STOCKS.length; i++) {
                     const stock = STOCKS[i];
                     
@@ -358,57 +493,49 @@
                         
                         if (data.error) {
                             html += `
-                                <div class="stock-card">
-                                    <div class="stock-symbol">${stock.symbol}</div>
-                                    <p style="color: var(--accent-red);">${data.error}</p>
+                                <div class="stock-item">
+                                    <div class="stock-left">
+                                        <div class="stock-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                            ${stock.symbol.substring(0, 2)}
+                                        </div>
+                                        <div class="stock-info">
+                                            <div class="stock-symbol">${stock.symbol}</div>
+                                            <div class="stock-name">${stock.name}</div>
+                                        </div>
+                                    </div>
+                                    <div style="color: #ef4444; font-size: 0.9rem;">خطأ في التحميل</div>
                                 </div>
                             `;
                             continue;
                         }
 
                         const isPositive = data.change >= 0;
-                        
+                        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6', '#f97316', '#6366f1', '#d946ef'];
+                        const colorIndex = STOCKS.indexOf(stock) % colors.length;
+                        const bgColor = colors[colorIndex];
+
                         html += `
-                            <div class="stock-card">
-                                <div class="stock-header">
-                                    <div>
+                            <div class="stock-item">
+                                <div class="stock-left">
+                                    <div class="stock-icon" style="background: linear-gradient(135deg, ${bgColor} 0%, ${bgColor}dd 100%);">
+                                        ${stock.symbol.substring(0, 2)}
+                                    </div>
+                                    <div class="stock-info">
                                         <div class="stock-symbol">${stock.symbol}</div>
                                         <div class="stock-name">${stock.name}</div>
                                     </div>
                                 </div>
-                                
-                                <div class="stock-price">$${data.price.toFixed(2)}</div>
-                                <div class="stock-change ${isPositive ? 'positive' : 'negative'}">
-                                    ${isPositive ? '▲' : '▼'} ${data.change.toFixed(2)}% (${data.changeAmount.toFixed(4)})
-                                </div>
-
-                                <div class="stock-details">
-                                    <div class="detail-item">
-                                        <div class="detail-label">أعلى اليوم</div>
-                                        <div class="detail-value">$${data.high.toFixed(2)}</div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">أقل اليوم</div>
-                                        <div class="detail-value">$${data.low.toFixed(2)}</div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">الحجم</div>
-                                        <div class="detail-value">${(data.volume / 1000000).toFixed(2)}M</div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">التغير</div>
-                                        <div class="detail-value" style="color: ${isPositive ? 'var(--accent-green)' : 'var(--accent-red)'}">
-                                            ${isPositive ? '+' : ''}${data.change.toFixed(2)}%
+                                <div class="stock-right">
+                                    <div class="stock-price">
+                                        <div class="price-value">$${data.price.toFixed(2)}</div>
+                                        <div class="price-change ${isPositive ? 'positive' : 'negative'}">
+                                            ${isPositive ? '▲' : '▼'} ${Math.abs(data.change).toFixed(2)}%
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="chart-container">
-                                    <canvas id="chart-${stock.symbol}"></canvas>
-                                </div>
-
-                                <div class="last-update">
-                                    آخر تحديث: ${new Date(data.timestamp).toLocaleTimeString('ar-SA')}
+                                    <div class="stock-details">
+                                        <div class="detail-badge">أعلى: $${data.high.toFixed(2)}</div>
+                                        <div class="detail-badge">أقل: $${data.low.toFixed(2)}</div>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -416,80 +543,41 @@
                         stockData[stock.symbol] = data;
 
                     } catch (error) {
-                        console.error(`خطأ في جلب بيانات ${stock.symbol}:`, error);
-                        html += `
-                            <div class="stock-card">
-                                <div class="stock-symbol">${stock.symbol}</div>
-                                <p style="color: var(--accent-red);">خطأ في تحميل البيانات</p>
-                            </div>
-                        `;
+                        console.error(`خطأ في جلب ${stock.symbol}:`, error);
                     }
                 }
 
-                portfolioGrid.innerHTML = html;
-
-                for (const symbol in stockData) {
-                    if (stockData[symbol].intraday) {
-                        drawChart(symbol, stockData[symbol].intraday);
-                    }
-                }
+                portfolioList.innerHTML = html || '<div class="loading"><p>لا توجد بيانات</p></div>';
 
             } catch (error) {
-                console.error('خطأ في جلب البيانات:', error);
-                errorContainer.innerHTML = `
-                    <div class="error-message">
-                        ⚠️ خطأ في تحميل البيانات. يرجى المحاولة لاحقاً.
-                    </div>
-                `;
+                console.error('خطأ:', error);
+                errorContainer.innerHTML = `<div class="error-message">⚠️ خطأ في تحميل البيانات</div>`;
             }
         }
 
-        // Fetch stock data from Alpha Vantage
+        // Fetch stock data
         async function fetchStockData(symbol) {
             try {
-                const quoteResponse = await fetch(
+                const response = await fetch(
                     `${API_BASE}?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
                 );
-                const quoteData = await quoteResponse.json();
+                const data = await response.json();
 
-                if (quoteData.Note || quoteData.Information) {
-                    return { error: 'حد أقصى للطلبات - يرجى المحاولة لاحقاً' };
+                if (data.Note || data.Information) {
+                    return { error: 'حد أقصى للطلبات' };
                 }
 
-                if (!quoteData['Global Quote'] || !quoteData['Global Quote']['05. price']) {
+                if (!data['Global Quote'] || !data['Global Quote']['05. price']) {
                     return { error: 'لم يتم العثور على البيانات' };
                 }
 
-                const quote = quoteData['Global Quote'];
-                const price = parseFloat(quote['05. price']);
-                const change = parseFloat(quote['10. change percent']) || 0;
-                const changeAmount = parseFloat(quote['09. change']) || 0;
-                const high = parseFloat(quote['03. high']) || price;
-                const low = parseFloat(quote['04. low']) || price;
-                const volume = parseInt(quote['06. volume']) || 0;
-                const timestamp = quote['07. latest trading day'] || new Date().toISOString();
-
-                const intradayResponse = await fetch(
-                    `${API_BASE}?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=60min&apikey=${ALPHA_VANTAGE_API_KEY}`
-                );
-                const intradayData = await intradayResponse.json();
-
-                let intradayPrices = [];
-                if (intradayData['Time Series (60min)']) {
-                    const timeSeries = intradayData['Time Series (60min)'];
-                    const times = Object.keys(timeSeries).slice(0, 24).reverse();
-                    intradayPrices = times.map(time => parseFloat(timeSeries[time]['4. close']));
-                }
-
+                const quote = data['Global Quote'];
                 return {
-                    price,
-                    change,
-                    changeAmount,
-                    high,
-                    low,
-                    volume,
-                    timestamp,
-                    intraday: intradayPrices
+                    price: parseFloat(quote['05. price']),
+                    change: parseFloat(quote['10. change percent']) || 0,
+                    high: parseFloat(quote['03. high']) || parseFloat(quote['05. price']),
+                    low: parseFloat(quote['04. low']) || parseFloat(quote['05. price']),
+                    volume: parseInt(quote['06. volume']) || 0
                 };
 
             } catch (error) {
@@ -498,58 +586,45 @@
             }
         }
 
-        // Draw chart for stock
-        function drawChart(symbol, prices) {
-            const canvas = document.getElementById(`chart-${symbol}`);
-            if (!canvas || prices.length === 0) return;
-
-            const ctx = canvas.getContext('2d');
-            
-            if (window.charts && window.charts[symbol]) {
-                window.charts[symbol].destroy();
-            }
-
-            if (!window.charts) window.charts = {};
-
-            const isPositive = prices[prices.length - 1] >= prices[0];
-            
-            window.charts[symbol] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Array.from({length: prices.length}, (_, i) => `${i}h`),
-                    datasets: [{
-                        label: symbol,
-                        data: prices,
-                        borderColor: isPositive ? '#10b981' : '#ef4444',
-                        backgroundColor: isPositive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            display: false,
-                            beginAtZero: false
-                        },
-                        x: {
-                            display: false
-                        }
-                    }
-                }
-            });
+        // Modal functions
+        function openAddModal() {
+            document.getElementById('addStockModal').classList.add('active');
         }
 
+        function closeAddModal() {
+            document.getElementById('addStockModal').classList.remove('active');
+            document.getElementById('newStockSymbol').value = '';
+            document.getElementById('newStockName').value = '';
+        }
+
+        function addNewStock() {
+            const symbol = document.getElementById('newStockSymbol').value.toUpperCase().trim();
+            const name = document.getElementById('newStockName').value.trim();
+
+            if (!symbol || !name) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            if (STOCKS.find(s => s.symbol === symbol)) {
+                alert('هذا السهم موجود بالفعل');
+                return;
+            }
+
+            STOCKS.push({ symbol, name });
+            saveStocks();
+            closeAddModal();
+            fetchAllStocks();
+        }
+
+        // Close modal on outside click
+        document.getElementById('addStockModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddModal();
+            }
+        });
+
+        // Start
         init();
     </script>
 </body>
