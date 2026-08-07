@@ -1,11 +1,11 @@
 {
   "name": "asiri-capital-terminal",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node startup-v683.js",
-    "start": "node startup-v683.js",
+    "dev": "node live-server.js",
+    "start": "node live-server.js",
     "check": "node check-v720.js"
   },
   "engines": {
