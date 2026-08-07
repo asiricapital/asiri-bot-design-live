@@ -75,6 +75,26 @@
             color: var(--text-secondary);
         }
 
+        .header-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .alert-badge {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .alert-badge:hover {
+            transform: scale(1.05);
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -129,12 +149,18 @@
             align-items: center;
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
         }
 
         .stock-item:hover {
             border-color: var(--accent-blue);
             background: linear-gradient(135deg, rgba(15, 20, 41, 0.95) 0%, rgba(26, 40, 71, 0.6) 100%);
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+
+        .stock-item.alert-active {
+            border-color: var(--accent-red);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
         }
 
         .stock-left {
@@ -156,6 +182,16 @@
             font-size: 1.2rem;
             color: white;
             flex-shrink: 0;
+            position: relative;
+        }
+
+        .stock-icon.alert {
+            animation: alertPulse 1s infinite;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
         }
 
         .stock-info {
@@ -222,6 +258,23 @@
             border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
+        .alert-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--accent-red);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .alert-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--accent-red);
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -246,6 +299,8 @@
             padding: 2rem;
             max-width: 500px;
             width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-title {
@@ -318,6 +373,47 @@
             color: var(--accent-blue);
         }
 
+        .alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-item-info {
+            flex: 1;
+        }
+
+        .alert-item-symbol {
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .alert-item-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .alert-item-remove {
+            background: transparent;
+            border: none;
+            color: var(--accent-red);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.5rem;
+        }
+
         .loading {
             text-align: center;
             padding: 2rem;
@@ -339,13 +435,39 @@
             100% { transform: rotate(360deg); }
         }
 
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--accent-red);
-            color: var(--accent-red);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(500px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .notification-message {
+            font-size: 0.95rem;
         }
 
         @media (max-width: 768px) {
@@ -371,6 +493,12 @@
             .container {
                 padding: 1rem;
             }
+
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
         }
     </style>
 </head>
@@ -382,6 +510,11 @@
             <div>
                 <div class="header-title">ASIRI CAPITAL</div>
                 <div class="header-status">LIVE PORTFOLIO</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="alert-badge" onclick="openAlertsModal()">
+                🔔 <span id="alert-count">0</span> تنبيهات
             </div>
         </div>
     </div>
@@ -421,6 +554,38 @@
         </div>
     </div>
 
+    <!-- Add Alert Modal -->
+    <div class="modal" id="addAlertModal">
+        <div class="modal-content">
+            <div class="modal-title">تعيين تنبيهات - <span id="alert-stock-symbol"></span></div>
+            <div class="form-group">
+                <label class="form-label">السعر المستهدف (أعلى)</label>
+                <input type="number" class="form-input" id="alertPriceHigh" placeholder="أدخل السعر الأعلى" step="0.01">
+            </div>
+            <div class="form-group">
+                <label class="form-label">السعر المستهدف (أقل)</label>
+                <input type="number" class="form-input" id="alertPriceLow" placeholder="أدخل السعر الأقل" step="0.01">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="saveAlert()">حفظ التنبيهات</button>
+                <button class="btn btn-secondary" onclick="closeAlertModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts List Modal -->
+    <div class="modal" id="alertsListModal">
+        <div class="modal-content">
+            <div class="modal-title">التنبيهات النشطة</div>
+            <div class="alerts-list" id="alerts-list">
+                <p style="color: var(--text-secondary); text-align: center;">لا توجد تنبيهات نشطة</p>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeAlertsModal()" style="flex: 1;">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Alpha Vantage API Configuration
         const ALPHA_VANTAGE_API_KEY = 'SR8IZVAS9PQH763P';
@@ -451,23 +616,30 @@
         ];
 
         let stockData = {};
+        let alerts = {};
+        let currentAlertSymbol = '';
 
-        // Load stocks from localStorage
-        function loadStocks() {
+        // Load data from localStorage
+        function loadData() {
             const saved = localStorage.getItem('asiri_stocks');
             if (saved) {
                 STOCKS = JSON.parse(saved);
             }
+            const savedAlerts = localStorage.getItem('asiri_alerts');
+            if (savedAlerts) {
+                alerts = JSON.parse(savedAlerts);
+            }
         }
 
-        // Save stocks to localStorage
-        function saveStocks() {
+        // Save data to localStorage
+        function saveData() {
             localStorage.setItem('asiri_stocks', JSON.stringify(STOCKS));
+            localStorage.setItem('asiri_alerts', JSON.stringify(alerts));
         }
 
         // Initialize
         async function init() {
-            loadStocks();
+            loadData();
             await fetchAllStocks();
             setInterval(fetchAllStocks, 60000);
         }
@@ -514,10 +686,21 @@
                         const colorIndex = STOCKS.indexOf(stock) % colors.length;
                         const bgColor = colors[colorIndex];
 
+                        // Check alerts
+                        const hasAlert = alerts[stock.symbol];
+                        let alertTriggered = false;
+                        if (hasAlert) {
+                            if ((hasAlert.high && data.price >= hasAlert.high) || 
+                                (hasAlert.low && data.price <= hasAlert.low)) {
+                                alertTriggered = true;
+                                triggerAlert(stock.symbol, stock.name, data.price, hasAlert);
+                            }
+                        }
+
                         html += `
-                            <div class="stock-item">
+                            <div class="stock-item ${alertTriggered ? 'alert-active' : ''}">
                                 <div class="stock-left">
-                                    <div class="stock-icon" style="background: linear-gradient(135deg, ${bgColor} 0%, ${bgColor}dd 100%);">
+                                    <div class="stock-icon ${alertTriggered ? 'alert' : ''}" style="background: linear-gradient(135deg, ${bgColor} 0%, ${bgColor}dd 100%);">
                                         ${stock.symbol.substring(0, 2)}
                                     </div>
                                     <div class="stock-info">
@@ -535,6 +718,7 @@
                                     <div class="stock-details">
                                         <div class="detail-badge">أعلى: $${data.high.toFixed(2)}</div>
                                         <div class="detail-badge">أقل: $${data.low.toFixed(2)}</div>
+                                        <button class="alert-btn" onclick="openAlertModal('${stock.symbol}')">🔔 تنبيه</button>
                                     </div>
                                 </div>
                             </div>
@@ -548,10 +732,10 @@
                 }
 
                 portfolioList.innerHTML = html || '<div class="loading"><p>لا توجد بيانات</p></div>';
+                updateAlertCount();
 
             } catch (error) {
                 console.error('خطأ:', error);
-                errorContainer.innerHTML = `<div class="error-message">⚠️ خطأ في تحميل البيانات</div>`;
             }
         }
 
@@ -586,6 +770,123 @@
             }
         }
 
+        // Alert functions
+        function openAlertModal(symbol) {
+            currentAlertSymbol = symbol;
+            document.getElementById('alert-stock-symbol').textContent = symbol;
+            const stock = STOCKS.find(s => s.symbol === symbol);
+            if (stock) {
+                const alert = alerts[symbol];
+                document.getElementById('alertPriceHigh').value = alert?.high || '';
+                document.getElementById('alertPriceLow').value = alert?.low || '';
+            }
+            document.getElementById('addAlertModal').classList.add('active');
+        }
+
+        function closeAlertModal() {
+            document.getElementById('addAlertModal').classList.remove('active');
+            currentAlertSymbol = '';
+        }
+
+        function saveAlert() {
+            const high = parseFloat(document.getElementById('alertPriceHigh').value);
+            const low = parseFloat(document.getElementById('alertPriceLow').value);
+
+            if (!high && !low) {
+                alert('يرجى إدخال سعر واحد على الأقل');
+                return;
+            }
+
+            if (high && low && high <= low) {
+                alert('السعر الأعلى يجب أن يكون أكبر من السعر الأقل');
+                return;
+            }
+
+            alerts[currentAlertSymbol] = {
+                high: high || null,
+                low: low || null
+            };
+
+            saveData();
+            closeAlertModal();
+            fetchAllStocks();
+        }
+
+        function triggerAlert(symbol, name, price, alert) {
+            const message = `السهم ${symbol} وصل إلى $${price.toFixed(2)}`;
+            showNotification(`تنبيه: ${name}`, message);
+            playAlertSound();
+        }
+
+        function showNotification(title, message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        function playAlertSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        function updateAlertCount() {
+            const count = Object.keys(alerts).length;
+            document.getElementById('alert-count').textContent = count;
+        }
+
+        function openAlertsModal() {
+            const alertsList = document.getElementById('alerts-list');
+            if (Object.keys(alerts).length === 0) {
+                alertsList.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">لا توجد تنبيهات نشطة</p>';
+            } else {
+                alertsList.innerHTML = Object.entries(alerts).map(([symbol, alert]) => `
+                    <div class="alert-item">
+                        <div class="alert-item-info">
+                            <div class="alert-item-symbol">${symbol}</div>
+                            <div class="alert-item-details">
+                                ${alert.high ? `أعلى: $${alert.high.toFixed(2)}` : ''} 
+                                ${alert.low ? `أقل: $${alert.low.toFixed(2)}` : ''}
+                            </div>
+                        </div>
+                        <button class="alert-item-remove" onclick="removeAlert('${symbol}')">✕</button>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('alertsListModal').classList.add('active');
+        }
+
+        function closeAlertsModal() {
+            document.getElementById('alertsListModal').classList.remove('active');
+        }
+
+        function removeAlert(symbol) {
+            delete alerts[symbol];
+            saveData();
+            openAlertsModal();
+            fetchAllStocks();
+        }
+
         // Modal functions
         function openAddModal() {
             document.getElementById('addStockModal').classList.add('active');
@@ -612,15 +913,21 @@
             }
 
             STOCKS.push({ symbol, name });
-            saveStocks();
+            saveData();
             closeAddModal();
             fetchAllStocks();
         }
 
-        // Close modal on outside click
-        document.getElementById('addStockModal').addEventListener('click', function(e) {
-            if (e.target === this) {
+        // Close modals on outside click
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'addStockModal') {
                 closeAddModal();
+            }
+            if (e.target.id === 'addAlertModal') {
+                closeAlertModal();
+            }
+            if (e.target.id === 'alertsListModal') {
+                closeAlertsModal();
             }
         });
 
