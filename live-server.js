@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { getQuote, getMarketPulse } from './market.js';
 
@@ -16,7 +17,7 @@ function cleanSymbol(value) {
 }
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'asiri-capital-live', time: new Date().toISOString() });
+  res.json({ ok: true, service: 'asiri-capital-live', alerts: true, time: new Date().toISOString() });
 });
 
 app.get('/api/quote/:symbol', async (req, res) => {
@@ -52,8 +53,23 @@ app.get('/api/market', async (_req, res) => {
   }
 });
 
-app.get('/', (_req, res) => res.sendFile(path.join(root, 'live-index.html')));
-app.get('/live-index.html', (_req, res) => res.sendFile(path.join(root, 'live-index.html')));
+app.get('/live-alerts.js', (_req, res) => res.sendFile(path.join(root, 'live-alerts.js')));
+
+async function renderLivePage(_req, res) {
+  try {
+    let html = await fs.readFile(path.join(root, 'live-index.html'), 'utf8');
+    if (!html.includes('/live-alerts.js')) {
+      html = html.replace('</body>', '<script src="/live-alerts.js?v=1"></script></body>');
+    }
+    res.set('Cache-Control', 'no-store');
+    res.type('html').send(html);
+  } catch (error) {
+    res.status(500).send('تعذر تحميل الواجهة الحية');
+  }
+}
+
+app.get('/', renderLivePage);
+app.get('/live-index.html', renderLivePage);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Asiri Capital Live listening on ${port}`);
