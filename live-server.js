@@ -17,7 +17,7 @@ function cleanSymbol(value) {
 }
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'asiri-capital-live', alerts: true, time: new Date().toISOString() });
+  res.json({ ok: true, service: 'asiri-capital-live', version: '7.3.0-smart-alerts', alerts: true, smartAlerts: true, time: new Date().toISOString() });
 });
 
 app.get('/api/quote/:symbol', async (req, res) => {
@@ -53,14 +53,20 @@ app.get('/api/market', async (_req, res) => {
   }
 });
 
-app.get('/live-alerts.js', (_req, res) => res.sendFile(path.join(root, 'live-alerts.js')));
+app.get('/live-alerts.js', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.sendFile(path.join(root, 'live-alerts.js'));
+});
+app.get('/smart-alerts.js', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.type('application/javascript').sendFile(path.join(root, 'smart-alerts.js'));
+});
 
 async function renderLivePage(_req, res) {
   try {
     let html = await fs.readFile(path.join(root, 'live-index.html'), 'utf8');
-    if (!html.includes('/live-alerts.js')) {
-      html = html.replace('</body>', '<script src="/live-alerts.js?v=1"></script></body>');
-    }
+    if (!html.includes('/live-alerts.js')) html = html.replace('</body>', '<script src="/live-alerts.js?v=2"></script></body>');
+    if (!html.includes('/smart-alerts.js')) html = html.replace('</body>', '<script src="/smart-alerts.js?v=7300"></script></body>');
     res.set('Cache-Control', 'no-store');
     res.type('html').send(html);
   } catch (error) {
@@ -72,5 +78,5 @@ app.get('/', renderLivePage);
 app.get('/live-index.html', renderLivePage);
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Asiri Capital Live listening on ${port}`);
+  console.log(`Asiri Capital Live v7.3.0 Smart Alerts listening on ${port}`);
 });
