@@ -1,0 +1,52 @@
+name: Asiri cross-account backup
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: asiri-cross-account-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    if: github.repository_owner == 'vip7733661'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Backup all branches and tags
+        shell: bash
+        env:
+          SOURCE_TOKEN: ${{ github.token }}
+          BACKUP_TOKEN: ${{ secrets.ASIRICAPITAL_BACKUP_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${BACKUP_TOKEN:-}" ]; then
+            echo "ASIRICAPITAL_BACKUP_TOKEN is not configured."
+            exit 1
+          fi
+
+          repo_name="${GITHUB_REPOSITORY#*/}"
+          workdir="$(mktemp -d)"
+          trap 'rm -rf "$workdir"' EXIT
+
+          git clone --bare \
+            "https://x-access-token:${SOURCE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$workdir/source.git"
+
+          cd "$workdir/source.git"
+          git remote add backup \
+            "https://x-access-token:${BACKUP_TOKEN}@github.com/asiricapital/${repo_name}.git"
+
+          git push backup --all
+          git push backup --tags
