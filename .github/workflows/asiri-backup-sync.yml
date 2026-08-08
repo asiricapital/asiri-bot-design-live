@@ -1,4 +1,4 @@
-name: Asiri cross-account backup
+name: Asiri primary to VIP backup
 
 on:
   push:
@@ -14,25 +14,25 @@ permissions:
   contents: read
 
 concurrency:
-  group: asiri-cross-account-backup
+  group: asiri-primary-to-vip-backup
   cancel-in-progress: false
 
 jobs:
   backup:
-    if: github.repository_owner == 'vip7733661'
+    if: github.repository_owner == 'asiricapital'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Backup all branches and tags
+      - name: Backup all branches and tags to VIP7733661
         shell: bash
         env:
           SOURCE_TOKEN: ${{ github.token }}
-          BACKUP_TOKEN: ${{ secrets.ASIRICAPITAL_BACKUP_TOKEN }}
+          BACKUP_TOKEN: ${{ secrets.VIP7733661_BACKUP_TOKEN }}
         run: |
           set -euo pipefail
 
           if [ -z "${BACKUP_TOKEN:-}" ]; then
-            echo "ASIRICAPITAL_BACKUP_TOKEN is not configured."
+            echo "VIP7733661_BACKUP_TOKEN is not configured."
             exit 1
           fi
 
@@ -46,7 +46,7 @@ jobs:
 
           cd "$workdir/source.git"
           git remote add backup \
-            "https://x-access-token:${BACKUP_TOKEN}@github.com/asiricapital/${repo_name}.git"
+            "https://x-access-token:${BACKUP_TOKEN}@github.com/vip7733661/${repo_name}.git"
 
           git push backup --all
           git push backup --tags
