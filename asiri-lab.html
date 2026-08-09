@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>ASIRI Technical Lab — سجل الأدلة</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07101d; --card:#0d1a2c; --line:#223653; --text:#f5f8ff; --muted:#9eb0c8; --cyan:#4dd8ff; --green:#42d39b; --amber:#f5bd59; --red:#ff6b7a; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif; color:var(--text); background:radial-gradient(circle at 20% 0,#14335a 0,transparent 34%),linear-gradient(145deg,#050b14,var(--bg)); }
+    main { width:min(1080px,calc(100% - 28px)); margin:auto; padding:42px 0 64px; }
+    header { display:flex; gap:20px; align-items:flex-start; justify-content:space-between; margin-bottom:22px; }
+    h1 { margin:0 0 8px; font-size:clamp(1.75rem,5vw,3.3rem); letter-spacing:-.04em; }
+    h2 { margin:0 0 14px; font-size:1.16rem; }
+    p { color:var(--muted); line-height:1.8; margin:0; }
+    .stamp,.pill { display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; padding:7px 11px; font-size:.78rem; white-space:nowrap; }
+    .stamp { color:var(--cyan); background:#0b2135; }
+    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+    .card { grid-column:span 12; border:1px solid var(--line); border-radius:18px; padding:20px; background:linear-gradient(155deg,rgba(17,34,57,.95),rgba(8,18,32,.96)); box-shadow:0 18px 50px rgba(0,0,0,.18); }
+    .hero { border-color:#633543; background:linear-gradient(145deg,rgba(83,22,38,.48),rgba(12,25,43,.96)); }
+    .hero-top { display:flex; gap:14px; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+    .status { color:#fff; background:#7c2637; border-color:#b84a61; font-weight:800; letter-spacing:.06em; }
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:18px; }
+    .metric { padding:14px; border:1px solid var(--line); border-radius:14px; background:rgba(0,0,0,.16); }
+    .metric b { display:block; font-size:1.45rem; margin-bottom:4px; }
+    .metric span { color:var(--muted); font-size:.8rem; }
+    .bad b { color:var(--red); } .safe b { color:var(--green); }
+    table { width:100%; border-collapse:collapse; margin-top:4px; }
+    th,td { padding:13px 10px; text-align:right; border-bottom:1px solid var(--line); vertical-align:top; }
+    th { color:var(--muted); font-size:.78rem; font-weight:650; }
+    td { font-size:.9rem; }
+    tr:last-child td { border-bottom:0; }
+    code { direction:ltr; unicode-bidi:isolate; color:#d9e9ff; font-size:.78rem; }
+    a { color:var(--cyan); text-decoration:none; } a:hover { text-decoration:underline; }
+    .review { color:var(--amber); } .blocked { color:var(--red); } .applied { color:var(--green); }
+    .findings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:14px; }
+    .finding { direction:ltr; text-align:left; padding:11px 12px; border-radius:12px; border:1px solid #533442; background:#25131d; font: .78rem/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .safety { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    .safety .pill { color:var(--green); background:#0d2a24; border-color:#205344; }
+    .note { margin-top:14px; padding:13px 14px; border-right:3px solid var(--amber); background:#211b10; border-radius:10px; color:#e8d7ae; line-height:1.75; }
+    footer { margin-top:20px; color:var(--muted); font-size:.78rem; line-height:1.8; }
+    @media (min-width:760px) { .half { grid-column:span 6; } }
+    @media (max-width:700px) { header { display:block; } .stamp { margin-top:14px; } .metrics { grid-template-columns:repeat(2,1fr); } .findings { grid-template-columns:1fr; } table { display:block; overflow-x:auto; white-space:nowrap; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>ASIRI Technical Lab</h1>
+      <p>سجل أدلة معقّم من الحساب الأساسي <b>asiricapital</b> — نتائج فعلية وليست قائمة اقتراحات.</p>
+    </div>
+    <span class="stamp">آخر تحديث · 9 أغسطس 2026</span>
+  </header>
+
+  <section class="grid">
+    <article class="card hero">
+      <div class="hero-top">
+        <div>
+          <h2>OpenAI Agents SDK for Python</h2>
+          <p><a href="https://github.com/openai/openai-agents-python" rel="noopener noreferrer">openai/openai-agents-python ↗</a> · الدرجة 96/100 · commit مثبت</p>
+        </div>
+        <span class="pill status">BLOCKED</span>
+      </div>
+      <div class="metrics">
+        <div class="metric bad"><b>2</b><span>Critical</span></div>
+        <div class="metric bad"><b>27</b><span>High</span></div>
+        <div class="metric safe"><b>0</b><span>Secrets</span></div>
+        <div class="metric safe"><b>871</b><span>ملف Python اجتاز Syntax</span></div>
+      </div>
+      <div class="note">توقّف المختبر قبل pytest وruff فور فشل بوابة الأمن. لم يُنسخ كود المشروع، ولم يبدأ اعتماد أو نشر أو اتصال إنتاجي.</div>
+      <div class="findings">
+        <div class="finding">CRITICAL CVE-2026-42208 · litellm 1.83.0 → 1.83.7</div>
+        <div class="finding">CRITICAL CVE-2026-49468 · litellm 1.83.0 → 1.84.0</div>
+        <div class="finding">HIGH CVE-2026-69244 · aiohttp 3.12.15 → 3.14.3</div>
+        <div class="finding">HIGH CVE-2026-69247 · cryptography 45.0.7 → 50.0.0</div>
+      </div>
+      <p style="margin-top:16px"><a href="https://github.com/asiricapital/asiri-bot/actions/runs/31330163927" rel="noopener noreferrer">GitHub Run 31330163927 ↗</a> · <a href="https://github.com/asiricapital/asiri-bot/pull/16" rel="noopener noreferrer">السجل المدمج PR #16 ↗</a></p>
+    </article>
+
+    <article class="card">
+      <h2>ما نُقل إلى المختبر حتى الآن؟</h2>
+      <table>
+        <thead><tr><th>المستودع</th><th>الحالة</th><th>ما ثبت</th><th>الدليل</th></tr></thead>
+        <tbody>
+          <tr><td>OpenAI Agents</td><td class="blocked">blocked</td><td>Syntax ناجح؛ مانع أمني فعلي</td><td><a href="https://github.com/asiricapital/asiri-bot/actions/runs/31330163927">Run</a></td></tr>
+          <tr><td>QuantConnect LEAN</td><td class="review">needs-review</td><td>519 ملف Python؛ يلزم ملف .NET موثوق</td><td><a href="https://github.com/asiricapital/asiri-bot/actions/runs/31329217306">Run</a></td></tr>
+          <tr><td>Streamlit</td><td class="review">needs-review</td><td>1171 ملف Python؛ PoC داخلي طُبّق</td><td><a href="https://github.com/asiricapital/asiri-bot/actions/runs/31329613480">Run</a></td></tr>
+          <tr><td>Alpaca Python SDK</td><td class="review">needs-review</td><td>106 ملفات؛ يلزم fake transport</td><td><a href="https://github.com/asiricapital/asiri-bot/actions/runs/31329773687">Run</a></td></tr>
+          <tr><td>NVIDIA NemoClaw</td><td class="review">needs-review</td><td>Syntax ناجح؛ لم تُشغّل تبعيات غير موثوقة</td><td><a href="https://github.com/asiricapital/asiri-bot/actions/runs/31327641709">Run</a></td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="card half">
+      <h2>تطبيق فعلي تم</h2>
+      <p><span class="applied">●</span> بُنيت واجهة <b>ASIRI Research UI</b> داخلية بوضع <code>OFFLINE_SHADOW_ONLY</code> لعرض نتائج البحث وEvidence Ledger على بيانات محلية حتمية.</p>
+      <p style="margin-top:10px"><a href="https://github.com/asiricapital/asiri-bot/commit/ddba57572df90f0c979a87c1e39475297a42587c">Commit التطبيق ↗</a></p>
+    </article>
+
+    <article class="card half">
+      <h2>حدود الأمان</h2>
+      <p>النقل إلى المختبر لا يعني اعتماد المشروع أو تشغيله في الإنتاج.</p>
+      <div class="safety">
+        <span class="pill">READ ONLY</span><span class="pill">NETWORK OFF</span><span class="pill">NO SECRETS</span><span class="pill">NO PRODUCTION</span><span class="pill">NO TRADING</span>
+      </div>
+    </article>
+  </section>
+
+  <footer>الحد الأدنى للنقل التلقائي 85/100، لكن الاجتياز النهائي يتطلب أيضًا ترخيصًا واضحًا، صيانة موثوقة، اختبارات وتوثيقًا كافيين، و0 Critical / 0 High / 0 أسرار.</footer>
+</main>
+</body>
+</html>
