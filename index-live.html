@@ -337,8 +337,53 @@
             color: var(--accent);
         }
 
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.05));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .analytics-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+        }
+
+        .analytics-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .analytics-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .analytics-change.positive {
+            color: var(--success);
+        }
+
+        .analytics-change.negative {
+            color: var(--danger);
+        }
+
         @media (max-width: 768px) {
             .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -371,6 +416,30 @@
 
     <!-- Main Content -->
     <div class="container">
+        <!-- Analytics Section -->
+        <div id="analytics-section" style="display: none; margin-bottom: 2rem;">
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="analytics-label">إجمالي قيمة المحفظة</div>
+                    <div class="analytics-value" id="total-value">$0.00</div>
+                    <div class="analytics-change" id="total-change">0%</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-label">الأرباح/الخسائر</div>
+                    <div class="analytics-value" id="total-profit">$0.00</div>
+                    <div class="analytics-change" id="profit-percent">0%</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-label">أسهم رابحة</div>
+                    <div class="analytics-value" id="winning-count" style="color: var(--success);">0</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-label">أسهم خاسرة</div>
+                    <div class="analytics-value" id="losing-count" style="color: var(--danger);">0</div>
+                </div>
+            </div>
+        </div>
+
         <div class="section-header">
             <div class="section-title">📊 محفظتي</div>
             <button class="btn-add" onclick="openAddModal()">+ إضافة سهم</button>
@@ -443,12 +512,79 @@
             localStorage.setItem('asiri_stocks', JSON.stringify(stocks));
         }
 
+        // Calculate portfolio analytics
+        function calculateAnalytics() {
+            let totalValue = 0;
+            let totalProfit = 0;
+            let winningCount = 0;
+            let losingCount = 0;
+
+            stocks.forEach(stock => {
+                // Assume 1 share per stock for calculation
+                const quantity = 1;
+                totalValue += stock.price * quantity;
+                
+                const profit = (stock.price * stock.change) / 100;
+                totalProfit += profit * quantity;
+
+                if (stock.change > 0) {
+                    winningCount++;
+                } else if (stock.change < 0) {
+                    losingCount++;
+                }
+            });
+
+            const totalChangePercent = stocks.length > 0 
+                ? (stocks.reduce((sum, s) => sum + s.change, 0) / stocks.length)
+                : 0;
+
+            return {
+                totalValue,
+                totalProfit,
+                winningCount,
+                losingCount,
+                totalChangePercent
+            };
+        }
+
+        // Update analytics display
+        function updateAnalytics() {
+            const analytics = calculateAnalytics();
+            const analyticsSection = document.getElementById('analytics-section');
+
+            if (stocks.length > 0) {
+                analyticsSection.style.display = 'block';
+
+                document.getElementById('total-value').textContent = `$${analytics.totalValue.toFixed(2)}`;
+                document.getElementById('total-profit').textContent = `$${analytics.totalProfit.toFixed(2)}`;
+                document.getElementById('winning-count').textContent = analytics.winningCount;
+                document.getElementById('losing-count').textContent = analytics.losingCount;
+
+                const changeElement = document.getElementById('total-change');
+                const profitElement = document.getElementById('profit-percent');
+                
+                changeElement.textContent = `${analytics.totalChangePercent >= 0 ? '▲' : '▼'} ${Math.abs(analytics.totalChangePercent).toFixed(2)}%`;
+                changeElement.className = `analytics-change ${analytics.totalChangePercent >= 0 ? 'positive' : 'negative'}`;
+
+                const profitPercent = analytics.totalValue > 0 ? (analytics.totalProfit / analytics.totalValue) * 100 : 0;
+                profitElement.textContent = `${profitPercent >= 0 ? '▲' : '▼'} ${Math.abs(profitPercent).toFixed(2)}%`;
+                profitElement.className = `analytics-change ${profitPercent >= 0 ? 'positive' : 'negative'}`;
+
+                // Color the profit value
+                const profitValue = document.getElementById('total-profit');
+                profitValue.style.color = analytics.totalProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+            } else {
+                analyticsSection.style.display = 'none';
+            }
+        }
+
         // Render portfolio
         function renderPortfolio() {
             const grid = document.getElementById('portfolio-grid');
             
             if (stocks.length === 0) {
                 grid.innerHTML = '<div class="loading"><p>لا توجد أسهم في المحفظة</p></div>';
+                updateAnalytics();
                 return;
             }
 
@@ -485,6 +621,8 @@
                     </div>
                 `;
             }).join('');
+
+            updateAnalytics();
         }
 
         // Modal functions
@@ -512,13 +650,16 @@
                 return;
             }
 
+            const price = Math.random() * 100 + 1;
+            const change = (Math.random() - 0.5) * 20;
+
             stocks.push({
                 symbol,
                 name,
-                price: Math.random() * 100 + 1,
-                change: (Math.random() - 0.5) * 20,
-                high: 0,
-                low: 0
+                price: price,
+                change: change,
+                high: price * 1.05,
+                low: price * 0.95
             });
 
             saveStocks();
