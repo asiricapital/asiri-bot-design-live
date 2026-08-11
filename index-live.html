@@ -107,6 +107,47 @@
             box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
         }
 
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.05));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .analytics-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+        }
+
+        .analytics-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .analytics-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .analytics-change.positive {
+            color: var(--success);
+        }
+
+        .analytics-change.negative {
+            color: var(--danger);
+        }
+
         .portfolio-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -230,16 +271,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        .error-message {
-            background: rgba(255, 51, 102, 0.1);
-            border: 1px solid var(--danger);
-            border-radius: 8px;
-            padding: 1rem;
-            color: var(--danger);
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -337,45 +368,13 @@
             color: var(--accent);
         }
 
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .analytics-card {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.05));
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .analytics-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-        }
-
-        .analytics-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-        }
-
-        .analytics-change {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .analytics-change.positive {
-            color: var(--success);
-        }
-
-        .analytics-change.negative {
+        .error {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 1rem;
             color: var(--danger);
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {
@@ -449,7 +448,7 @@
         <div id="portfolio-grid" class="portfolio-grid">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>جاري تحميل البيانات...</p>
+                <p>جاري تحميل البيانات الحقيقية...</p>
             </div>
         </div>
     </div>
@@ -462,10 +461,6 @@
                 <label class="form-label">رمز السهم</label>
                 <input type="text" class="form-input" id="symbolInput" placeholder="AAPL" style="text-transform: uppercase;">
             </div>
-            <div class="form-group">
-                <label class="form-label">اسم الشركة</label>
-                <input type="text" class="form-input" id="nameInput" placeholder="Apple Inc">
-            </div>
             <div class="modal-buttons">
                 <button class="btn btn-primary" onclick="addStock()">إضافة</button>
                 <button class="btn btn-secondary" onclick="closeAddModal()">إلغاء</button>
@@ -474,36 +469,27 @@
     </div>
 
     <script>
-        // Stock data with realistic prices
-        const STOCKS = [
-            { symbol: 'SNAP', name: 'Snap Inc', price: 5.33, change: 2.11, high: 5.37, low: 5.22 },
-            { symbol: 'MVIS', name: 'MicroVision, Inc', price: 3.38, change: 3.83, high: 3.52, low: 3.11 },
-            { symbol: 'SG', name: 'Sweetgreen, Inc', price: 5.40, change: -8.01, high: 5.64, low: 5.00 },
-            { symbol: 'RKLB', name: 'Rocket Lab USA, Inc', price: 82.83, change: 9.46, high: 83.25, low: 77.38 },
-            { symbol: 'CHPT', name: 'ChargePoint Holdings, Inc', price: 6.22, change: 5.78, high: 6.25, low: 5.89 },
-            { symbol: 'BLNK', name: 'Blink Charging Co', price: 0.61, change: 13.30, high: 0.63, low: 0.54 },
-            { symbol: 'HUMA', name: 'Humacyte, Inc', price: 0.72, change: 1.21, high: 0.74, low: 0.70 },
-            { symbol: 'AGEN', name: 'Agenus Inc', price: 6.96, change: -7.08, high: 7.55, low: 6.92 },
-            { symbol: 'ENSC', name: 'Ensysce Biosciences, Inc', price: 0.52, change: -0.78, high: 0.55, low: 0.47 },
-            { symbol: 'TMCI', name: 'Treace Medical Concepts, Inc', price: 4.76, change: 8.68, high: 5.20, low: 4.47 },
-            { symbol: 'AMPL', name: 'Amplitude, Inc', price: 11.26, change: 4.55, high: 11.38, low: 10.80 },
-            { symbol: 'RDW', name: 'Redwire Corp', price: 13.59, change: 14.88, high: 13.68, low: 12.42 },
-            { symbol: 'INO', name: 'Inovio Pharmaceuticals, Inc', price: 0.67, change: -0.86, high: 0.68, low: 0.64 },
-            { symbol: 'LASE', name: 'Laser Photonics Corporation', price: 1.14, change: -0.87, high: 1.17, low: 1.09 },
-            { symbol: 'PLUG', name: 'Plug Power Inc', price: 2.18, change: 5.31, high: 2.19, low: 2.06 },
-            { symbol: 'CRDL', name: 'Cardiol Therapeutics Inc', price: 1.42, change: 4.41, high: 1.43, low: 1.35 },
-            { symbol: 'ADMA', name: 'ADMA Biologics, Inc', price: 9.90, change: -1.59, high: 10.19, low: 9.75 },
-            { symbol: 'OPTT', name: 'Ocean Power Technologies, Inc', price: 0.18, change: 4.35, high: 0.19, low: 0.18 },
-            { symbol: 'INLF', name: 'INLIF Limited', price: 4.51, change: -17.10, high: 5.49, low: 4.50 }
+        const POLYGON_API_KEY = 'pp9Wp8ypugygYEp6YFkEssQIUjs90Wu8';
+        const POLYGON_BASE_URL = 'https://api.polygon.io/v1/open-close';
+
+        const DEFAULT_STOCKS = [
+            'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
+            'BLNK', 'HUMA', 'AGEN', 'ENSC', 'TMCI',
+            'AMPL', 'RDW', 'INO', 'LASE', 'PLUG',
+            'CRDL', 'ADMA', 'OPTT', 'INLF'
         ];
 
-        let stocks = [...STOCKS];
+        let stocks = [];
+        let stocksData = {};
 
         // Load stocks from localStorage
         function loadStocks() {
             const saved = localStorage.getItem('asiri_stocks');
             if (saved) {
                 stocks = JSON.parse(saved);
+            } else {
+                stocks = [...DEFAULT_STOCKS];
+                saveStocks();
             }
         }
 
@@ -512,21 +498,63 @@
             localStorage.setItem('asiri_stocks', JSON.stringify(stocks));
         }
 
-        // Calculate portfolio analytics
+        // Fetch stock data from Polygon.io
+        async function fetchStockData(symbol) {
+            try {
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                const dateStr = yesterday.toISOString().split('T')[0];
+                const url = `${POLYGON_BASE_URL}/${symbol}/${dateStr}?adjusted=true&apiKey=${POLYGON_API_KEY}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    return {
+                        symbol: symbol,
+                        price: data.close,
+                        high: data.high,
+                        low: data.low,
+                        change: ((data.close - data.open) / data.open) * 100,
+                        volume: data.volume
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error(`Error fetching ${symbol}:`, error);
+                return null;
+            }
+        }
+
+        // Fetch all stocks data
+        async function fetchAllStocks() {
+            const grid = document.getElementById('portfolio-grid');
+            grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري تحميل البيانات الحقيقية...</p></div>';
+            
+            const promises = stocks.map(symbol => fetchStockData(symbol));
+            const results = await Promise.all(promises);
+            
+            stocksData = {};
+            results.forEach(data => {
+                if (data) {
+                    stocksData[data.symbol] = data;
+                }
+            });
+            
+            renderPortfolio();
+            updateAnalytics();
+        }
+
+        // Calculate analytics
         function calculateAnalytics() {
             let totalValue = 0;
-            let totalProfit = 0;
             let winningCount = 0;
             let losingCount = 0;
 
-            stocks.forEach(stock => {
-                // Assume 1 share per stock for calculation
-                const quantity = 1;
-                totalValue += stock.price * quantity;
-                
-                const profit = (stock.price * stock.change) / 100;
-                totalProfit += profit * quantity;
-
+            Object.values(stocksData).forEach(stock => {
+                totalValue += stock.price;
                 if (stock.change > 0) {
                     winningCount++;
                 } else if (stock.change < 0) {
@@ -534,16 +562,15 @@
                 }
             });
 
-            const totalChangePercent = stocks.length > 0 
-                ? (stocks.reduce((sum, s) => sum + s.change, 0) / stocks.length)
+            const avgChange = Object.values(stocksData).length > 0
+                ? Object.values(stocksData).reduce((sum, s) => sum + s.change, 0) / Object.values(stocksData).length
                 : 0;
 
             return {
                 totalValue,
-                totalProfit,
                 winningCount,
                 losingCount,
-                totalChangePercent
+                avgChange
             };
         }
 
@@ -552,27 +579,26 @@
             const analytics = calculateAnalytics();
             const analyticsSection = document.getElementById('analytics-section');
 
-            if (stocks.length > 0) {
+            if (Object.keys(stocksData).length > 0) {
                 analyticsSection.style.display = 'block';
 
                 document.getElementById('total-value').textContent = `$${analytics.totalValue.toFixed(2)}`;
-                document.getElementById('total-profit').textContent = `$${analytics.totalProfit.toFixed(2)}`;
                 document.getElementById('winning-count').textContent = analytics.winningCount;
                 document.getElementById('losing-count').textContent = analytics.losingCount;
 
                 const changeElement = document.getElementById('total-change');
-                const profitElement = document.getElementById('profit-percent');
-                
-                changeElement.textContent = `${analytics.totalChangePercent >= 0 ? '▲' : '▼'} ${Math.abs(analytics.totalChangePercent).toFixed(2)}%`;
-                changeElement.className = `analytics-change ${analytics.totalChangePercent >= 0 ? 'positive' : 'negative'}`;
+                changeElement.textContent = `${analytics.avgChange >= 0 ? '▲' : '▼'} ${Math.abs(analytics.avgChange).toFixed(2)}%`;
+                changeElement.className = `analytics-change ${analytics.avgChange >= 0 ? 'positive' : 'negative'}`;
 
-                const profitPercent = analytics.totalValue > 0 ? (analytics.totalProfit / analytics.totalValue) * 100 : 0;
-                profitElement.textContent = `${profitPercent >= 0 ? '▲' : '▼'} ${Math.abs(profitPercent).toFixed(2)}%`;
-                profitElement.className = `analytics-change ${profitPercent >= 0 ? 'positive' : 'negative'}`;
-
-                // Color the profit value
                 const profitValue = document.getElementById('total-profit');
-                profitValue.style.color = analytics.totalProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+                const totalProfit = Object.values(stocksData).reduce((sum, s) => sum + (s.price * s.change / 100), 0);
+                profitValue.textContent = `$${totalProfit.toFixed(2)}`;
+                profitValue.style.color = totalProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+                const profitPercent = document.getElementById('profit-percent');
+                const profitPercentValue = (totalProfit / analytics.totalValue) * 100;
+                profitPercent.textContent = `${profitPercentValue >= 0 ? '▲' : '▼'} ${Math.abs(profitPercentValue).toFixed(2)}%`;
+                profitPercent.className = `analytics-change ${profitPercentValue >= 0 ? 'positive' : 'negative'}`;
             } else {
                 analyticsSection.style.display = 'none';
             }
@@ -582,23 +608,23 @@
         function renderPortfolio() {
             const grid = document.getElementById('portfolio-grid');
             
-            if (stocks.length === 0) {
-                grid.innerHTML = '<div class="loading"><p>لا توجد أسهم في المحفظة</p></div>';
-                updateAnalytics();
+            if (Object.keys(stocksData).length === 0) {
+                grid.innerHTML = '<div class="loading"><p>لا توجد بيانات متاحة</p></div>';
                 return;
             }
 
-            grid.innerHTML = stocks.map(stock => {
+            const colors = ['#00d4ff', '#00ff88', '#ffaa00', '#ff3366', '#00ffff', '#ff00ff'];
+            
+            grid.innerHTML = Object.values(stocksData).map((stock, index) => {
                 const isPositive = stock.change >= 0;
-                const colors = ['#00d4ff', '#00ff88', '#ffaa00', '#ff3366', '#00ffff', '#ff00ff'];
-                const color = colors[stocks.indexOf(stock) % colors.length];
+                const color = colors[index % colors.length];
 
                 return `
                     <div class="stock-card">
                         <div class="stock-header">
                             <div>
                                 <div class="stock-symbol">${stock.symbol}</div>
-                                <div class="stock-name">${stock.name}</div>
+                                <div class="stock-name">${stock.symbol}</div>
                             </div>
                             <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, ${color}, ${color}99); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">
                                 ${stock.symbol.substring(0, 2)}
@@ -621,8 +647,6 @@
                     </div>
                 `;
             }).join('');
-
-            updateAnalytics();
         }
 
         // Modal functions
@@ -633,38 +657,33 @@
         function closeAddModal() {
             document.getElementById('addModal').classList.remove('active');
             document.getElementById('symbolInput').value = '';
-            document.getElementById('nameInput').value = '';
         }
 
-        function addStock() {
+        async function addStock() {
             const symbol = document.getElementById('symbolInput').value.toUpperCase().trim();
-            const name = document.getElementById('nameInput').value.trim();
 
-            if (!symbol || !name) {
-                alert('يرجى ملء جميع الحقول');
+            if (!symbol) {
+                alert('يرجى إدخال رمز السهم');
                 return;
             }
 
-            if (stocks.find(s => s.symbol === symbol)) {
+            if (stocks.includes(symbol)) {
                 alert('هذا السهم موجود بالفعل');
                 return;
             }
 
-            const price = Math.random() * 100 + 1;
-            const change = (Math.random() - 0.5) * 20;
-
-            stocks.push({
-                symbol,
-                name,
-                price: price,
-                change: change,
-                high: price * 1.05,
-                low: price * 0.95
-            });
-
+            stocks.push(symbol);
             saveStocks();
             closeAddModal();
-            renderPortfolio();
+            
+            const data = await fetchStockData(symbol);
+            if (data) {
+                stocksData[symbol] = data;
+                renderPortfolio();
+                updateAnalytics();
+            } else {
+                alert('لم يتمكن من جلب بيانات السهم');
+            }
         }
 
         // Close modal on outside click
@@ -676,7 +695,10 @@
 
         // Initialize
         loadStocks();
-        renderPortfolio();
+        fetchAllStocks();
+
+        // Refresh data every 5 minutes
+        setInterval(fetchAllStocks, 5 * 60 * 1000);
     </script>
 </body>
 </html>
