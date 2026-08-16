@@ -2,22 +2,21 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asiri Capital | Obsidian Pro Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Asiri Capital | Live Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #050b14;
-            --bg-card: #0c1527;
-            --bg-card-hover: #13223f;
-            --accent-gold: #f3ba2f;
-            --accent-cyan: #00f0ff;
-            --success: #00ff88;
-            --danger: #ff3366;
-            --text-main: #f8fafc;
+            --bg-base: #060e18;
+            --bg-card: #0c1a2c;
+            --bg-card-hover: #13243f;
+            --border-color: #1e3356;
+            --accent-gold: #e2bc53;
+            --accent-cyan: #00e5ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #f1f5f9;
             --text-muted: #94a3b8;
-            --border: #1e293b;
-            --border-glow: rgba(0, 240, 255, 0.2);
         }
 
         * {
@@ -25,458 +24,483 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-deep);
+            background-color: var(--bg-base);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 3rem;
+            padding-bottom: 100px;
         }
 
-        /* Top Bar */
-        .topbar {
-            background: rgba(12, 21, 39, 0.85);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+        /* Top Bar / Account Bar */
+        .account-bar {
+            background: rgba(12, 26, 44, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .account-info {
+            text-align: right;
         }
 
-        .brand-logo {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-cyan));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: #000;
-            font-size: 1.2rem;
-            box-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
-        }
-
-        .brand-title h1 {
-            font-size: 1.2rem;
+        .account-status {
+            font-size: 0.95rem;
             font-weight: 700;
-            letter-spacing: 0.5px;
-            background: linear-gradient(90deg, #fff, var(--text-muted));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--success);
         }
 
-        .brand-title span {
+        .account-email {
             font-size: 0.75rem;
-            color: var(--accent-cyan);
-            letter-spacing: 1px;
+            color: var(--text-muted);
         }
 
-        .market-status {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid rgba(0, 255, 136, 0.3);
+        .btn-account {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            color: var(--accent-cyan);
             padding: 0.4rem 1rem;
             border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-account:hover {
+            background: rgba(0, 229, 255, 0.2);
+        }
+
+        /* Navigation Header Pills */
+        .nav-pills-container {
+            display: flex;
+            gap: 0.6rem;
+            padding: 0.8rem 1rem;
+            overflow-x: auto;
+            background: rgba(6, 14, 24, 0.9);
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+
+        .nav-pills-container::-webkit-scrollbar { display: none; }
+
+        .nav-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
             font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
         }
 
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--success);
-            animation: pulse 1.5s infinite;
+        .nav-pill.active {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(226, 188, 83, 0.2));
+            border-color: var(--accent-cyan);
+            color: #fff;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 1; }
+        .badge-count {
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 10px;
+            font-weight: 700;
         }
 
         /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
+        .main-container {
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* Portfolio Summary Header */
-        .summary-banner {
-            background: linear-gradient(135deg, var(--bg-card), #162645);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .summary-banner::after {
-            content: '';
-            position: absolute;
-            top: 0; right: 0; width: 4px; height: 100%;
-            background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-gold));
-        }
-
-        .summary-item label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .summary-item .value {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .summary-item .sub-value {
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .positive { color: var(--success); }
-        .negative { color: var(--danger); }
-
-        /* Controls Toolbar */
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .section-heading h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .action-btns {
-            display: flex;
-            gap: 0.8rem;
-        }
-
-        .btn {
-            background: var(--bg-card-hover);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 240, 255, 0.05);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-cyan), #0088ff);
-            color: #000;
-            border: none;
-            font-weight: 700;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-        }
-
-        /* Stock Cards Grid */
-        .stocks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.2rem;
-        }
-
-        .stock-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+        /* Sync Button Banner */
+        .sync-banner {
+            background: linear-gradient(135deg, #0c1a2c, #162b4d);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 1.2rem;
-            transition: all 0.25s ease;
-            position: relative;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .stock-card:hover {
+        .sync-banner:hover {
             border-color: var(--accent-cyan);
-            background: var(--bg-card-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
 
-        .stock-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+        .sync-banner h3 {
+            font-size: 0.95rem;
+            color: #fff;
+            margin-bottom: 0.2rem;
+        }
+
+        .sync-banner p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Decision Hub Section */
+        .card-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.2rem;
             margin-bottom: 1rem;
         }
 
-        .stock-info h3 {
+        .section-header-meta {
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        .section-title-main {
             font-size: 1.2rem;
             font-weight: 700;
             color: #fff;
+            margin-bottom: 0.4rem;
         }
 
-        .stock-info p {
+        .section-desc {
             font-size: 0.8rem;
             color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.4;
         }
 
-        .stock-badge {
-            font-size: 0.75rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-        }
-
-        .stock-price-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
+        /* Filter Buttons Grid */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
             margin-bottom: 1rem;
         }
 
-        .current-price {
-            font-size: 1.5rem;
+        .filter-btn {
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.7rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: rgba(0, 229, 255, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Table / List Header */
+        .table-headers {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+        }
+
+        .table-headers div:first-child { text-align: right; }
+
+        /* Stock Live Row */
+        .stock-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            background: rgba(6, 14, 24, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem;
+            border-radius: 10px;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .stock-row:hover {
+            border-color: var(--accent-cyan);
+            background: var(--bg-card-hover);
+        }
+
+        .stock-col-name {
+            text-align: right;
+        }
+
+        .stock-col-name .sym {
+            font-size: 1rem;
             font-weight: 700;
             color: #fff;
         }
 
-        .price-change {
-            font-size: 0.9rem;
-            font-weight: 600;
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-        }
-
-        .price-change.positive { background: rgba(0, 255, 136, 0.15); color: var(--success); }
-        .price-change.negative { background: rgba(255, 51, 102, 0.15); color: var(--danger); }
-
-        .stock-metrics {
-            border-top: 1px solid var(--border);
-            padding-top: 0.8rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            font-size: 0.8rem;
+        .stock-col-name .name {
+            font-size: 0.7rem;
             color: var(--text-muted);
         }
 
-        .metric-val {
-            color: var(--text-main);
+        .stock-col-price, .stock-col-change, .stock-col-action {
+            text-align: center;
+            font-size: 0.85rem;
             font-weight: 600;
         }
 
-        /* Modal */
+        .val-pos { color: var(--success); }
+        .val-neg { color: var(--danger); }
+
+        .badge-decision {
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-wait { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
+        .badge-avoid { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        /* Bottom Fixed Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(12, 26, 44, 0.98);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            padding: 0.6rem 0.4rem;
+            z-index: 1000;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.6);
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .nav-item.active {
+            color: var(--accent-gold);
+        }
+
+        .nav-item.active svg {
+            fill: var(--accent-gold);
+            filter: drop-shadow(0 0 8px rgba(226, 188, 83, 0.4));
+        }
+
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 11, 20, 0.8);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(6, 14, 24, 0.85);
             backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
+            padding: 1rem;
         }
 
         .modal-overlay.active { display: flex; }
 
-        .modal-box {
+        .modal-card {
             background: var(--bg-card);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
             width: 100%;
-            max-width: 450px;
-            padding: 2rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            max-width: 400px;
+            padding: 1.5rem;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1rem;
         }
 
-        .modal-header h3 { font-size: 1.2rem; color: #fff; }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-input {
+        .modal-input {
             width: 100%;
-            background: var(--bg-deep);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             padding: 0.8rem;
             color: #fff;
             font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: right;
         }
 
-        .form-input:focus {
+        .modal-input:focus {
             outline: none;
             border-color: var(--accent-cyan);
         }
 
+        .modal-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 0.7rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-confirm { background: var(--accent-cyan); color: #000; }
+        .btn-cancel { background: var(--bg-base); color: var(--text-muted); border: 1px solid var(--border-color); }
+
         .loading-state {
-            grid-column: 1 / -1;
             text-align: center;
-            padding: 4rem;
+            padding: 3rem;
             color: var(--text-muted);
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0,240,255,0.1);
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(0,229,255,0.1);
             border-top: 3px solid var(--accent-cyan);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+            margin: 0 auto 0.8rem;
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) {
-            .topbar { padding: 1rem; }
-            .container { padding: 0 1rem; }
-            .summary-banner { padding: 1.2rem; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- Top Navigation -->
-    <header class="topbar">
-        <div class="brand">
-            <div class="brand-logo">AC</div>
-            <div class="brand-title">
-                <h1>ASIRI CAPITAL</h1>
-                <span>OBSIDIAN PRO TERMINAL v26</span>
-            </div>
+    <!-- Account & Status Top Bar -->
+    <div class="account-bar">
+        <button class="btn-account" onclick="openAddStockModal()">+ إضافة أصل</button>
+        <div class="account-info">
+            <div class="account-status">حساب ثابت وآمن</div>
+            <div class="account-email">vip7733661@gmail.com</div>
         </div>
-        <div class="market-status">
-            <div class="live-dot"></div>
-            <span>الأسواق المادية الحية (Polygon.io)</span>
-        </div>
-    </header>
+    </div>
 
-    <!-- Main Container -->
-    <main class="container">
+    <!-- Navigation Pills Top -->
+    <div class="nav-pills-container">
+        <button class="nav-pill active" onclick="switchTab('decisions')">أدوات القرار</button>
+        <button class="nav-pill" onclick="switchTab('command')">قمة القرار <span style="font-size:0.6rem; background:var(--accent-cyan); color:#000; padding:1px 4px; border-radius:4px;">⚡</span></button>
+        <button class="nav-pill" onclick="switchTab('alerts')">التنبيهات <span class="badge-count">54</span></button>
+        <button class="nav-pill" onclick="switchTab('portfolio')">المحفظة الذكية</button>
+    </div>
 
-        <!-- Portfolio Summary Header -->
-        <section class="summary-banner">
-            <div class="summary-item">
-                <label>إجمالي قيمة المحفظة</label>
-                <div class="value" id="total-val">$0.00</div>
-                <div class="sub-value" id="portfolio-count-text">جاري مزامنة الأصول...</div>
-            </div>
-            <div class="summary-item">
-                <label>صافي الربح / الخسارة (يومي)</label>
-                <div class="value" id="total-pnl">$0.00</div>
-                <div class="sub-value" id="total-pnl-pct">0.00%</div>
-            </div>
-            <div class="summary-item">
-                <label>الأصول الرابحة مقابل الخاسرة</label>
-                <div class="value" id="win-loss-ratio">0 / 0</div>
-                <div class="sub-value positive"><span>تحديث مباشر كل 60 ثانية</span></div>
-            </div>
-            <div class="summary-item">
-                <label>حالة الاتصال والبيانات</label>
-                <div class="value" style="font-size: 1.2rem; color: var(--success); margin-top: 5px;">مستقر ومؤمن</div>
-                <div class="sub-value">Polygon API Connected</div>
-            </div>
-        </section>
+    <!-- Main Content View -->
+    <div class="main-container">
 
-        <!-- Toolbar -->
-        <div class="toolbar">
-            <div class="section-heading">
-                <h2>📈 أصول المحفظة والمراقبة اللحظية</h2>
-            </div>
-            <div class="action-btns">
-                <button class="btn" onclick="refreshData()">🔄 تحديث فوري</button>
-                <button class="btn btn-primary" onclick="openModal()">+ إضافة رمز سهم جديد</button>
-            </div>
+        <!-- Sync Button Card -->
+        <div class="sync-banner" onclick="forceSync()">
+            <h3>تحديث لوحة القيادة والأسعار الفورية</h3>
+            <p>اضغط هنا لجلب أحدث إغلاق وأسعار مباشرة عبر خوادم Polygon.io</p>
         </div>
 
-        <!-- Stocks Grid -->
-        <div id="stocks-grid" class="stocks-grid">
-            <div class="loading-state">
-                <div class="spinner"></div>
-                <p>جاري جلب أحدث بيانات الإغلاق والتغيرات من خوادم السوق...</p>
+        <!-- Section 1: Executive Decision Hub -->
+        <div class="card-section" id="section-decisions">
+            <div class="section-header-meta">EXECUTIVE DECISION • الأولوية الأولى</div>
+            <div class="section-title-main">القرار التنفيذي لكل سهم</div>
+            <div class="section-desc">القرار والإجراء المطلوب لكل سهم قبل الاطلاع على بقية المؤشرات الفنية والمالية.</div>
+
+            <!-- Filter Pills -->
+            <div class="filter-grid">
+                <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
+                <button class="filter-btn" onclick="filterAction('BUY', this)">شراء</button>
+                <button class="filter-btn" onclick="filterAction('WAIT', this)">انتظار</button>
+                <button class="filter-btn" onclick="filterAction('AVOID', this)">تجنب</button>
+            </div>
+
+            <!-- Table Header -->
+            <div class="table-headers">
+                <div>السهم</div>
+                <div>السعر</div>
+                <div>التغير</div>
+                <div>قرار التنفيذ</div>
+            </div>
+
+            <!-- Stocks List Container -->
+            <div id="stocks-list-wrapper">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل البيانات الحية للمحفظة والقرارات التنفيذية...</p>
+                </div>
             </div>
         </div>
 
-    </main>
+    </div>
 
-    <!-- Add Modal -->
-    <div class="modal-overlay" id="addModal">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3>إضافة سهم جديد للمراقبة</h3>
-                <button class="close-modal" onclick="closeModal()">✕</button>
-            </div>
-            <div class="form-group">
-                <label class="form-label">رمز السهم (Ticker Symbol)</label>
-                <input type="text" id="newSymbol" class="form-input" placeholder="مثال: AAPL, TSLA, NVDA" style="text-transform: uppercase;">
-            </div>
-            <div class="action-btns" style="justify-content: flex-end; margin-top: 1.5rem;">
-                <button class="btn" onclick="closeModal()">إلغاء</button>
-                <button class="btn btn-primary" onclick="handleAddStock()">حفظ وإضافة</button>
+    <!-- Bottom Navigation Bar (Fixed) -->
+    <nav class="bottom-nav">
+        <button class="nav-item" onclick="bottomNavClick('tools')">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
+            <span>الأدوات</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('alerts')">
+            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <span>التنبيهات</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('opportunities')">
+            <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            <span>الفرص</span>
+        </button>
+        <button class="nav-item active" onclick="bottomNavClick('portfolio')">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+            <span>المحفظة</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('back')">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <span>السابق</span>
+        </button>
+    </nav>
+
+    <!-- Add Stock Modal -->
+    <div class="modal-overlay" id="addStockModal">
+        <div class="modal-card">
+            <div class="modal-title">إضافة سهم جديد للمتابعة</div>
+            <input type="text" id="modalSymbolInput" class="modal-input" placeholder="أدخل رمز السهم (مثال: AAPL)" style="text-transform: uppercase;">
+            <div class="modal-actions">
+                <button class="modal-btn btn-confirm" onclick="confirmAddStock()">إضافة فورية</button>
+                <button class="modal-btn btn-cancel" onclick="closeAddStockModal()">إلغاء</button>
             </div>
         </div>
     </div>
@@ -484,7 +508,7 @@
     <script>
         const API_KEY = 'pp9Wp8ypugygYEp6YFkEssQIUjs90Wu8';
         
-        // القائمة الأساسية الشاملة لمحفظة المستخدم
+        // المحفظة الأساسية الشاملة
         const DEFAULT_WATCHLIST = [
             'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
             'BLNK', 'HUMA', 'AGEN', 'ENSC', 'TMCI',
@@ -494,9 +518,10 @@
 
         let watchlist = [];
         let marketData = {};
+        let currentFilter = 'ALL';
 
         function initApp() {
-            const saved = localStorage.getItem('asiri_pro_watchlist');
+            const saved = localStorage.getItem('asiri_pro_watchlist_v2');
             if (saved) {
                 try {
                     watchlist = JSON.parse(saved);
@@ -511,7 +536,7 @@
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_pro_watchlist', JSON.stringify(watchlist));
+            localStorage.setItem('asiri_pro_watchlist_v2', JSON.stringify(watchlist));
         }
 
         async function fetchStockPrevClose(symbol) {
@@ -524,17 +549,29 @@
                     const r = data.results[0];
                     const close = r.c || 0;
                     const open = r.o || close;
-                    const high = r.h || close;
-                    const low = r.l || close;
                     const changePct = open > 0 ? ((close - open) / open) * 100 : 0;
                     
+                    // تحديد القرار التنفيذي تلقائياً بناءً على الأداء
+                    let decision = 'WAIT';
+                    let badgeClass = 'badge-wait';
+                    let badgeText = 'انتظار';
+                    if (changePct > 2.0) {
+                        decision = 'BUY';
+                        badgeClass = 'badge-buy';
+                        badgeText = 'شراء';
+                    } else if (changePct < -3.0) {
+                        decision = 'AVOID';
+                        badgeClass = 'badge-avoid';
+                        badgeText = 'تجنب';
+                    }
+
                     return {
                         symbol: symbol,
                         price: close,
-                        open: open,
-                        high: high,
-                        low: low,
-                        change: changePct
+                        change: changePct,
+                        decision: decision,
+                        badgeClass: badgeClass,
+                        badgeText: badgeText
                     };
                 }
                 return null;
@@ -545,12 +582,12 @@
         }
 
         async function fetchAllMarkets() {
-            const grid = document.getElementById('stocks-grid');
+            const wrapper = document.getElementById('stocks-list-wrapper');
             if (Object.keys(marketData).length === 0) {
-                grid.innerHTML = `
+                wrapper.innerHTML = `
                     <div class="loading-state">
                         <div class="spinner"></div>
-                        <p>جاري مزامنة أسعار ${watchlist.length} أصول مع خوادم Polygon الحية...</p>
+                        <p>جاري مزامنة أسعار المحفظة والقرارات التنفيذية...</p>
                     </div>
                 `;
             }
@@ -561,110 +598,113 @@
                 if (info) {
                     updatedData[sym] = info;
                 } else if (marketData[sym]) {
-                    updatedData[sym] = marketData[sym]; // الاحتفاظ بآخر قيمة صحيحة في حال التباطؤ المؤقت
+                    updatedData[sym] = marketData[sym];
                 }
             }
 
             marketData = updatedData;
-            renderTerminal();
-            updateSummaryBanner();
+            renderStocksList();
         }
 
-        function renderTerminal() {
-            const grid = document.getElementById('stocks-grid');
+        function renderStocksList() {
+            const wrapper = document.getElementById('stocks-list-wrapper');
             const symbols = Object.keys(marketData);
 
             if (symbols.length === 0) {
-                grid.innerHTML = `<div class="loading-state"><p>لا توجد أصول مضافة حالياً.</p></div>`;
+                wrapper.innerHTML = `<div class="loading-state"><p>لا توجد أسهم مضافة حالياً.</p></div>`;
                 return;
             }
 
-            grid.innerHTML = symbols.map(sym => {
+            const filteredSymbols = symbols.filter(sym => {
+                if (currentFilter === 'ALL') return true;
+                return marketData[sym].decision === currentFilter;
+            });
+
+            if (filteredSymbols.length === 0) {
+                wrapper.innerHTML = `<div class="loading-state"><p>لا توجد أسهم مطابقة لهذا التصنيف.</p></div>`;
+                return;
+            }
+
+            wrapper.innerHTML = filteredSymbols.map(sym => {
                 const item = marketData[sym];
                 const isPos = item.change >= 0;
-                const changeClass = isPos ? 'positive' : 'negative';
+                const changeClass = isPos ? 'val-pos' : 'val-neg';
                 const sign = isPos ? '+' : '';
 
                 return `
-                    <div class="stock-card">
-                        <div class="stock-top">
-                            <div class="stock-info">
-                                <h3>${item.symbol}</h3>
-                                <p>سهم أمريكي معتمد</p>
-                            </div>
-                            <span class="stock-badge">LIVE</span>
+                    <div class="stock-row">
+                        <div class="stock-col-name">
+                            <div class="sym">${item.symbol}</div>
+                            <div class="name">تتبع مباشر من السوق</div>
                         </div>
-                        <div class="stock-price-row">
-                            <div class="current-price">$${item.price.toFixed(2)}</div>
-                            <div class="price-change ${changeClass}">${sign}${item.change.toFixed(2)}%</div>
-                        </div>
-                        <div class="stock-metrics">
-                            <div>الأعلى: <span class="metric-val">$${item.high.toFixed(2)}</span></div>
-                            <div>الأدنى: <span class="metric-val">$${item.low.toFixed(2)}</span></div>
+                        <div class="stock-col-price">$${item.price.toFixed(2)}</div>
+                        <div class="stock-col-change ${changeClass}">${sign}${item.change.toFixed(2)}%</div>
+                        <div class="stock-col-action">
+                            <span class="badge-decision ${item.badgeClass}">${item.badgeText}</span>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function updateSummaryBanner() {
-            const items = Object.values(marketData);
-            if (items.length === 0) return;
-
-            let totalVal = 0;
-            let totalPnLDollar = 0;
-            let winning = 0;
-            let losing = 0;
-
-            items.forEach(item => {
-                totalVal += item.price;
-                const pnlItem = item.price * (item.change / 100);
-                totalPnLDollar += pnlItem;
-                if (item.change >= 0) winning++;
-                else losing++;
-            });
-
-            const avgChangePct = items.reduce((acc, cur) => acc + cur.change, 0) / items.length;
-
-            document.getElementById('total-val').textContent = `$${totalVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            document.getElementById('portfolio-count-text').textContent = `إجمالي ${items.نشط || items.length} أصول مفعلة في المحفظة`;
-            
-            const pnlEl = document.getElementById('total-pnl');
-            pnlEl.textContent = `${totalPnLDollar >= 0 ? '+' : ''}$${totalPnLDollar.toFixed(2)}`;
-            pnlEl.className = `value ${totalPnLDollar >= 0 ? 'positive' : 'negative'}`;
-
-            const pnlPctEl = document.getElementById('total-pnl-pct');
-            pnlPctEl.textContent = `${avgChangePct >= 0 ? '▲ +' : '▼ '}${avgChangePct.toFixed(2)}% متوسط تغير الأصول`;
-            pnlPctEl.className = `sub-value ${avgChangePct >= 0 ? 'positive' : 'negative'}`;
-
-            document.getElementById('win-loss-ratio').textContent = `${winning} رابح / ${losing} خاسر`;
+        function filterAction(actionType, btnElement) {
+            currentFilter = actionType;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            renderStocksList();
         }
 
-        function refreshData() {
+        function forceSync() {
             fetchAllMarkets();
         }
 
-        function openModal() {
-            document.getElementById('addModal').classList.add('active');
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            if (tabName === 'portfolio') {
+                alert('أنت في قسم المحفظة الذكية الحية والمراقبة المستمرة.');
+            } else if (tabName === 'alerts') {
+                alert('تنبيهات السوق النشطة (54 تنبيهاً ذكياً قيد التتبع).');
+            } else if (tabName === 'command') {
+                alert('قمة القرار التنفيذي: تجميع توصيات الذكاء الاصطناعي.');
+            }
         }
 
-        function closeModal() {
-            document.getElementById('addModal').classList.remove('active');
-            document.getElementById('newSymbol').value = '';
+        function bottomNavClick(navType) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            if (navType === 'tools') {
+                alert('أدوات التحليل الفني المتقدمة مفعلة.');
+            } else if (navType === 'alerts') {
+                alert('قسم التنبيهات الفورية الذكية.');
+            } else if (navType === 'opportunities') {
+                alert('رصد الفرص الحية في السوق الأمريكي.');
+            } else if (navType === 'back') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
-        async function handleAddStock() {
-            const symInput = document.getElementById('newSymbol');
-            const sym = symInput.value.toUpperCase().trim();
+        function openAddStockModal() {
+            document.getElementById('addStockModal').classList.add('active');
+        }
+
+        function closeAddStockModal() {
+            document.getElementById('addStockModal').classList.remove('active');
+            document.getElementById('modalSymbolInput').value = '';
+        }
+
+        async function confirmAddStock() {
+            const input = document.getElementById('modalSymbolInput');
+            const sym = input.value.toUpperCase().trim();
 
             if (!sym) {
-                alert('الرجاء إدخال رمز السهم بشكل صحيح');
+                alert('الرجاء إدخال رمز السهم');
                 return;
             }
 
             if (watchlist.includes(sym)) {
-                alert('هذا السهم موجود مسبقاً في المحفظة');
-                closeModal();
+                alert('هذا السهم موجود مسبقاً في قائمتك');
+                closeAddStockModal();
                 return;
             }
 
@@ -673,18 +713,17 @@
                 watchlist.push(sym);
                 saveWatchlist();
                 marketData[sym] = info;
-                closeModal();
-                renderTerminal();
-                updateSummaryBanner();
-                alert(`تمت إضافة السهم ${sym} بنجاح ومزامنة سعره اللحظي ($${info.price.toFixed(2)})`);
+                closeAddStockModal();
+                renderStocksList();
+                alert(`تمت إضافة السهم ${sym} بنجاح ومتابعة سعره ($${info.price.toFixed(2)})`);
             } else {
-                alert('عذراً، لم نتمكن من العثور على بيانات لهذا الرمز في السوق. تأكد من صحة الرمز.');
+                alert('تعذر جلب بيانات لهذا الرمز، تأكد من صحة الرمز.');
             }
         }
 
-        // بدء التشغيل
+        // التهيئة والتشغيل
         initApp();
-        // تحديث تلقائي كل 60 ثانية
+        // تحديث دوري كل 60 ثانية
         setInterval(fetchAllMarkets, 60000);
     </script>
 </body>
