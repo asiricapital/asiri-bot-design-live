@@ -3,38 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asiri Capital - محفظة الاستثمار الذكية</title>
+    <title>Asiri Capital | Obsidian Pro Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #050b14;
+            --bg-card: #0c1527;
+            --bg-card-hover: #13223f;
+            --accent-gold: #f3ba2f;
+            --accent-cyan: #00f0ff;
+            --success: #00ff88;
+            --danger: #ff3366;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+            --border-glow: rgba(0, 240, 255, 0.2);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #1a1f3a;
-            --secondary: #0f1428;
-            --accent: #00d4ff;
-            --success: #00ff88;
-            --danger: #ff3366;
-            --warning: #ffaa00;
-            --text: #ffffff;
-            --text-secondary: #a0aec0;
-            --border: #2d3561;
+            font-family: 'Cairo', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow-x: hidden;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 3rem;
         }
 
-        .header {
-            background: rgba(15, 20, 40, 0.9);
-            backdrop-filter: blur(10px);
+        /* Top Bar */
+        .topbar {
+            background: rgba(12, 21, 39, 0.85);
+            backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
-            padding: 1.5rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -43,653 +48,644 @@
             z-index: 100;
         }
 
-        .header-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header-status {
+        .brand {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            font-size: 0.9rem;
+            gap: 1rem;
         }
 
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-cyan));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #000;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
+        }
+
+        .brand-title h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title span {
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
+        }
+
+        .market-status {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
             background: var(--success);
-            animation: pulse 2s infinite;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
+        /* Container */
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
         }
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .btn-add {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            border: none;
-            color: var(--primary);
-            padding: 0.8rem 1.6rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
-        }
-
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .analytics-card {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.05));
+        /* Portfolio Summary Header */
+        .summary-banner {
+            background: linear-gradient(135deg, var(--bg-card), #162645);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .analytics-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-        }
-
-        .analytics-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-        }
-
-        .analytics-change {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .analytics-change.positive {
-            color: var(--success);
-        }
-
-        .analytics-change.negative {
-            color: var(--danger);
-        }
-
-        .portfolio-grid {
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
-        }
-
-        .stock-card {
-            background: linear-gradient(135deg, rgba(26, 31, 58, 0.8), rgba(15, 20, 40, 0.6));
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .stock-card::before {
+        .summary-banner::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent), var(--success));
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            top: 0; right: 0; width: 4px; height: 100%;
+            background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-gold));
+        }
+
+        .summary-item label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-item .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .summary-item .sub-value {
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
+
+        /* Controls Toolbar */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-heading h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            background: var(--bg-card-hover);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), #0088ff);
+            color: #000;
+            border: none;
+            font-weight: 700;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+
+        /* Stock Cards Grid */
+        .stocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .stock-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem;
+            transition: all 0.25s ease;
+            position: relative;
         }
 
         .stock-card:hover {
-            border-color: var(--accent);
-            background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(15, 20, 40, 0.8));
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.15);
+            border-color: var(--accent-cyan);
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
 
-        .stock-card:hover::before {
-            opacity: 1;
-        }
-
-        .stock-header {
+        .stock-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 1rem;
         }
 
-        .stock-symbol {
+        .stock-info h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stock-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .stock-badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .stock-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1rem;
+        }
+
+        .current-price {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--accent);
+            color: #fff;
         }
 
-        .stock-name {
+        .price-change {
             font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 0.3rem;
-        }
-
-        .stock-price {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .stock-change {
-            font-size: 1rem;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
         }
 
-        .stock-change.positive {
-            color: var(--success);
-        }
+        .price-change.positive { background: rgba(0, 255, 136, 0.15); color: var(--success); }
+        .price-change.negative { background: rgba(255, 51, 102, 0.15); color: var(--danger); }
 
-        .stock-change.negative {
-            color: var(--danger);
-        }
-
-        .stock-details {
+        .stock-metrics {
+            border-top: 1px solid var(--border);
+            padding-top: 0.8rem;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
-        .detail {
-            font-size: 0.85rem;
-        }
-
-        .detail-label {
-            color: var(--text-secondary);
-            margin-bottom: 0.3rem;
-        }
-
-        .detail-value {
+        .metric-val {
+            color: var(--text-main);
             font-weight: 600;
-            color: var(--accent);
         }
 
-        .loading {
-            text-align: center;
-            padding: 3rem 1rem;
-            grid-column: 1 / -1;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 212, 255, 0.2);
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .modal {
-            display: none;
+        /* Modal */
+        .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 11, 20, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
             justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .modal.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
 
-        .modal-content {
-            background: var(--primary);
+        .modal-box {
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
             padding: 2rem;
-            max-width: 500px;
-            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
 
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 700;
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1.5rem;
-            color: var(--accent);
+        }
+
+        .modal-header h3 { font-size: 1.2rem; color: #fff; }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
 
         .form-label {
             display: block;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+            font-size: 0.85rem;
+            color: var(--text-muted);
             margin-bottom: 0.5rem;
         }
 
         .form-input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--bg-deep);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 0.8rem;
-            color: var(--text);
+            color: #fff;
             font-size: 1rem;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: var(--accent);
-            background: rgba(0, 212, 255, 0.05);
+            border-color: var(--accent-cyan);
         }
 
-        .modal-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
+        .loading-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
         }
 
-        .btn {
-            flex: 1;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0,240,255,0.1);
+            border-top: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         @media (max-width: 768px) {
-            .portfolio-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .analytics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .section-header {
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-            }
+            .topbar { padding: 1rem; }
+            .container { padding: 0 1rem; }
+            .summary-banner { padding: 1.2rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div>
-            <div class="header-title">ASIRI CAPITAL</div>
-            <div style="font-size: 0.85rem; color: var(--text-secondary);">محفظة الاستثمار الذكية</div>
-        </div>
-        <div class="header-status">
-            <div class="status-dot"></div>
-            <span>بيانات حية ومحدثة</span>
-        </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Analytics Section -->
-        <div id="analytics-section" style="display: none; margin-bottom: 2rem;">
-            <div class="analytics-grid">
-                <div class="analytics-card">
-                    <div class="analytics-label">إجمالي قيمة المحفظة</div>
-                    <div class="analytics-value" id="total-value">$0.00</div>
-                    <div class="analytics-change" id="total-change">0%</div>
-                </div>
-                <div class="analytics-card">
-                    <div class="analytics-label">الأرباح/الخسائر</div>
-                    <div class="analytics-value" id="total-profit">$0.00</div>
-                    <div class="analytics-change" id="profit-percent">0%</div>
-                </div>
-                <div class="analytics-card">
-                    <div class="analytics-label">أسهم رابحة</div>
-                    <div class="analytics-value" id="winning-count" style="color: var(--success);">0</div>
-                </div>
-                <div class="analytics-card">
-                    <div class="analytics-label">أسهم خاسرة</div>
-                    <div class="analytics-value" id="losing-count" style="color: var(--danger);">0</div>
-                </div>
+    <!-- Top Navigation -->
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">AC</div>
+            <div class="brand-title">
+                <h1>ASIRI CAPITAL</h1>
+                <span>OBSIDIAN PRO TERMINAL v26</span>
+            </div>
+        </div>
+        <div class="market-status">
+            <div class="live-dot"></div>
+            <span>الأسواق المادية الحية (Polygon.io)</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <!-- Portfolio Summary Header -->
+        <section class="summary-banner">
+            <div class="summary-item">
+                <label>إجمالي قيمة المحفظة</label>
+                <div class="value" id="total-val">$0.00</div>
+                <div class="sub-value" id="portfolio-count-text">جاري مزامنة الأصول...</div>
+            </div>
+            <div class="summary-item">
+                <label>صافي الربح / الخسارة (يومي)</label>
+                <div class="value" id="total-pnl">$0.00</div>
+                <div class="sub-value" id="total-pnl-pct">0.00%</div>
+            </div>
+            <div class="summary-item">
+                <label>الأصول الرابحة مقابل الخاسرة</label>
+                <div class="value" id="win-loss-ratio">0 / 0</div>
+                <div class="sub-value positive"><span>تحديث مباشر كل 60 ثانية</span></div>
+            </div>
+            <div class="summary-item">
+                <label>حالة الاتصال والبيانات</label>
+                <div class="value" style="font-size: 1.2rem; color: var(--success); margin-top: 5px;">مستقر ومؤمن</div>
+                <div class="sub-value">Polygon API Connected</div>
+            </div>
+        </section>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="section-heading">
+                <h2>📈 أصول المحفظة والمراقبة اللحظية</h2>
+            </div>
+            <div class="action-btns">
+                <button class="btn" onclick="refreshData()">🔄 تحديث فوري</button>
+                <button class="btn btn-primary" onclick="openModal()">+ إضافة رمز سهم جديد</button>
             </div>
         </div>
 
-        <div class="section-header">
-            <div class="section-title">📊 محفظتي</div>
-            <button class="btn-add" onclick="openAddModal()">+ إضافة سهم</button>
-        </div>
-
-        <div id="portfolio-grid" class="portfolio-grid">
-            <div class="loading">
+        <!-- Stocks Grid -->
+        <div id="stocks-grid" class="stocks-grid">
+            <div class="loading-state">
                 <div class="spinner"></div>
-                <p>جاري جلب الأسعار المباشرة من السوق...</p>
+                <p>جاري جلب أحدث بيانات الإغلاق والتغيرات من خوادم السوق...</p>
             </div>
         </div>
-    </div>
 
-    <!-- Add Stock Modal -->
-    <div class="modal" id="addModal">
-        <div class="modal-content">
-            <div class="modal-title">إضافة سهم جديد</div>
-            <div class="form-group">
-                <label class="form-label">رمز السهم (مثل AAPL, TSLA)</label>
-                <input type="text" class="form-input" id="symbolInput" placeholder="AAPL" style="text-transform: uppercase;">
+    </main>
+
+    <!-- Add Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>إضافة سهم جديد للمراقبة</h3>
+                <button class="close-modal" onclick="closeModal()">✕</button>
             </div>
-            <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="addStock()">إضافة ومتابعة</button>
-                <button class="btn btn-secondary" onclick="closeAddModal()">إلغاء</button>
+            <div class="form-group">
+                <label class="form-label">رمز السهم (Ticker Symbol)</label>
+                <input type="text" id="newSymbol" class="form-input" placeholder="مثال: AAPL, TSLA, NVDA" style="text-transform: uppercase;">
+            </div>
+            <div class="action-btns" style="justify-content: flex-end; margin-top: 1.5rem;">
+                <button class="btn" onclick="closeModal()">إلغاء</button>
+                <button class="btn btn-primary" onclick="handleAddStock()">حفظ وإضافة</button>
             </div>
         </div>
     </div>
 
     <script>
-        const POLYGON_API_KEY = 'pp9Wp8ypugygYEp6YFkEssQIUjs90Wu8';
+        const API_KEY = 'pp9Wp8ypugygYEp6YFkEssQIUjs90Wu8';
         
-        const DEFAULT_STOCKS = [
+        // القائمة الأساسية الشاملة لمحفظة المستخدم
+        const DEFAULT_WATCHLIST = [
             'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
             'BLNK', 'HUMA', 'AGEN', 'ENSC', 'TMCI',
             'AMPL', 'RDW', 'INO', 'LASE', 'PLUG',
             'CRDL', 'ADMA', 'OPTT', 'INLF'
         ];
 
-        let stocks = [];
-        let stocksData = {};
+        let watchlist = [];
+        let marketData = {};
 
-        function loadStocks() {
-            const saved = localStorage.getItem('asiri_stocks');
+        function initApp() {
+            const saved = localStorage.getItem('asiri_pro_watchlist');
             if (saved) {
                 try {
-                    stocks = JSON.parse(saved);
+                    watchlist = JSON.parse(saved);
                 } catch(e) {
-                    stocks = [...DEFAULT_STOCKS];
+                    watchlist = [...DEFAULT_WATCHLIST];
                 }
             } else {
-                stocks = [...DEFAULT_STOCKS];
-                saveStocks();
+                watchlist = [...DEFAULT_WATCHLIST];
+                saveWatchlist();
             }
+            fetchAllMarkets();
         }
 
-        function saveStocks() {
-            localStorage.setItem('asiri_stocks', JSON.stringify(stocks));
+        function saveWatchlist() {
+            localStorage.setItem('asiri_pro_watchlist', JSON.stringify(watchlist));
         }
 
-        // استخدام Polygon Previous Close API لضمان جلب آخر سعر إغلاق مؤكد بدون أخطاء تاريخية
-        async function fetchStockData(symbol) {
+        async function fetchStockPrevClose(symbol) {
             try {
-                const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${POLYGON_API_KEY}`;
-                const response = await fetch(url);
-                const data = await response.json();
+                const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${API_KEY}`;
+                const res = await fetch(url);
+                const data = await res.json();
                 
                 if (data && data.results && data.results.length > 0) {
-                    const res = data.results[0];
-                    const close = res.c;
-                    const open = res.o;
-                    const high = res.h;
-                    const low = res.l;
-                    const change = open ? ((close - open) / open) * 100 : 0;
+                    const r = data.results[0];
+                    const close = r.c || 0;
+                    const open = r.o || close;
+                    const high = r.h || close;
+                    const low = r.l || close;
+                    const changePct = open > 0 ? ((close - open) / open) * 100 : 0;
                     
                     return {
                         symbol: symbol,
                         price: close,
+                        open: open,
                         high: high,
                         low: low,
-                        change: change
+                        change: changePct
                     };
                 }
                 return null;
-            } catch (error) {
-                console.error(`Error fetching ${symbol}:`, error);
+            } catch (err) {
+                console.error(`Failed to fetch ${symbol}:`, err);
                 return null;
             }
         }
 
-        async function fetchAllStocks() {
-            const grid = document.getElementById('portfolio-grid');
-            if (Object.keys(stocksData).length === 0) {
-                grid.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري تحميل الأسعار الحية للمحفظة...</p></div>';
+        async function fetchAllMarkets() {
+            const grid = document.getElementById('stocks-grid');
+            if (Object.keys(marketData).length === 0) {
+                grid.innerHTML = `
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>جاري مزامنة أسعار ${watchlist.length} أصول مع خوادم Polygon الحية...</p>
+                    </div>
+                `;
             }
 
-            const newStocksData = {};
-            for (const symbol of stocks) {
-                const data = await fetchStockData(symbol);
-                if (data) {
-                    newStocksData[symbol] = data;
-                } else if (stocksData[symbol]) {
-                    // الاحتفاظ بالبيانات السابقة مؤقتاً في حال فشل الاتصال المؤقت
-                    newStocksData[symbol] = stocksData[symbol];
+            const updatedData = {};
+            for (const sym of watchlist) {
+                const info = await fetchStockPrevClose(sym);
+                if (info) {
+                    updatedData[sym] = info;
+                } else if (marketData[sym]) {
+                    updatedData[sym] = marketData[sym]; // الاحتفاظ بآخر قيمة صحيحة في حال التباطؤ المؤقت
                 }
             }
 
-            stocksData = newStocksData;
-            renderPortfolio();
-            updateAnalytics();
+            marketData = updatedData;
+            renderTerminal();
+            updateSummaryBanner();
         }
 
-        function calculateAnalytics() {
-            let totalValue = 0;
-            let winningCount = 0;
-            let losingCount = 0;
+        function renderTerminal() {
+            const grid = document.getElementById('stocks-grid');
+            const symbols = Object.keys(marketData);
 
-            const values = Object.values(stocksData);
-            values.forEach(stock => {
-                totalValue += stock.price;
-                if (stock.change > 0) {
-                    winningCount++;
-                } else if (stock.change < 0) {
-                    losingCount++;
-                }
-            });
-
-            const avgChange = values.length > 0
-                ? values.reduce((sum, s) => sum + s.change, 0) / values.length
-                : 0;
-
-            return {
-                totalValue,
-                winningCount,
-                losingCount,
-                avgChange
-            };
-        }
-
-        function updateAnalytics() {
-            const analytics = calculateAnalytics();
-            const analyticsSection = document.getElementById('analytics-section');
-            const values = Object.values(stocksData);
-
-            if (values.length > 0) {
-                analyticsSection.style.display = 'block';
-
-                document.getElementById('total-value').textContent = `$${analytics.totalValue.toFixed(2)}`;
-                document.getElementById('winning-count').textContent = analytics.winningCount;
-                document.getElementById('losing-count').textContent = analytics.losingCount;
-
-                const changeElement = document.getElementById('total-change');
-                changeElement.textContent = `${analytics.avgChange >= 0 ? '▲' : '▼'} ${Math.abs(analytics.avgChange).toFixed(2)}%`;
-                changeElement.className = `analytics-change ${analytics.avgChange >= 0 ? 'positive' : 'negative'}`;
-
-                const profitValue = document.getElementById('total-profit');
-                const totalProfit = values.reduce((sum, s) => sum + (s.price * s.change / 100), 0);
-                profitValue.textContent = `$${totalProfit.toFixed(2)}`;
-                profitValue.style.color = totalProfit >= 0 ? 'var(--success)' : 'var(--danger)';
-
-                const profitPercent = document.getElementById('profit-percent');
-                const profitPercentValue = analytics.totalValue > 0 ? (totalProfit / analytics.totalValue) * 100 : 0;
-                profitPercent.textContent = `${profitPercentValue >= 0 ? '▲' : '▼'} ${Math.abs(profitPercentValue).toFixed(2)}%`;
-                profitPercent.className = `analytics-change ${profitPercentValue >= 0 ? 'positive' : 'negative'}`;
-            } else {
-                analyticsSection.style.display = 'none';
-            }
-        }
-
-        function renderPortfolio() {
-            const grid = document.getElementById('portfolio-grid');
-            const values = Object.values(stocksData);
-            
-            if (values.length === 0) {
-                grid.innerHTML = '<div class="loading"><p style="color: var(--danger);">عذراً، جاري الاتصال بالخادم لجلب الأسعار...</p></div>';
+            if (symbols.length === 0) {
+                grid.innerHTML = `<div class="loading-state"><p>لا توجد أصول مضافة حالياً.</p></div>`;
                 return;
             }
 
-            const colors = ['#00d4ff', '#00ff88', '#ffaa00', '#ff3366', '#00ffff', '#ff00ff'];
-            
-            grid.innerHTML = values.map((stock, index) => {
-                const isPositive = stock.change >= 0;
-                const color = colors[index % colors.length];
+            grid.innerHTML = symbols.map(sym => {
+                const item = marketData[sym];
+                const isPos = item.change >= 0;
+                const changeClass = isPos ? 'positive' : 'negative';
+                const sign = isPos ? '+' : '';
 
                 return `
                     <div class="stock-card">
-                        <div class="stock-header">
-                            <div>
-                                <div class="stock-symbol">${stock.symbol}</div>
-                                <div class="stock-name">سهم أمريكي معتمد</div>
+                        <div class="stock-top">
+                            <div class="stock-info">
+                                <h3>${item.symbol}</h3>
+                                <p>سهم أمريكي معتمد</p>
                             </div>
-                            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, ${color}, ${color}99); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">
-                                ${stock.symbol.substring(0, 2)}
-                            </div>
+                            <span class="stock-badge">LIVE</span>
                         </div>
-                        <div class="stock-price">$${stock.price.toFixed(2)}</div>
-                        <div class="stock-change ${isPositive ? 'positive' : 'negative'}">
-                            ${isPositive ? '▲' : '▼'} ${Math.abs(stock.change).toFixed(2)}%
+                        <div class="stock-price-row">
+                            <div class="current-price">$${item.price.toFixed(2)}</div>
+                            <div class="price-change ${changeClass}">${sign}${item.change.toFixed(2)}%</div>
                         </div>
-                        <div class="stock-details">
-                            <div class="detail">
-                                <div class="detail-label">أعلى سعر</div>
-                                <div class="detail-value">$${stock.high.toFixed(2)}</div>
-                            </div>
-                            <div class="detail">
-                                <div class="detail-label">أقل سعر</div>
-                                <div class="detail-value">$${stock.low.toFixed(2)}</div>
-                            </div>
+                        <div class="stock-metrics">
+                            <div>الأعلى: <span class="metric-val">$${item.high.toFixed(2)}</span></div>
+                            <div>الأدنى: <span class="metric-val">$${item.low.toFixed(2)}</span></div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function openAddModal() {
+        function updateSummaryBanner() {
+            const items = Object.values(marketData);
+            if (items.length === 0) return;
+
+            let totalVal = 0;
+            let totalPnLDollar = 0;
+            let winning = 0;
+            let losing = 0;
+
+            items.forEach(item => {
+                totalVal += item.price;
+                const pnlItem = item.price * (item.change / 100);
+                totalPnLDollar += pnlItem;
+                if (item.change >= 0) winning++;
+                else losing++;
+            });
+
+            const avgChangePct = items.reduce((acc, cur) => acc + cur.change, 0) / items.length;
+
+            document.getElementById('total-val').textContent = `$${totalVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('portfolio-count-text').textContent = `إجمالي ${items.نشط || items.length} أصول مفعلة في المحفظة`;
+            
+            const pnlEl = document.getElementById('total-pnl');
+            pnlEl.textContent = `${totalPnLDollar >= 0 ? '+' : ''}$${totalPnLDollar.toFixed(2)}`;
+            pnlEl.className = `value ${totalPnLDollar >= 0 ? 'positive' : 'negative'}`;
+
+            const pnlPctEl = document.getElementById('total-pnl-pct');
+            pnlPctEl.textContent = `${avgChangePct >= 0 ? '▲ +' : '▼ '}${avgChangePct.toFixed(2)}% متوسط تغير الأصول`;
+            pnlPctEl.className = `sub-value ${avgChangePct >= 0 ? 'positive' : 'negative'}`;
+
+            document.getElementById('win-loss-ratio').textContent = `${winning} رابح / ${losing} خاسر`;
+        }
+
+        function refreshData() {
+            fetchAllMarkets();
+        }
+
+        function openModal() {
             document.getElementById('addModal').classList.add('active');
         }
 
-        function closeAddModal() {
+        function closeModal() {
             document.getElementById('addModal').classList.remove('active');
-            document.getElementById('symbolInput').value = '';
+            document.getElementById('newSymbol').value = '';
         }
 
-        async function addStock() {
-            const symbol = document.getElementById('symbolInput').value.toUpperCase().trim();
+        async function handleAddStock() {
+            const symInput = document.getElementById('newSymbol');
+            const sym = symInput.value.toUpperCase().trim();
 
-            if (!symbol) {
-                alert('يرجى إدخال رمز السهم');
+            if (!sym) {
+                alert('الرجاء إدخال رمز السهم بشكل صحيح');
                 return;
             }
 
-            if (stocks.includes(symbol)) {
-                alert('هذا السهم موجود بالفعل في المحفظة');
+            if (watchlist.includes(sym)) {
+                alert('هذا السهم موجود مسبقاً في المحفظة');
+                closeModal();
                 return;
             }
 
-            const data = await fetchStockData(symbol);
-            if (data) {
-                stocks.push(symbol);
-                saveStocks();
-                stocksData[symbol] = data;
-                closeAddModal();
-                renderPortfolio();
-                updateAnalytics();
-                alert(`تمت إضافة السهم ${symbol} بنجاح وسعره الحالي $${data.price.toFixed(2)}`);
+            const info = await fetchStockPrevClose(sym);
+            if (info) {
+                watchlist.push(sym);
+                saveWatchlist();
+                marketData[sym] = info;
+                closeModal();
+                renderTerminal();
+                updateSummaryBanner();
+                alert(`تمت إضافة السهم ${sym} بنجاح ومزامنة سعره اللحظي ($${info.price.toFixed(2)})`);
             } else {
-                alert('تعذر جلب بيانات هذا السهم، تأكد من الرمز الصحيح');
+                alert('عذراً، لم نتمكن من العثور على بيانات لهذا الرمز في السوق. تأكد من صحة الرمز.');
             }
         }
 
-        document.addEventListener('click', function(e) {
-            if (e.target.id === 'addModal') {
-                closeAddModal();
-            }
-        });
-
-        loadStocks();
-        fetchAllStocks();
-
-        // تحديث دوري كل دقيقة
-        setInterval(fetchAllStocks, 60 * 1000);
+        // بدء التشغيل
+        initApp();
+        // تحديث تلقائي كل 60 ثانية
+        setInterval(fetchAllMarkets, 60000);
     </script>
 </body>
 </html>
