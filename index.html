@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asiri Capital | Stable Obsidian Terminal v26</title>
+    <title>Asiri Capital | Rock Solid Terminal v26</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -25,6 +25,8 @@
             box-sizing: border-box;
             font-family: 'Cairo', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         body {
@@ -33,6 +35,7 @@
             min-height: 100vh;
             padding-bottom: 110px;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         .account-bar {
@@ -132,7 +135,7 @@
             border-radius: 16px;
             padding: 1.2rem;
             margin-bottom: 1rem;
-            min-height: 300px;
+            min-height: 400px;
         }
 
         .section-header-meta { font-size: 0.7rem; color: var(--accent-gold); letter-spacing: 1px; margin-bottom: 0.3rem; text-transform: uppercase; }
@@ -168,7 +171,7 @@
         }
         .table-headers div:first-child { text-align: right; }
 
-        /* تثبيت ارتفاع الصفوف لمنع القفز والتذبذب أثناء تحديث البيانات */
+        /* تثبيت ارتفاع الصفوف لمنع القفز والتذبذب نهائياً */
         .stock-row {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1.2fr;
@@ -178,10 +181,10 @@
             border-radius: 10px;
             align-items: center;
             margin-bottom: 0.5rem;
-            min-height: 64px;
-            transition: background 0.2s;
+            height: 64px;
+            max-height: 64px;
+            overflow: hidden;
         }
-        .stock-row:hover { border-color: var(--accent-cyan); background: var(--bg-card-hover); }
 
         .stock-col-name { text-align: right; }
         .stock-col-name .sym { font-size: 1rem; font-weight: 700; color: #fff; }
@@ -192,7 +195,7 @@
         .val-neg { color: var(--danger); }
         .val-err { color: var(--danger); font-size: 0.75rem; }
 
-        .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; min-width: 65px; text-align: center; }
+        .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 75px; text-align: center; }
         .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-wait { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
         .badge-avoid { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
@@ -267,17 +270,6 @@
         .btn-confirm { background: var(--accent-cyan); color: #000; }
         .btn-cancel { background: var(--bg-base); color: var(--text-muted); border: 1px solid var(--border-color); }
 
-        .loading-state { text-align: center; padding: 3rem; color: var(--text-muted); }
-        .spinner {
-            width: 36px; height: 36px;
-            border: 3px solid rgba(0,229,255,0.1);
-            border-top: 3px solid var(--accent-cyan);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 0.8rem;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
         .alert-card-item {
             background: rgba(6, 14, 24, 0.6);
             border: 1px solid var(--border-color);
@@ -339,7 +331,7 @@
                 </div>
 
                 <div id="stocks-list-wrapper">
-                    <!-- يتم تعبئة العناصر دفعة واحدة لمنع التذبذب والقفز -->
+                    <!-- التعبئة تتم بثبات تام وبدون قفزات -->
                 </div>
             </div>
         </div>
@@ -443,10 +435,9 @@
         let watchlist = [];
         let marketData = {};
         let currentFilter = 'ALL';
-        let isFetching = false;
 
         function initApp() {
-            const saved = localStorage.getItem('asiri_pro_watchlist_v6');
+            const saved = localStorage.getItem('asiri_pro_watchlist_v7');
             if (saved) {
                 try {
                     watchlist = JSON.parse(saved);
@@ -458,27 +449,26 @@
                 saveWatchlist();
             }
             
-            // تهيئة مبدئية بدون تذبذب (عرض هيكل العناصر أولاً)
-            renderInitialSkeleton();
+            renderStaticSkeleton();
             fetchAllMarkets();
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_pro_watchlist_v6', JSON.stringify(watchlist));
+            localStorage.setItem('asiri_pro_watchlist_v7', JSON.stringify(watchlist));
         }
 
-        function renderInitialSkeleton() {
+        function renderStaticSkeleton() {
             const wrapper = document.getElementById('stocks-list-wrapper');
             wrapper.innerHTML = watchlist.map(sym => `
                 <div class="stock-row" id="row-${sym}">
                     <div class="stock-col-name">
                         <div class="sym">${sym}</div>
-                        <div class="name">جاري الاتصال...</div>
+                        <div class="name">Alpha Vantage Live</div>
                     </div>
                     <div class="stock-col-price">...</div>
                     <div class="stock-col-change">...</div>
                     <div class="stock-col-action">
-                        <span class="badge-decision badge-wait">جاري التحميل</span>
+                        <span class="badge-decision badge-wait">جاري الاتصال</span>
                     </div>
                 </div>
             `).join('');
@@ -537,25 +527,20 @@
                     change: 0,
                     decision: 'ERR',
                     badgeClass: 'badge-err',
-                    badgeText: 'تعذر الاتصال',
+                    badgeText: 'خطأ اتصال',
                     hasError: true
                 };
             }
         }
 
         async function fetchAllMarkets() {
-            if (isFetching) return;
-            isFetching = true;
-
-            // جلب متوازي منظم لتقليل وقت التحميل ومنع القفزات
-            const promises = watchlist.map(async sym => {
+            for (const sym of watchlist) {
                 const info = await fetchStockAlphaVantage(sym);
                 marketData[sym] = info;
                 updateSingleRow(sym);
-            });
-
-            await Promise.all(promises);
-            isFetching = false;
+                // تأخير بسيط لمنع حظر الطلبات (Rate limit)
+                await new Promise(r => setTimeout(r, 300));
+            }
             document.getElementById('active-assets-count').textContent = watchlist.length;
         }
 
@@ -563,9 +548,7 @@
             const item = marketData[sym];
             if (!item) return;
 
-            // التحقق مما إذا كان السهم يطابق الفلتر الحالي
             const matchesFilter = (currentFilter === 'ALL' || item.decision === currentFilter);
-            
             let rowEl = document.getElementById(`row-${sym}`);
             
             if (!matchesFilter) {
@@ -574,7 +557,6 @@
             }
 
             if (!rowEl) {
-                // إعادة إنشاء الصف إذا لم يكن موجوداً ومطابقاً للفلتر
                 renderStocksList();
                 return;
             }
@@ -722,14 +704,8 @@
             }
 
             if (watchlist.includes(sym)) {
-                alert(`السهم ${sym} موجود بالفعل في قائمتك وتم عرضه مباشرة.`);
+                alert(`السهم ${sym} موجود بالفعل في قائمتك.`);
                 closeAddStockModal();
-                currentFilter = 'ALL';
-                document.querySelectorAll('.filter-btn').forEach((b, idx) => {
-                    if (idx === 0) b.classList.add('active');
-                    else b.classList.remove('active');
-                });
-                renderStocksList();
                 return;
             }
 
@@ -737,7 +713,7 @@
             saveWatchlist();
             closeAddStockModal();
             
-            // جلب السهم الجديد بشكل فوري وتحديث القائمة بثبات
+            renderStaticSkeleton();
             const info = await fetchStockAlphaVantage(sym);
             marketData[sym] = info;
             renderStocksList();
