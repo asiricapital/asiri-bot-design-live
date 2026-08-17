@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asiri Capital | Rock Solid Terminal v26</title>
+    <title>Asiri Capital | Stable Obsidian Terminal v26</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -171,7 +171,6 @@
         }
         .table-headers div:first-child { text-align: right; }
 
-        /* تثبيت ارتفاع الصفوف لمنع القفز والتذبذب نهائياً */
         .stock-row {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1.2fr;
@@ -193,7 +192,7 @@
         .stock-col-price, .stock-col-change, .stock-col-action { text-align: center; font-size: 0.85rem; font-weight: 600; }
         .val-pos { color: var(--success); }
         .val-neg { color: var(--danger); }
-        .val-err { color: var(--danger); font-size: 0.75rem; }
+        .val-err { color: var(--danger); font-size: 0.7rem; }
 
         .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 75px; text-align: center; }
         .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
@@ -305,8 +304,8 @@
     <div class="main-container">
 
         <div class="sync-banner" onclick="forceSync()">
-            <h3>🔄 تحديث البيانات الفورية</h3>
-            <p>انقر هنا لإعادة تحديث الأسعار الحقيقية من السوق</p>
+            <h3>🔄 تحديث البيانات (تخزين مؤقت ذكي)</h3>
+            <p>انقر هنا لجلب أحدث سعر متاح مع حماية حدود الطلبات</p>
         </div>
 
         <!-- SECTION 1: DECISIONS & TOOLS -->
@@ -314,7 +313,7 @@
             <div class="card-section">
                 <div class="section-header-meta">EXECUTIVE DECISION • الأولوية الأولى</div>
                 <div class="section-title-main">القرار التنفيذي لكل سهم</div>
-                <div class="section-desc">القرار والإجراء المطلوب لكل سهم بناءً على السعر الحقيقي المستلم من السوق.</div>
+                <div class="section-desc">القرار والإجراء المطلوب لكل سهم بناءً على آخر بيانات موثقة من السوق.</div>
 
                 <div class="filter-grid">
                     <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
@@ -344,7 +343,7 @@
                 <div class="section-desc">تجميع ذكي لتدفقات السيولة والزخم اللحظي لجميع أصول محفظتك.</div>
                 <div style="padding: 2rem 0; text-align: center; color: var(--accent-cyan);">
                     <h3>⚡ النظام يعمل بأعلى كفاءة تحليلية</h3>
-                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size:0.85rem;">تم فحص الأصول ومطابقة الأسعار الحقيقية بنجاح.</p>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size:0.85rem;">تم فحص الأصول ومطابقة الأسعار بنجاح.</p>
                 </div>
             </div>
         </div>
@@ -437,7 +436,7 @@
         let currentFilter = 'ALL';
 
         function initApp() {
-            const saved = localStorage.getItem('asiri_pro_watchlist_v7');
+            const saved = localStorage.getItem('asiri_pro_watchlist_v8');
             if (saved) {
                 try {
                     watchlist = JSON.parse(saved);
@@ -449,29 +448,66 @@
                 saveWatchlist();
             }
             
+            // تحميل البيانات المخزنة مؤقتاً لتجنب ضرب حدود الـ API فوراً
+            const cached = localStorage.getItem('asiri_market_cache_v8');
+            if (cached) {
+                try {
+                    marketData = JSON.parse(cached);
+                } catch(e) {
+                    marketData = {};
+                }
+            }
+
             renderStaticSkeleton();
-            fetchAllMarkets();
+            
+            // جلب تدريجي ذكي (سهمين كل 1.5 ثانية) لضمان عدم تجاوز حد الطلبات وعدم حدوث أي حظر
+            fetchBatchSmart();
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_pro_watchlist_v7', JSON.stringify(watchlist));
+            localStorage.setItem('asiri_pro_watchlist_v8', JSON.stringify(watchlist));
+        }
+
+        function saveCache() {
+            localStorage.setItem('asiri_market_cache_v8', JSON.stringify(marketData));
         }
 
         function renderStaticSkeleton() {
             const wrapper = document.getElementById('stocks-list-wrapper');
-            wrapper.innerHTML = watchlist.map(sym => `
-                <div class="stock-row" id="row-${sym}">
-                    <div class="stock-col-name">
-                        <div class="sym">${sym}</div>
-                        <div class="name">Alpha Vantage Live</div>
+            wrapper.innerHTML = watchlist.map(sym => {
+                const item = marketData[sym];
+                if (item && !item.hasError) {
+                    const isPos = item.change >= 0;
+                    const changeClass = isPos ? 'val-pos' : 'val-neg';
+                    const sign = isPos ? '+' : '';
+                    return `
+                        <div class="stock-row" id="row-${sym}">
+                            <div class="stock-col-name">
+                                <div class="sym">${sym}</div>
+                                <div class="name">مخزن مؤقتاً</div>
+                            </div>
+                            <div class="stock-col-price">$${item.price.toFixed(2)}</div>
+                            <div class="stock-col-change ${changeClass}">${sign}${item.change.toFixed(2)}%</div>
+                            <div class="stock-col-action">
+                                <span class="badge-decision ${item.badgeClass}">${item.badgeText}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                return `
+                    <div class="stock-row" id="row-${sym}">
+                        <div class="stock-col-name">
+                            <div class="sym">${sym}</div>
+                            <div class="name">Alpha Vantage Live</div>
+                        </div>
+                        <div class="stock-col-price">...</div>
+                        <div class="stock-col-change">...</div>
+                        <div class="stock-col-action">
+                            <span class="badge-decision badge-wait">جاري الاتصال</span>
+                        </div>
                     </div>
-                    <div class="stock-col-price">...</div>
-                    <div class="stock-col-change">...</div>
-                    <div class="stock-col-action">
-                        <span class="badge-decision badge-wait">جاري الاتصال</span>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             document.getElementById('active-assets-count').textContent = watchlist.length;
         }
 
@@ -510,7 +546,7 @@
                         hasError: false
                     };
                 } else {
-                    return {
+                    return marketData[symbol] || {
                         symbol: symbol,
                         price: 0,
                         change: 0,
@@ -521,7 +557,7 @@
                     };
                 }
             } catch (err) {
-                return {
+                return marketData[symbol] || {
                     symbol: symbol,
                     price: 0,
                     change: 0,
@@ -533,13 +569,19 @@
             }
         }
 
-        async function fetchAllMarkets() {
-            for (const sym of watchlist) {
-                const info = await fetchStockAlphaVantage(sym);
-                marketData[sym] = info;
-                updateSingleRow(sym);
-                // تأخير بسيط لمنع حظر الطلبات (Rate limit)
-                await new Promise(r => setTimeout(r, 300));
+        async function fetchBatchSmart() {
+            for (let i = 0; i < watchlist.length; i += 2) {
+                const chunk = watchlist.slice(i, i + 2);
+                await Promise.all(chunk.map(async sym => {
+                    const info = await fetchStockAlphaVantage(sym);
+                    marketData[sym] = info;
+                    updateSingleRow(sym);
+                }));
+                saveCache();
+                // فاصل زمني آمن بين الدفعات لمنع حد الطلبات (Rate Limit)
+                if (i + 2 < watchlist.length) {
+                    await new Promise(r => setTimeout(r, 1500));
+                }
             }
             document.getElementById('active-assets-count').textContent = watchlist.length;
         }
@@ -561,20 +603,20 @@
                 return;
             }
 
-            const nameSub = item.hasError ? '<span style="color:var(--danger)">حد الطلبات API</span>' : 'Alpha Vantage Live';
-            const priceText = item.hasError ? 'غير متاح' : `$${item.price.toFixed(2)}`;
-            const isPos = item.change >= 0;
+            const nameSub = item.hasError ? '<span style="color:var(--danger)">مؤقت (حد الطلبات)</span>' : 'Alpha Vantage Live';
+            const priceText = item.hasError && !item.price ? 'غير متاح' : `$${(item.price || 0).toFixed(2)}`;
+            const isPos = (item.change || 0) >= 0;
             const changeClass = isPos ? 'val-pos' : 'val-neg';
             const sign = isPos ? '+' : '';
-            const changeText = item.hasError ? '---' : `${sign}${item.change.toFixed(2)}%`;
+            const changeText = item.hasError && !item.price ? '---' : `${sign}${(item.change || 0).toFixed(2)}%`;
 
             rowEl.innerHTML = `
                 <div class="stock-col-name">
                     <div class="sym">${item.symbol}</div>
                     <div class="name">${nameSub}</div>
                 </div>
-                <div class="stock-col-price ${item.hasError ? 'val-err' : ''}">${priceText}</div>
-                <div class="stock-col-change ${item.hasError ? 'val-err' : changeClass}">${changeText}</div>
+                <div class="stock-col-price ${item.hasError && !item.price ? 'val-err' : ''}">${priceText}</div>
+                <div class="stock-col-change ${item.hasError && !item.price ? 'val-err' : changeClass}">${changeText}</div>
                 <div class="stock-col-action">
                     <span class="badge-decision ${item.badgeClass}">${item.badgeText}</span>
                 </div>
@@ -583,7 +625,7 @@
 
         function renderStocksList() {
             const wrapper = document.getElementById('stocks-list-wrapper');
-            const symbols = Object.keys(marketData);
+            const symbols = watchlist;
 
             if (symbols.length === 0) {
                 wrapper.innerHTML = `<div class="loading-state"><p>لا توجد أسهم مضافة حالياً.</p></div>`;
@@ -601,28 +643,13 @@
             }
 
             wrapper.innerHTML = filteredSymbols.map(sym => {
-                const item = marketData[sym];
-                if (!item) return '';
+                const item = marketData[sym] || { symbol: sym, price: 0, change: 0, badgeClass: 'badge-wait', badgeText: 'انتظار', hasError: true };
 
-                if (item.hasError) {
-                    return `
-                        <div class="stock-row" id="row-${sym}">
-                            <div class="stock-col-name">
-                                <div class="sym">${item.symbol}</div>
-                                <div class="name" style="color:var(--danger)">حد الطلبات API</div>
-                            </div>
-                            <div class="stock-col-price val-err">غير متاح</div>
-                            <div class="stock-col-change val-err">---</div>
-                            <div class="stock-col-action">
-                                <span class="badge-decision badge-err">حد الطلبات</span>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                const isPos = item.change >= 0;
+                const isPos = (item.change || 0) >= 0;
                 const changeClass = isPos ? 'val-pos' : 'val-neg';
                 const sign = isPos ? '+' : '';
+                const priceText = item.price ? `$${item.price.toFixed(2)}` : 'جاري التحميل...';
+                const changeText = item.price ? `${sign}${item.change.toFixed(2)}%` : '...';
 
                 return `
                     <div class="stock-row" id="row-${sym}">
@@ -630,8 +657,8 @@
                             <div class="sym">${item.symbol}</div>
                             <div class="name">Alpha Vantage Live</div>
                         </div>
-                        <div class="stock-col-price">$${item.price.toFixed(2)}</div>
-                        <div class="stock-col-change ${changeClass}">${sign}${item.change.toFixed(2)}%</div>
+                        <div class="stock-col-price">${priceText}</div>
+                        <div class="stock-col-change ${changeClass}">${changeText}</div>
                         <div class="stock-col-action">
                             <span class="badge-decision ${item.badgeClass}">${item.badgeText}</span>
                         </div>
@@ -648,7 +675,8 @@
         }
 
         function forceSync() {
-            fetchAllMarkets();
+            localStorage.removeItem('asiri_market_cache_v8');
+            fetchBatchSmart();
         }
 
         function switchMainTab(tabName, btnElement) {
@@ -716,6 +744,7 @@
             renderStaticSkeleton();
             const info = await fetchStockAlphaVantage(sym);
             marketData[sym] = info;
+            saveCache();
             renderStocksList();
             document.getElementById('active-assets-count').textContent = watchlist.length;
         }
