@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asiri Capital | Live Command Center v26</title>
+    <title>Asiri Capital | True Live Terminal v26</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -180,11 +180,13 @@
         .stock-col-price, .stock-col-change, .stock-col-action { text-align: center; font-size: 0.85rem; font-weight: 600; }
         .val-pos { color: var(--success); }
         .val-neg { color: var(--danger); }
+        .val-err { color: var(--danger); font-size: 0.75rem; }
 
         .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; }
         .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-wait { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
         .badge-avoid { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-err { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
 
         .bottom-nav {
             position: fixed;
@@ -301,8 +303,8 @@
     <div class="main-container">
 
         <div class="sync-banner" onclick="forceSync()">
-            <h3>🔄 تحديث لوحة القيادة والأسعار الفورية</h3>
-            <p>اضغط هنا لجلب أحدث إغلاق وأسعار مباشرة عبر خوادم Polygon.io</p>
+            <h3>🔄 جلب الأسعار الفورية (Alpha Vantage Live)</h3>
+            <p>اضغط هنا لجلب أحدث الأسعار الفعلية عبر مفتاحك المعتمد</p>
         </div>
 
         <!-- SECTION 1: DECISIONS & TOOLS -->
@@ -310,7 +312,7 @@
             <div class="card-section">
                 <div class="section-header-meta">EXECUTIVE DECISION • الأولوية الأولى</div>
                 <div class="section-title-main">القرار التنفيذي لكل سهم</div>
-                <div class="section-desc">القرار والإجراء المطلوب لكل سهم قبل الاطلاع على بقية المؤشرات الفنية والمالية.</div>
+                <div class="section-desc">القرار والإجراء المطلوب لكل سهم بناءً على السعر الحقيقي المستلم من السوق.</div>
 
                 <div class="filter-grid">
                     <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
@@ -329,7 +331,7 @@
                 <div id="stocks-list-wrapper">
                     <div class="loading-state">
                         <div class="spinner"></div>
-                        <p>جاري تحميل البيانات الحية للمحفظة والقرارات التنفيذية...</p>
+                        <p>جاري جلب الأسعار الحقيقية من السوق...</p>
                     </div>
                 </div>
             </div>
@@ -343,7 +345,7 @@
                 <div class="section-desc">تجميع ذكي لتدفقات السيولة والزخم اللحظي لجميع أصول محفظتك.</div>
                 <div style="padding: 2rem 0; text-align: center; color: var(--accent-cyan);">
                     <h3>⚡ النظام يعمل بأعلى كفاءة تحليلية</h3>
-                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size:0.85rem;">تم فحص الأصول المدرجة بنجاح وتوليد مؤشرات السيولة.</p>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size:0.85rem;">تم فحص الأصول ومطابقة الأسعار الحقيقية بنجاح.</p>
                 </div>
             </div>
         </div>
@@ -422,7 +424,7 @@
     </div>
 
     <script>
-        const API_KEY = 'pp9Wp8ypugygYEp6YFkEssQIUjs90Wu8';
+        const AV_KEY = 'SR8IZVAS9PQH763P';
         
         const DEFAULT_WATCHLIST = [
             'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
@@ -436,7 +438,7 @@
         let currentFilter = 'ALL';
 
         function initApp() {
-            const saved = localStorage.getItem('asiri_pro_watchlist_v4');
+            const saved = localStorage.getItem('asiri_pro_watchlist_v5');
             if (saved) {
                 try {
                     watchlist = JSON.parse(saved);
@@ -451,56 +453,66 @@
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_pro_watchlist_v4', JSON.stringify(watchlist));
+            localStorage.setItem('asiri_pro_watchlist_v5', JSON.stringify(watchlist));
         }
 
-        async function fetchStockPrevClose(symbol) {
+        async function fetchStockAlphaVantage(symbol) {
             try {
-                const url = `https://api.polygon.io/v2/aggs/ticker/${symbol}/prev?adjusted=true&apiKey=${API_KEY}`;
+                // استخدام Global Quote من Alpha Vantage لجلب السعر الحقيقي بدقة
+                const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${AV_KEY}`;
                 const res = await fetch(url);
                 const data = await res.json();
                 
-                let close = 10.0;
-                let changePct = 0.5;
+                const quote = data && data["Global Quote"];
+                if (quote && quote["05. price"]) {
+                    const price = parseFloat(quote["05. price"]);
+                    const changePctStr = quote["10. change percent"] || "0%";
+                    const changePct = parseFloat(changePctStr.replace('%', '')) || 0;
 
-                if (data && data.results && data.results.length > 0) {
-                    const r = data.results[0];
-                    close = r.c || 10.0;
-                    const open = r.o || close;
-                    changePct = open > 0 ? ((close - open) / open) * 100 : 0.5;
-                }
-                
-                let decision = 'WAIT';
-                let badgeClass = 'badge-wait';
-                let badgeText = 'انتظار';
-                if (changePct > 1.0) {
-                    decision = 'BUY';
-                    badgeClass = 'badge-buy';
-                    badgeText = 'شراء';
-                } else if (changePct < -1.5) {
-                    decision = 'AVOID';
-                    badgeClass = 'badge-avoid';
-                    badgeText = 'تجنب';
-                }
+                    let decision = 'WAIT';
+                    let badgeClass = 'badge-wait';
+                    let badgeText = 'انتظار';
+                    if (changePct > 1.0) {
+                        decision = 'BUY';
+                        badgeClass = 'badge-buy';
+                        badgeText = 'شراء';
+                    } else if (changePct < -1.5) {
+                        decision = 'AVOID';
+                        badgeClass = 'badge-avoid';
+                        badgeText = 'تجنب';
+                    }
 
-                return {
-                    symbol: symbol,
-                    price: close,
-                    change: changePct,
-                    decision: decision,
-                    badgeClass: badgeClass,
-                    badgeText: badgeText
-                };
+                    return {
+                        symbol: symbol,
+                        price: price,
+                        change: changePct,
+                        decision: decision,
+                        badgeClass: badgeClass,
+                        badgeText: badgeText,
+                        hasError: false
+                    };
+                } else {
+                    // إذا فشل الاستعلام أو تم بلوغ حد الطلبات المجاني، نرجع حالة خطأ حقيقية وصادقة
+                    return {
+                        symbol: symbol,
+                        price: 0,
+                        change: 0,
+                        decision: 'ERR',
+                        badgeClass: 'badge-err',
+                        badgeText: 'خطأ حد الطلبات',
+                        hasError: true
+                    };
+                }
             } catch (err) {
                 console.error(`Failed to fetch ${symbol}:`, err);
-                // Fallback آمن لضمان عدم اختفاء أي سهم
                 return {
                     symbol: symbol,
-                    price: 15.50,
-                    change: 1.20,
-                    decision: 'BUY',
-                    badgeClass: 'badge-buy',
-                    badgeText: 'شراء'
+                    price: 0,
+                    change: 0,
+                    decision: 'ERR',
+                    badgeClass: 'badge-err',
+                    badgeText: 'تعذر الاتصال',
+                    hasError: true
                 };
             }
         }
@@ -511,17 +523,15 @@
                 wrapper.innerHTML = `
                     <div class="loading-state">
                         <div class="spinner"></div>
-                        <p>جاري مزامنة أسعار المحفظة والقرارات التنفيذية...</p>
+                        <p>جاري الاتصال بخوادم Alpha Vantage وجلب الأسعار الحقيقية...</p>
                     </div>
                 `;
             }
 
             const updatedData = {};
             for (const sym of watchlist) {
-                const info = await fetchStockPrevClose(sym);
-                if (info) {
-                    updatedData[sym] = info;
-                }
+                const info = await fetchStockAlphaVantage(sym);
+                updatedData[sym] = info;
             }
 
             marketData = updatedData;
@@ -551,6 +561,23 @@
             wrapper.innerHTML = filteredSymbols.map(sym => {
                 const item = marketData[sym];
                 if (!item) return '';
+
+                if (item.hasError) {
+                    return `
+                        <div class="stock-row">
+                            <div class="stock-col-name">
+                                <div class="sym">${item.symbol}</div>
+                                <div class="name" style="color:var(--danger)">فشل جلب السعر اللحظي</div>
+                            </div>
+                            <div class="stock-col-price val-err">غير متاح</div>
+                            <div class="stock-col-change val-err">---</div>
+                            <div class="stock-col-action">
+                                <span class="badge-decision badge-err">حد الطلبات API</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 const isPos = item.change >= 0;
                 const changeClass = isPos ? 'val-pos' : 'val-neg';
                 const sign = isPos ? '+' : '';
@@ -559,7 +586,7 @@
                     <div class="stock-row">
                         <div class="stock-col-name">
                             <div class="sym">${item.symbol}</div>
-                            <div class="name">تتبع مباشر من السوق</div>
+                            <div class="name">Alpha Vantage Live</div>
                         </div>
                         <div class="stock-col-price">$${item.price.toFixed(2)}</div>
                         <div class="stock-col-change ${changeClass}">${sign}${item.change.toFixed(2)}%</div>
@@ -579,7 +606,7 @@
         }
 
         function forceSync() {
-            alert('جاري تحديث البيانات الفورية من الخادم...');
+            alert('جاري إعادة مزامنة الأسعار من Alpha Vantage...');
             fetchAllMarkets();
         }
 
@@ -647,27 +674,26 @@
                 return;
             }
 
-            const info = await fetchStockPrevClose(sym);
-            if (info) {
-                watchlist.push(sym);
-                saveWatchlist();
-                marketData[sym] = info;
-                closeAddStockModal();
-                currentFilter = 'ALL';
-                document.querySelectorAll('.filter-btn').forEach((b, idx) => {
-                    if (idx === 0) b.classList.add('active');
-                    else b.classList.remove('active');
-                });
-                renderStocksList();
-                document.getElementById('active-assets-count').textContent = watchlist.length;
-                alert(`تمت إضافة السهم ${sym} بنجاح ومتابعة سعره ($${info.price.toFixed(2)})`);
+            const info = await fetchStockAlphaVantage(sym);
+            watchlist.push(sym);
+            saveWatchlist();
+            marketData[sym] = info;
+            closeAddStockModal();
+            currentFilter = 'ALL';
+            document.querySelectorAll('.filter-btn').forEach((b, idx) => {
+                if (idx === 0) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+            renderStocksList();
+            document.getElementById('active-assets-count').textContent = watchlist.length;
+            if (info.hasError) {
+                alert(`تمت إضافة السهم ${sym} للقائمة، ولكن تعذر جلب سعره الفعلي حالياً بسبب حدود الطلبات.`);
             } else {
-                alert('تعذر جلب بيانات لهذا الرمز، تأكد من صحة الرمز.');
+                alert(`تمت إضافة السهم ${sym} بنجاح بسعر حقيقي ($${info.price.toFixed(2)})`);
             }
         }
 
         initApp();
-        setInterval(fetchAllMarkets, 60000);
     </script>
 </body>
 </html>
