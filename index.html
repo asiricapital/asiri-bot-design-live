@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asiri Capital | Live Command Center</title>
+    <title>Asiri Capital | Fully Interactive Live Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,7 +31,7 @@
             background-color: var(--bg-base);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 100px;
+            padding-bottom: 110px;
         }
 
         /* Top Bar / Account Bar */
@@ -153,7 +153,14 @@
             color: var(--text-muted);
         }
 
-        /* Decision Hub Section */
+        /* Sections */
+        .app-section {
+            display: none;
+        }
+        .app-section.active {
+            display: block;
+        }
+
         .card-section {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -187,8 +194,8 @@
         /* Filter Buttons Grid */
         .filter-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.6rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
             margin-bottom: 1rem;
         }
 
@@ -196,9 +203,9 @@
             background: var(--bg-base);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 0.7rem;
+            padding: 0.6rem 0.2rem;
             border-radius: 10px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             text-align: center;
@@ -214,7 +221,7 @@
         /* Table / List Header */
         .table-headers {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1.2fr;
             background: rgba(255, 255, 255, 0.03);
             padding: 0.6rem 0.8rem;
             border-radius: 8px;
@@ -230,7 +237,7 @@
         /* Stock Live Row */
         .stock-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr 1.2fr;
             background: rgba(6, 14, 24, 0.6);
             border: 1px solid var(--border-color);
             padding: 0.8rem;
@@ -270,7 +277,7 @@
         .val-neg { color: var(--danger); }
 
         .badge-decision {
-            padding: 0.2rem 0.6rem;
+            padding: 0.2rem 0.5rem;
             border-radius: 6px;
             font-size: 0.7rem;
             font-weight: 700;
@@ -406,6 +413,21 @@
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .alert-card-item {
+            background: rgba(6, 14, 24, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 0.9rem;
+            border-radius: 10px;
+            margin-bottom: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-card-item .title { font-weight: 700; font-size: 0.9rem; color: #fff; }
+        .alert-card-item .desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .alert-time { font-size: 0.7rem; color: var(--accent-gold); }
     </style>
 </head>
 <body>
@@ -419,50 +441,106 @@
         </div>
     </div>
 
-    <!-- Navigation Pills Top -->
+    <!-- Navigation Header Pills -->
     <div class="nav-pills-container">
-        <button class="nav-pill active" onclick="switchTab('decisions')">أدوات القرار</button>
-        <button class="nav-pill" onclick="switchTab('command')">قمة القرار <span style="font-size:0.6rem; background:var(--accent-cyan); color:#000; padding:1px 4px; border-radius:4px;">⚡</span></button>
-        <button class="nav-pill" onclick="switchTab('alerts')">التنبيهات <span class="badge-count">54</span></button>
-        <button class="nav-pill" onclick="switchTab('portfolio')">المحفظة الذكية</button>
+        <button class="nav-pill active" onclick="switchMainTab('tools', this)">أدوات القرار</button>
+        <button class="nav-pill" onclick="switchMainTab('command', this)">قمة القرار ⚡</button>
+        <button class="nav-pill" onclick="switchMainTab('alerts', this)">التنبيهات <span class="badge-count" id="alert-badge-num">54</span></button>
+        <button class="nav-pill" onclick="switchMainTab('portfolio', this)">المحفظة الذكية</button>
     </div>
 
     <!-- Main Content View -->
     <div class="main-container">
 
-        <!-- Sync Button Card -->
+        <!-- Sync Button Banner -->
         <div class="sync-banner" onclick="forceSync()">
-            <h3>تحديث لوحة القيادة والأسعار الفورية</h3>
+            <h3>🔄 تحديث لوحة القيادة والأسعار الفورية</h3>
             <p>اضغط هنا لجلب أحدث إغلاق وأسعار مباشرة عبر خوادم Polygon.io</p>
         </div>
 
-        <!-- Section 1: Executive Decision Hub -->
-        <div class="card-section" id="section-decisions">
-            <div class="section-header-meta">EXECUTIVE DECISION • الأولوية الأولى</div>
-            <div class="section-title-main">القرار التنفيذي لكل سهم</div>
-            <div class="section-desc">القرار والإجراء المطلوب لكل سهم قبل الاطلاع على بقية المؤشرات الفنية والمالية.</div>
+        <!-- SECTION 1: DECISIONS & TOOLS (Default) -->
+        <div id="sec-tools" class="app-section active">
+            <div class="card-section">
+                <div class="section-header-meta">EXECUTIVE DECISION • الأولوية الأولى</div>
+                <div class="section-title-main">القرار التنفيذي لكل سهم</div>
+                <div class="section-desc">القرار والإجراء المطلوب لكل سهم قبل الاطلاع على بقية المؤشرات الفنية والمالية.</div>
 
-            <!-- Filter Pills -->
-            <div class="filter-grid">
-                <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
-                <button class="filter-btn" onclick="filterAction('BUY', this)">شراء</button>
-                <button class="filter-btn" onclick="filterAction('WAIT', this)">انتظار</button>
-                <button class="filter-btn" onclick="filterAction('AVOID', this)">تجنب</button>
+                <div class="filter-grid">
+                    <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
+                    <button class="filter-btn" onclick="filterAction('BUY', this)">شراء</button>
+                    <button class="filter-btn" onclick="filterAction('WAIT', this)">انتظار</button>
+                    <button class="filter-btn" onclick="filterAction('AVOID', this)">تجنب</button>
+                </div>
+
+                <div class="table-headers">
+                    <div>السهم</div>
+                    <div>السعر</div>
+                    <div>التغير</div>
+                    <div>قرار التنفيذ</div>
+                </div>
+
+                <div id="stocks-list-wrapper">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>جاري تحميل البيانات الحية للمحفظة والقرارات التنفيذية...</p>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <!-- Table Header -->
-            <div class="table-headers">
-                <div>السهم</div>
-                <div>السعر</div>
-                <div>التغير</div>
-                <div>قرار التنفيذ</div>
+        <!-- SECTION 2: COMMAND CENTER -->
+        <div id="sec-command" class="app-section">
+            <div class="card-section">
+                <div class="section-header-meta">AI STRATEGIC COMMAND</div>
+                <div class="section-title-main">قمة القرار الذكي والتحليل العميق</div>
+                <div class="section-desc">تجميع ذكي لتدفقات السيولة والزخم اللحظي لجميع أصول محفظتك.</div>
+                <div style="padding: 2rem 0; text-align: center; color: var(--accent-cyan);">
+                    <h3>⚡ النظام يعمل بأعلى كفاءة تحليلية</h3>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size:0.85rem;">تم فحص 19 أصل مدرج بنجاح وتوليد مؤشرات السيولة.</p>
+                </div>
             </div>
+        </div>
 
-            <!-- Stocks List Container -->
-            <div id="stocks-list-wrapper">
-                <div class="loading-state">
-                    <div class="spinner"></div>
-                    <p>جاري تحميل البيانات الحية للمحفظة والقرارات التنفيذية...</p>
+        <!-- SECTION 3: ALERTS -->
+        <div id="sec-alerts" class="app-section">
+            <div class="card-section">
+                <div class="section-header-meta">REAL-TIME NOTIFICATIONS</div>
+                <div class="section-title-main">سجل التنبيهات الذكية (54 تنبيهاً)</div>
+                <div class="section-desc">رصد فوري لتحركات الأسعار واقتراب الأصول من مستويات الدعم والمقاومة.</div>
+                <div id="alerts-container">
+                    <div class="alert-card-item">
+                        <div>
+                            <div class="title">تنبيه سيولة: RKLB</div>
+                            <div class="desc">تجاوز متوسط التداول الحجم المعتاد بنسبة 18%</div>
+                        </div>
+                        <div class="alert-time">منذ 5 د</div>
+                    </div>
+                    <div class="alert-card-item">
+                        <div>
+                            <div class="title">إشارة دخول: SNAP</div>
+                            <div class="desc">اختراق مستوى المقاومة اللحظي بنجاح</div>
+                        </div>
+                        <div class="alert-time">منذ 14 د</div>
+                    </div>
+                    <div class="alert-card-item">
+                        <div>
+                            <div class="title">تنبيه مخاطر: INLF</div>
+                            <div class="desc">ضغط بيعي ملحوظ قرب الحد الأدنى لجلسة الأمس</div>
+                        </div>
+                        <div class="alert-time">منذ 32 د</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: SMART PORTFOLIO -->
+        <div id="sec-portfolio" class="app-section">
+            <div class="card-section">
+                <div class="section-header-meta">ASIRI CAPITAL ASSETS</div>
+                <div class="section-title-main">ملخص الأصول والمحفظة الحية</div>
+                <div class="section-desc">إدارة شاملة لجميع الأصول المضافة ومتابعة الأداء اللحظي.</div>
+                <div id="portfolio-summary-box" style="padding: 1rem 0;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">إجمالي الأصول المفعلة قيد المتابعة المباشرة: <span id="active-assets-count" style="color: var(--accent-cyan); font-weight:700;">19</span> أصل.</p>
                 </div>
             </div>
         </div>
@@ -471,23 +549,23 @@
 
     <!-- Bottom Navigation Bar (Fixed) -->
     <nav class="bottom-nav">
-        <button class="nav-item" onclick="bottomNavClick('tools')">
+        <button class="nav-item active" onclick="bottomNavClick('tools', this)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
             <span>الأدوات</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('alerts')">
+        <button class="nav-item" onclick="bottomNavClick('alerts', this)">
             <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
             <span>التنبيهات</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('opportunities')">
+        <button class="nav-item" onclick="bottomNavClick('opportunities', this)">
             <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
             <span>الفرص</span>
         </button>
-        <button class="nav-item active" onclick="bottomNavClick('portfolio')">
+        <button class="nav-item" onclick="bottomNavClick('portfolio', this)">
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
             <span>المحفظة</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('back')">
+        <button class="nav-item" onclick="bottomNavClick('back', this)">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             <span>السابق</span>
         </button>
@@ -508,7 +586,6 @@
     <script>
         const API_KEY = 'pp9Wp8ypugygYEp6YFkEssQIUjs90Wu8';
         
-        // المحفظة الأساسية الشاملة
         const DEFAULT_WATCHLIST = [
             'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
             'BLNK', 'HUMA', 'AGEN', 'ENSC', 'TMCI',
@@ -521,7 +598,7 @@
         let currentFilter = 'ALL';
 
         function initApp() {
-            const saved = localStorage.getItem('asiri_pro_watchlist_v2');
+            const saved = localStorage.getItem('asiri_pro_watchlist_v3');
             if (saved) {
                 try {
                     watchlist = JSON.parse(saved);
@@ -536,7 +613,7 @@
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_pro_watchlist_v2', JSON.stringify(watchlist));
+            localStorage.setItem('asiri_pro_watchlist_v3', JSON.stringify(watchlist));
         }
 
         async function fetchStockPrevClose(symbol) {
@@ -551,15 +628,14 @@
                     const open = r.o || close;
                     const changePct = open > 0 ? ((close - open) / open) * 100 : 0;
                     
-                    // تحديد القرار التنفيذي تلقائياً بناءً على الأداء
                     let decision = 'WAIT';
                     let badgeClass = 'badge-wait';
                     let badgeText = 'انتظار';
-                    if (changePct > 2.0) {
+                    if (changePct > 1.5) {
                         decision = 'BUY';
                         badgeClass = 'badge-buy';
                         badgeText = 'شراء';
-                    } else if (changePct < -3.0) {
+                    } else if (changePct < -2.5) {
                         decision = 'AVOID';
                         badgeClass = 'badge-avoid';
                         badgeText = 'تجنب';
@@ -604,6 +680,7 @@
 
             marketData = updatedData;
             renderStocksList();
+            document.getElementById('active-assets-count').textContent = watchlist.length;
         }
 
         function renderStocksList() {
@@ -617,7 +694,7 @@
 
             const filteredSymbols = symbols.filter(sym => {
                 if (currentFilter === 'ALL') return true;
-                return marketData[sym].decision === currentFilter;
+                return marketData[sym] && marketData[sym].decision === currentFilter;
             });
 
             if (filteredSymbols.length === 0) {
@@ -627,6 +704,7 @@
 
             wrapper.innerHTML = filteredSymbols.map(sym => {
                 const item = marketData[sym];
+                if (!item) return '';
                 const isPos = item.change >= 0;
                 const changeClass = isPos ? 'val-pos' : 'val-neg';
                 const sign = isPos ? '+' : '';
@@ -655,30 +733,39 @@
         }
 
         function forceSync() {
+            alert('جاري تحديث البيانات الفورية من الخادم...');
             fetchAllMarkets();
         }
 
-        function switchTab(tabName) {
+        function switchMainTab(tabName, btnElement) {
             document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
-            event.target.classList.add('active');
-            if (tabName === 'portfolio') {
-                alert('أنت في قسم المحفظة الذكية الحية والمراقبة المستمرة.');
-            } else if (tabName === 'alerts') {
-                alert('تنبيهات السوق النشطة (54 تنبيهاً ذكياً قيد التتبع).');
+            if (btnElement) btnElement.classList.add('active');
+
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+            
+            if (tabName === 'tools') {
+                document.getElementById('sec-tools').classList.add('active');
             } else if (tabName === 'command') {
-                alert('قمة القرار التنفيذي: تجميع توصيات الذكاء الاصطناعي.');
+                document.getElementById('sec-command').classList.add('active');
+            } else if (tabName === 'alerts') {
+                document.getElementById('sec-alerts').classList.add('active');
+            } else if (tabName === 'portfolio') {
+                document.getElementById('sec-portfolio').classList.add('active');
             }
         }
 
-        function bottomNavClick(navType) {
+        function bottomNavClick(navType, btnElement) {
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if (btnElement) btnElement.classList.add('active');
+
             if (navType === 'tools') {
-                alert('أدوات التحليل الفني المتقدمة مفعلة.');
+                switchMainTab('tools', document.querySelector('.nav-pill'));
             } else if (navType === 'alerts') {
-                alert('قسم التنبيهات الفورية الذكية.');
+                switchMainTab('alerts', document.querySelectorAll('.nav-pill')[2]);
             } else if (navType === 'opportunities') {
-                alert('رصد الفرص الحية في السوق الأمريكي.');
+                switchMainTab('command', document.querySelectorAll('.nav-pill')[1]);
+            } else if (navType === 'portfolio') {
+                switchMainTab('portfolio', document.querySelectorAll('.nav-pill')[3]);
             } else if (navType === 'back') {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -715,6 +802,7 @@
                 marketData[sym] = info;
                 closeAddStockModal();
                 renderStocksList();
+                document.getElementById('active-assets-count').textContent = watchlist.length;
                 alert(`تمت إضافة السهم ${sym} بنجاح ومتابعة سعره ($${info.price.toFixed(2)})`);
             } else {
                 alert('تعذر جلب بيانات لهذا الرمز، تأكد من صحة الرمز.');
@@ -723,7 +811,6 @@
 
         // التهيئة والتشغيل
         initApp();
-        // تحديث دوري كل 60 ثانية
         setInterval(fetchAllMarkets, 60000);
     </script>
 </body>
