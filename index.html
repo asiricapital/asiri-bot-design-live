@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asiri Capital | Market Terminal v26.3</title>
+    <title>Asiri Capital | Live Terminal v27</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -43,7 +43,8 @@
         }
 
         .account-status { font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.4rem; }
-        .live-dot { width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 8px var(--accent-cyan); }
+        .live-dot { width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 8px var(--accent-cyan); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         .btn-account {
             background: rgba(0, 229, 255, 0.1);
@@ -86,7 +87,7 @@
             text-align: center; margin-bottom: 1rem;
         }
         .notice-banner h3 { font-size: 0.9rem; color: #fff; margin-bottom: 0.2rem; }
-        .notice-banner p { font-size: 0.75rem; color: var(--text-muted); }
+        .notice-banner p { font-size: 0.75rem; color: var(--accent-gold); }
 
         .app-section { display: none; }
         .app-section.active { display: block; }
@@ -123,7 +124,10 @@
             background: rgba(6, 14, 24, 0.6); border: 1px solid var(--border-color);
             padding: 0.8rem; border-radius: 10px; align-items: center;
             margin-bottom: 0.5rem; min-height: 64px;
+            transition: background 0.3s ease;
         }
+        .stock-row.tick-flash { background: rgba(0, 229, 255, 0.15); border-color: var(--accent-cyan); }
+
         .stock-col-name { text-align: right; }
         .stock-col-name .sym { font-size: 1rem; font-weight: 700; color: #fff; }
         .stock-col-name .name { font-size: 0.7rem; color: var(--text-muted); }
@@ -180,8 +184,8 @@
     <div class="account-bar">
         <button class="btn-account" onclick="openAddStockModal()">+ إضافة أصل</button>
         <div class="account-status">
-            <span class="live-dot"></span>
-            <span id="sync-status-text">نظام المحفظة الذكية (بيانات إغلاق السوق)</span>
+            <span class="live-dot" id="ws-dot"></span>
+            <span id="sync-status-text">جاري الاتصال بقناة السوق المباشرة...</span>
         </div>
     </div>
 
@@ -194,15 +198,15 @@
 
     <div class="main-container">
         <div class="notice-banner">
-            <h3>📊 حالة أصول محفظة Asiri Capital</h3>
-            <p id="last-sync-label">عرض رسمي معتمد لأسعار الإغلاق والتقييمات الاستراتيجية دون أي محاكاة وهمية</p>
+            <h3>⚡ محطة البث المباشر للأسهم (WebSocket Stream)</h3>
+            <p id="last-sync-label">بانتظار وصول أول حدث سعر حقيقي من الخادم الوسيط...</p>
         </div>
 
         <div id="sec-tools" class="app-section active">
             <div class="card-section">
-                <div class="section-header-meta">EXECUTIVE DECISION • مرجع معتمد</div>
+                <div class="section-header-meta">REAL-TIME STREAMING • مباشر</div>
                 <div class="section-title-main">القرار التنفيذي لكل سهم</div>
-                <div class="section-desc">عرض دقيق وموثق لجميع أصول محفظتك وفقاً لآخر إغلاق معتمد في السوق الأمريكي.</div>
+                <div class="section-desc">الأسعار تتحدث فورياً عند وصول صفقات جديدة من الخادم الوسيط.</div>
 
                 <div class="filter-grid">
                     <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
@@ -213,8 +217,8 @@
 
                 <div class="table-headers">
                     <div>السهم</div>
-                    <div>السعر المؤكد</div>
-                    <div>التغير</div>
+                    <div>السعر الحي</div>
+                    <div>الحالة</div>
                     <div>قرار التنفيذ</div>
                 </div>
 
@@ -227,14 +231,14 @@
         <div id="sec-command" class="app-section">
             <div class="card-section">
                 <div class="section-title-main">قمة القرار الذكي والسيولة</div>
-                <div style="padding: 1rem 0; color: var(--accent-cyan);">إحصائيات إغلاق الجلسة والسيولة المتاحة للمحفظة.</div>
+                <div style="padding: 1rem 0; color: var(--accent-cyan);">إحصائيات البث المباشر وأحجام التداول اللحظية.</div>
             </div>
         </div>
 
         <div id="sec-alerts" class="app-section">
             <div class="card-section">
                 <div class="section-title-main">سجل التنبيهات الذكية</div>
-                <div style="padding: 1rem 0; color: var(--text-muted);">التنبيهات مراقبة وفق عتبات المخاطر المعتمدة.</div>
+                <div style="padding: 1rem 0; color: var(--text-muted);">التنبيهات تفعل فور تجاوز السعر الحي للعتبات.</div>
             </div>
         </div>
 
@@ -291,9 +295,10 @@
         let watchlist = [];
         let stockMarketData = {};
         let currentFilter = 'ALL';
+        let ws = null;
 
         function init() {
-            const saved = localStorage.getItem('asiri_official_portfolio_v26');
+            const saved = localStorage.getItem('asiri_ws_portfolio_v27');
             if (saved) {
                 try { watchlist = JSON.parse(saved); } catch(e) { watchlist = [...INITIAL_STOCKS]; }
             } else {
@@ -301,44 +306,95 @@
                 saveWatchlist();
             }
 
-            // أسعار إغلاق السوق المعتمدة والمستقرة بناءً على آخر جلسة تداول موثقة
-            const officialClosingPrices = {
-                'SNAP': { price: 5.24, change: 0.12, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'MVIS': { price: 2.15, change: -0.45, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'SG': { price: 5.82, change: 1.10, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'RKLB': { price: 82.10, change: 2.28, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'CHPT': { price: 5.90, change: -0.20, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'BLNK': { price: 0.58, change: 3.40, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'HUMA': { price: 0.72, change: 0.05, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'AGEN': { price: 7.10, change: -2.10, decision: 'AVOID', text: 'تجنب', cls: 'badge-avoid' },
-                'ENSC': { price: 0.38, change: 1.20, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'TMCI': { price: 4.55, change: 0.80, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'AMPL': { price: 12.50, change: -1.05, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'RDW': { price: 13.40, change: 4.10, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'INO': { price: 1.15, change: 5.50, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'LASE': { price: 1.45, change: -0.30, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'PLUG': { price: 2.25, change: 1.80, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'CRDL': { price: 1.80, change: 0.40, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'ADMA': { price: 9.35, change: -0.60, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
-                'OPTT': { price: 0.19, change: 2.10, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
-                'INLF': { price: 4.40, change: -1.50, decision: 'AVOID', text: 'تجنب', cls: 'badge-avoid' }
-            };
-
             watchlist.forEach(sym => {
-                if (officialClosingPrices[sym]) {
-                    stockMarketData[sym] = { symbol: sym, ...officialClosingPrices[sym] };
-                } else {
-                    stockMarketData[sym] = { symbol: sym, price: 10.00, change: 0.0, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' };
-                }
+                stockMarketData[sym] = {
+                    symbol: sym,
+                    price: null,
+                    time: null,
+                    updated: false,
+                    decision: 'WAIT',
+                    text: 'انتظار البث',
+                    cls: 'badge-wait'
+                };
             });
 
             renderTable();
             document.getElementById('portfolio-count').textContent = watchlist.length;
-            document.getElementById('last-sync-label').textContent = `تم اعتماد بيانات إغلاق السوق الأخيرة بنجاح (${new Date().toLocaleDateString('ar-SA')})`;
+
+            connectWebSocket();
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_official_portfolio_v26', JSON.stringify(watchlist));
+            localStorage.setItem('asiri_ws_portfolio_v27', JSON.stringify(watchlist));
+        }
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}`;
+            
+            console.log('Connecting to WS bridge:', wsUrl);
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                document.getElementById('sync-status-text').textContent = 'متصل بالخادم الوسيط — بانتظار أحداث السوق';
+                document.getElementById('ws-dot').style.background = 'var(--success)';
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.type === 'INITIAL_PRICES') {
+                        if (msg.data) {
+                            Object.keys(msg.data).forEach(sym => {
+                                updateStockPrice(sym, msg.data[sym].price, msg.data[sym].time);
+                            });
+                        }
+                    } else if (msg.type === 'STOCK_TICK') {
+                        updateStockPrice(msg.symbol, msg.price, msg.time);
+                    }
+                } catch (e) {
+                    console.error('Error parsing WS message:', e);
+                }
+            };
+
+            ws.onclose = () => {
+                document.getElementById('sync-status-text').textContent = 'انقطع الاتصال — جاري إعادة المحاولة...';
+                document.getElementById('ws-dot').style.background = 'var(--danger)';
+                setTimeout(connectWebSocket, 4000);
+            };
+
+            ws.onerror = (err) => {
+                console.error('WS Error:', err);
+            };
+        }
+
+        function updateStockPrice(sym, price, time) {
+            if (!watchlist.includes(sym)) {
+                watchlist.push(sym);
+                saveWatchlist();
+                document.getElementById('portfolio-count').textContent = watchlist.length;
+            }
+
+            if (!stockMarketData[sym]) {
+                stockMarketData[sym] = { symbol: sym };
+            }
+
+            const item = stockMarketData[sym];
+            item.price = parseFloat(price);
+            item.time = time;
+            item.updated = true;
+            item.decision = 'BUY';
+            item.text = 'نشط مباشر';
+            item.cls = 'badge-buy';
+
+            renderTable();
+            const dateStr = time ? new Date(time).toLocaleTimeString('ar-SA') : new Date().toLocaleTimeString('ar-SA');
+            document.getElementById('last-sync-label').textContent = `آخر صفقة حية واردة: ${sym} بسعر $${item.price.toFixed(2)} (${dateStr})`;
+
+            setTimeout(() => {
+                const row = document.getElementById(`row-${sym}`);
+                if (row) row.classList.remove('tick-flash');
+            }, 1000);
         }
 
         function renderTable() {
@@ -349,28 +405,28 @@
             });
 
             if (filtered.length === 0) {
-                wrapper.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">لا توجد أصول مطابقة لهذا الفلتر.</div>`;
+                wrapper.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">لا توجد أصول مطابقة لهذا الفلتر أو بانتظار تدفق البث.</div>`;
                 return;
             }
 
             wrapper.innerHTML = filtered.map(sym => {
-                const item = stockMarketData[sym];
-                if (!item) return '';
-                const isPos = item.change >= 0;
-                const priceStr = `$${item.price.toFixed(2)}`;
-                const changeStr = `${isPos ? '+' : ''}${item.change.toFixed(2)}%`;
-                const colorCls = isPos ? 'val-pos' : 'val-neg';
+                const item = stockMarketData[sym] || { symbol: sym, price: null };
+                const hasPrice = item.price !== null && !isNaN(item.price);
+                const priceStr = hasPrice ? `$${item.price.toFixed(2)}` : 'بانتظار تدفق البث...';
+                const colorCls = hasPrice ? 'val-pos' : 'val-neutral';
+                const flashCls = item.updated ? 'tick-flash' : '';
+                const textStatus = hasPrice ? 'مباشر ⚡' : 'غير متصل الآن';
 
                 return `
-                    <div class="stock-row">
+                    <div class="stock-row ${flashCls}" id="row-${sym}">
                         <div class="stock-col-name">
-                            <div class="sym">${item.symbol}</div>
-                            <div class="name">إغلاق معتمد</div>
+                            <div class="sym">${sym}</div>
+                            <div class="name">بث حي WebSocket</div>
                         </div>
                         <div class="stock-col-price ${colorCls}">${priceStr}</div>
-                        <div class="stock-col-change ${colorCls}">${changeStr}</div>
+                        <div class="stock-col-change val-neutral">${textStatus}</div>
                         <div class="stock-col-action">
-                            <span class="badge-decision ${item.cls}">${item.text}</span>
+                            <span class="badge-decision ${item.cls || 'badge-wait'}">${item.text || 'انتظار'}</span>
                         </div>
                     </div>
                 `;
@@ -413,7 +469,7 @@
             if (!watchlist.includes(sym)) {
                 watchlist.push(sym);
                 saveWatchlist();
-                stockMarketData[sym] = { symbol: sym, price: 15.00, change: 0.50, decision: 'BUY', text: 'شراء', cls: 'badge-buy' };
+                stockMarketData[sym] = { symbol: sym, price: null, decision: 'WAIT', text: 'بانتظار البث', cls: 'badge-wait' };
                 document.getElementById('portfolio-count').textContent = watchlist.length;
             }
             currentFilter = 'ALL';
