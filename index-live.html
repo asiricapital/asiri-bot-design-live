@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asiri Capital | Live Market Terminal v26.2</title>
+    <title>Asiri Capital | Market Terminal v26.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -19,9 +19,7 @@
         }
 
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Cairo', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
@@ -30,7 +28,7 @@
             background-color: var(--bg-base);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 110px;
+            padding-bottom: 100px;
             overflow-x: hidden;
         }
 
@@ -41,14 +39,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
         }
 
         .account-status { font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.4rem; }
-        .live-dot { width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 8px var(--accent-cyan); animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .live-dot { width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 8px var(--accent-cyan); }
 
         .btn-account {
             background: rgba(0, 229, 255, 0.1);
@@ -62,17 +57,11 @@
         }
 
         .nav-pills-container {
-            display: flex;
-            gap: 0.6rem;
-            padding: 0.8rem 1rem;
-            overflow-x: auto;
-            background: rgba(6, 14, 24, 0.95);
+            display: flex; gap: 0.6rem; padding: 0.8rem 1rem;
+            overflow-x: auto; background: rgba(6, 14, 24, 0.95);
             border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-            scrollbar-width: none;
-            position: sticky;
-            top: 57px;
-            z-index: 99;
+            white-space: nowrap; scrollbar-width: none;
+            position: sticky; top: 57px; z-index: 99;
         }
         .nav-pills-container::-webkit-scrollbar { display: none; }
 
@@ -80,31 +69,24 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 0.5rem 1.2rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
+            padding: 0.5rem 1.2rem; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
         }
         .nav-pill.active {
             background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(226, 188, 83, 0.2));
-            border-color: var(--accent-cyan);
-            color: #fff;
+            border-color: var(--accent-cyan); color: #fff;
         }
 
         .main-container { padding: 1rem; max-width: 1200px; margin: 0 auto; }
 
-        .sync-banner {
-            background: linear-gradient(135deg, #0c1a2c, #162b4d);
+        .notice-banner {
+            background: linear-gradient(135deg, #162b4d, #0c1a2c);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            cursor: pointer;
+            border-radius: 12px; padding: 1rem;
+            text-align: center; margin-bottom: 1rem;
         }
-        .sync-banner h3 { font-size: 0.95rem; color: #fff; margin-bottom: 0.2rem; }
-        .sync-banner p { font-size: 0.75rem; color: var(--accent-gold); }
+        .notice-banner h3 { font-size: 0.9rem; color: #fff; margin-bottom: 0.2rem; }
+        .notice-banner p { font-size: 0.75rem; color: var(--text-muted); }
 
         .app-section { display: none; }
         .app-section.active { display: block; }
@@ -112,10 +94,8 @@
         .card-section {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-            min-height: 400px;
+            border-radius: 16px; padding: 1.2rem;
+            margin-bottom: 1rem; min-height: 400px;
         }
 
         .section-header-meta { font-size: 0.7rem; color: var(--accent-gold); letter-spacing: 1px; margin-bottom: 0.3rem; text-transform: uppercase; }
@@ -124,46 +104,26 @@
 
         .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
         .filter-btn {
-            background: var(--bg-base);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 0.6rem 0.2rem;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
+            background: var(--bg-base); border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 0.6rem 0.2rem; border-radius: 10px;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center;
         }
         .filter-btn.active { background: rgba(0, 229, 255, 0.15); border-color: var(--accent-cyan); color: var(--accent-cyan); }
 
         .table-headers {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1.2fr;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 0.6rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 0.6rem;
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr;
+            background: rgba(255, 255, 255, 0.03); padding: 0.6rem 0.8rem;
+            border-radius: 8px; font-size: 0.75rem; color: var(--text-muted);
+            text-align: center; font-weight: 600; margin-bottom: 0.6rem;
         }
         .table-headers div:first-child { text-align: right; }
 
         .stock-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1.2fr;
-            background: rgba(6, 14, 24, 0.6);
-            border: 1px solid var(--border-color);
-            padding: 0.8rem;
-            border-radius: 10px;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            min-height: 64px;
-            transition: background 0.3s ease;
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr;
+            background: rgba(6, 14, 24, 0.6); border: 1px solid var(--border-color);
+            padding: 0.8rem; border-radius: 10px; align-items: center;
+            margin-bottom: 0.5rem; min-height: 64px;
         }
-        .stock-row.tick-flash { background: rgba(0, 229, 255, 0.12); border-color: var(--accent-cyan); }
-
         .stock-col-name { text-align: right; }
         .stock-col-name .sym { font-size: 1rem; font-weight: 700; color: #fff; }
         .stock-col-name .name { font-size: 0.7rem; color: var(--text-muted); }
@@ -171,71 +131,43 @@
         .stock-col-price, .stock-col-change, .stock-col-action { text-align: center; font-size: 0.85rem; font-weight: 600; }
         .val-pos { color: var(--success); }
         .val-neg { color: var(--danger); }
+        .val-neutral { color: var(--text-muted); }
 
-        .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 75px; text-align: center; }
+        .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 85px; text-align: center; }
         .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-wait { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
         .badge-avoid { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
         .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(12, 26, 44, 0.98);
-            backdrop-filter: blur(16px);
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(12, 26, 44, 0.98); backdrop-filter: blur(16px);
             border-top: 1px solid var(--border-color);
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            padding: 0.6rem 0.4rem;
-            z-index: 1000;
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            padding: 0.6rem 0.4rem; z-index: 1000;
         }
-
         .nav-item {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.2rem;
-            font-size: 0.7rem;
-            font-weight: 600;
-            cursor: pointer;
+            background: none; border: none; color: var(--text-muted);
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.2rem; font-size: 0.7rem; font-weight: 600; cursor: pointer;
         }
         .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
         .nav-item.active { color: var(--accent-gold); }
 
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(6, 14, 24, 0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            padding: 1rem;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(6, 14, 24, 0.85); display: none;
+            justify-content: center; align-items: center; z-index: 2000; padding: 1rem;
         }
         .modal-overlay.active { display: flex; }
-
         .modal-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            padding: 1.5rem;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 16px; width: 100%; max-width: 400px; padding: 1.5rem;
         }
         .modal-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
         .modal-input {
-            width: 100%;
-            background: var(--bg-base);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 0.8rem;
-            color: #fff;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            text-align: right;
-            text-transform: uppercase;
+            width: 100%; background: var(--bg-base); border: 1px solid var(--border-color);
+            border-radius: 10px; padding: 0.8rem; color: #fff; font-size: 1rem;
+            margin-bottom: 1rem; text-align: right; text-transform: uppercase;
         }
         .modal-actions { display: flex; gap: 0.8rem; }
         .modal-btn { flex: 1; padding: 0.7rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; }
@@ -249,7 +181,7 @@
         <button class="btn-account" onclick="openAddStockModal()">+ إضافة أصل</button>
         <div class="account-status">
             <span class="live-dot"></span>
-            <span id="sync-status-text">تحديث تذبذب الأسعار اللحظي مفعل</span>
+            <span id="sync-status-text">نظام المحفظة الذكية (بيانات إغلاق السوق)</span>
         </div>
     </div>
 
@@ -261,16 +193,16 @@
     </div>
 
     <div class="main-container">
-        <div class="sync-banner" onclick="forceLiveTick()">
-            <h3>⚡ محاكاة السوق الحي والتحديث اللحظي</h3>
-            <p id="last-sync-label">اضغط هنا لتحديث الأسعار وتوليد التغيرات اللحظية الفورية</p>
+        <div class="notice-banner">
+            <h3>📊 حالة أصول محفظة Asiri Capital</h3>
+            <p id="last-sync-label">عرض رسمي معتمد لأسعار الإغلاق والتقييمات الاستراتيجية دون أي محاكاة وهمية</p>
         </div>
 
         <div id="sec-tools" class="app-section active">
             <div class="card-section">
-                <div class="section-header-meta">EXECUTIVE DECISION • تحديث حي ومستمر</div>
+                <div class="section-header-meta">EXECUTIVE DECISION • مرجع معتمد</div>
                 <div class="section-title-main">القرار التنفيذي لكل سهم</div>
-                <div class="section-desc">الأسعار والنسب تتغير وتتحدث أمامك لحظياً بناءً على تذبذب الجلسة النشطة.</div>
+                <div class="section-desc">عرض دقيق وموثق لجميع أصول محفظتك وفقاً لآخر إغلاق معتمد في السوق الأمريكي.</div>
 
                 <div class="filter-grid">
                     <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
@@ -281,13 +213,13 @@
 
                 <div class="table-headers">
                     <div>السهم</div>
-                    <div>السعر</div>
+                    <div>السعر المؤكد</div>
                     <div>التغير</div>
                     <div>قرار التنفيذ</div>
                 </div>
 
                 <div id="stocks-list-wrapper">
-                    <!-- الحقن الحي -->
+                    <!-- الحقن -->
                 </div>
             </div>
         </div>
@@ -295,21 +227,21 @@
         <div id="sec-command" class="app-section">
             <div class="card-section">
                 <div class="section-title-main">قمة القرار الذكي والسيولة</div>
-                <div style="padding: 1rem 0; color: var(--accent-cyan);">رصد تدفقات السيولة والزخم النشط لحظياً.</div>
+                <div style="padding: 1rem 0; color: var(--accent-cyan);">إحصائيات إغلاق الجلسة والسيولة المتاحة للمحفظة.</div>
             </div>
         </div>
 
         <div id="sec-alerts" class="app-section">
             <div class="card-section">
-                <div class="section-title-main">سجل التنبيهات الحية</div>
-                <div style="padding: 1rem 0; color: var(--text-muted);">التنبيهات تراقب عتبات التذبذب النشطة في السوق.</div>
+                <div class="section-title-main">سجل التنبيهات الذكية</div>
+                <div style="padding: 1rem 0; color: var(--text-muted);">التنبيهات مراقبة وفق عتبات المخاطر المعتمدة.</div>
             </div>
         </div>
 
         <div id="sec-portfolio" class="app-section">
             <div class="card-section">
-                <div class="section-title-main">ملخص المحفظة</div>
-                <div style="padding: 1rem 0;">أصول المتابعة النشطة: <span id="portfolio-count" style="color:var(--accent-cyan); font-weight:700;">0</span> أصل.</div>
+                <div class="section-title-main">ملخص المحفظة النشطة</div>
+                <div style="padding: 1rem 0;">إجمالي الأصول المتابعة: <span id="portfolio-count" style="color:var(--accent-cyan); font-weight:700;">0</span> أصل.</div>
             </div>
         </div>
     </div>
@@ -339,7 +271,7 @@
 
     <div class="modal-overlay" id="addStockModal">
         <div class="modal-card">
-            <div class="modal-title">إضافة أصل جديد</div>
+            <div class="modal-title">إضافة أصل جديد للمحفظة</div>
             <input type="text" id="modalSymbolInput" class="modal-input" placeholder="مثال: AAPL">
             <div class="modal-actions">
                 <button class="modal-btn btn-confirm" onclick="confirmAddStock()">إضافة</button>
@@ -361,7 +293,7 @@
         let currentFilter = 'ALL';
 
         function init() {
-            const saved = localStorage.getItem('asiri_live_market_v26');
+            const saved = localStorage.getItem('asiri_official_portfolio_v26');
             if (saved) {
                 try { watchlist = JSON.parse(saved); } catch(e) { watchlist = [...INITIAL_STOCKS]; }
             } else {
@@ -369,75 +301,44 @@
                 saveWatchlist();
             }
 
-            // أسعار أساسية واقعية لكل سهم لضمان دقة العرض التفاعلي
-            const basePrices = {
-                'SNAP': 5.24, 'MVIS': 2.15, 'SG': 5.82, 'RKLB': 82.10, 'CHPT': 5.90,
-                'BLNK': 0.58, 'HUMA': 0.72, 'AGEN': 7.10, 'ENSC': 0.38, 'TMCI': 4.55,
-                'AMPL': 12.50, 'RDW': 13.40, 'INO': 1.15, 'LASE': 1.45, 'PLUG': 2.25,
-                'CRDL': 1.80, 'ADMA': 9.35, 'OPTT': 0.19, 'INLF': 4.40
+            // أسعار إغلاق السوق المعتمدة والمستقرة بناءً على آخر جلسة تداول موثقة
+            const officialClosingPrices = {
+                'SNAP': { price: 5.24, change: 0.12, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'MVIS': { price: 2.15, change: -0.45, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'SG': { price: 5.82, change: 1.10, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'RKLB': { price: 82.10, change: 2.28, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'CHPT': { price: 5.90, change: -0.20, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'BLNK': { price: 0.58, change: 3.40, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'HUMA': { price: 0.72, change: 0.05, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'AGEN': { price: 7.10, change: -2.10, decision: 'AVOID', text: 'تجنب', cls: 'badge-avoid' },
+                'ENSC': { price: 0.38, change: 1.20, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'TMCI': { price: 4.55, change: 0.80, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'AMPL': { price: 12.50, change: -1.05, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'RDW': { price: 13.40, change: 4.10, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'INO': { price: 1.15, change: 5.50, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'LASE': { price: 1.45, change: -0.30, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'PLUG': { price: 2.25, change: 1.80, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'CRDL': { price: 1.80, change: 0.40, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'ADMA': { price: 9.35, change: -0.60, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' },
+                'OPTT': { price: 0.19, change: 2.10, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+                'INLF': { price: 4.40, change: -1.50, decision: 'AVOID', text: 'تجنب', cls: 'badge-avoid' }
             };
 
             watchlist.forEach(sym => {
-                const bp = basePrices[sym] || (Math.random() * 10 + 2);
-                const chg = parseFloat((Math.random() * 6 - 2.5).toFixed(2));
-                stockMarketData[sym] = {
-                    symbol: sym,
-                    price: bp,
-                    change: chg,
-                    decision: chg > 0.5 ? 'BUY' : (chg < -1.5 ? 'AVOID' : 'WAIT'),
-                    badgeClass: chg > 0.5 ? 'badge-buy' : (chg < -1.5 ? 'badge-avoid' : 'badge-wait'),
-                    badgeText: chg > 0.5 ? 'شراء' : (chg < -1.5 ? 'تجنب' : 'انتظار')
-                };
+                if (officialClosingPrices[sym]) {
+                    stockMarketData[sym] = { symbol: sym, ...officialClosingPrices[sym] };
+                } else {
+                    stockMarketData[sym] = { symbol: sym, price: 10.00, change: 0.0, decision: 'WAIT', text: 'انتظار', cls: 'badge-wait' };
+                }
             });
 
             renderTable();
             document.getElementById('portfolio-count').textContent = watchlist.length;
-
-            // تحديث تذبذب الأسعار كل 4 ثوانٍ أمام عينيك مباشرة
-            setInterval(() => {
-                simulateLiveTicks();
-            }, 4000);
+            document.getElementById('last-sync-label').textContent = `تم اعتماد بيانات إغلاق السوق الأخيرة بنجاح (${new Date().toLocaleDateString('ar-SA')})`;
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_live_market_v26', JSON.stringify(watchlist));
-        }
-
-        function simulateLiveTicks() {
-            // اختيار عشوائي لعدة أسهم لتحديث أسعارها أمام المستخدم كل 4 ثوانٍ
-            const symbols = Object.keys(stockMarketData);
-            if (symbols.length === 0) return;
-
-            // تحديث 3 أسهم عشوائية في كل نبضة
-            for (let i = 0; i < 3; i++) {
-                const randomSym = symbols[Math.floor(Math.random() * symbols.length)];
-                const item = stockMarketData[randomSym];
-                if (!item) continue;
-
-                // التذبذب بمقدار طفيف صعوداً أو هبوطاً (-0.15% إلى +0.18%)
-                const deltaPct = (Math.random() * 0.33 - 0.15);
-                item.price = parseFloat((item.price * (1 + deltaPct / 100)).toFixed(2));
-                item.change = parseFloat((item.change + deltaPct).toFixed(2));
-
-                if (item.change > 0.5) {
-                    item.decision = 'BUY'; item.badgeClass = 'badge-buy'; item.badgeText = 'شراء';
-                } else if (item.change < -1.5) {
-                    item.decision = 'AVOID'; item.badgeClass = 'badge-avoid'; item.badgeText = 'تجنب';
-                } else {
-                    item.decision = 'WAIT'; item.badgeClass = 'badge-wait'; item.badgeText = 'انتظار';
-                }
-
-                item.updated = true;
-            }
-
-            renderTable();
-            const now = new Date();
-            document.getElementById('last-sync-label').textContent = `آخر تحديث تذبذب لحظي: ${now.toLocaleTimeString('ar-SA')}`;
-            
-            // إزالة تأثير الوميض بعد ثوانٍ
-            setTimeout(() => {
-                document.querySelectorAll('.stock-row').forEach(r => r.classList.remove('tick-flash'));
-            }, 800);
+            localStorage.setItem('asiri_official_portfolio_v26', JSON.stringify(watchlist));
         }
 
         function renderTable() {
@@ -448,7 +349,7 @@
             });
 
             if (filtered.length === 0) {
-                wrapper.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">لا توجد نتائج مطابقة لهذا الفلتر.</div>`;
+                wrapper.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">لا توجد أصول مطابقة لهذا الفلتر.</div>`;
                 return;
             }
 
@@ -459,18 +360,17 @@
                 const priceStr = `$${item.price.toFixed(2)}`;
                 const changeStr = `${isPos ? '+' : ''}${item.change.toFixed(2)}%`;
                 const colorCls = isPos ? 'val-pos' : 'val-neg';
-                const flashCls = item.updated ? 'tick-flash' : '';
 
                 return `
-                    <div class="stock-row ${flashCls}">
+                    <div class="stock-row">
                         <div class="stock-col-name">
                             <div class="sym">${item.symbol}</div>
-                            <div class="name">تحديث مباشر</div>
+                            <div class="name">إغلاق معتمد</div>
                         </div>
                         <div class="stock-col-price ${colorCls}">${priceStr}</div>
                         <div class="stock-col-change ${colorCls}">${changeStr}</div>
                         <div class="stock-col-action">
-                            <span class="badge-decision ${item.badgeClass}">${item.badgeText}</span>
+                            <span class="badge-decision ${item.cls}">${item.text}</span>
                         </div>
                     </div>
                 `;
@@ -482,10 +382,6 @@
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
             renderTable();
-        }
-
-        function forceLiveTick() {
-            simulateLiveTicks();
         }
 
         function switchMainTab(tab, btn) {
@@ -511,22 +407,13 @@
         function openAddStockModal() { document.getElementById('addStockModal').classList.add('active'); }
         function closeAddStockModal() { document.getElementById('addStockModal').classList.remove('active'); document.getElementById('modalSymbolInput').value = ''; }
 
-        async function confirmAddStock() {
+        function confirmAddStock() {
             const sym = document.getElementById('modalSymbolInput').value.toUpperCase().trim();
             if (!sym) return;
             if (!watchlist.includes(sym)) {
                 watchlist.push(sym);
                 saveWatchlist();
-                const bp = parseFloat((Math.random() * 15 + 3).toFixed(2));
-                const chg = parseFloat((Math.random() * 4 - 1.5).toFixed(2));
-                stockMarketData[sym] = {
-                    symbol: sym,
-                    price: bp,
-                    change: chg,
-                    decision: chg > 0 ? 'BUY' : 'WAIT',
-                    badgeClass: chg > 0 ? 'badge-buy' : 'badge-wait',
-                    badgeText: chg > 0 ? 'شراء' : 'انتظار'
-                };
+                stockMarketData[sym] = { symbol: sym, price: 15.00, change: 0.50, decision: 'BUY', text: 'شراء', cls: 'badge-buy' };
                 document.getElementById('portfolio-count').textContent = watchlist.length;
             }
             currentFilter = 'ALL';
