@@ -13,55 +13,36 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-const POLYGON_WS_URL = process.env.POLYGON_WS_URL || 'wss://delayed.polygon.io/stocks';
+// استخدام نقطة نهاية REST موثوقة وجلب دوري آمن للأسعار لتجنب قيود WebSocket المجانية
 const POLYGON_API_KEY = process.env.POLYGON_API_KEY || 'pp9Wp8ypugygYEp6YFkEssQIUjs90Wu8';
+const SYMBOLS = ['SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT', 'BLNK', 'HUMA', 'AGEN', 'ENSC', 'TMCI', 'AMPL', 'RDW', 'INO', 'LASE', 'PLUG', 'CRDL', 'ADMA', 'OPTT', 'INLF'];
 
-let polygonWs = null;
 let latestPrices = {};
 
-function connectPolygon() {
-    console.log('[Polygon WS] Connecting to streaming server...');
-    polygonWs = new WebSocket(POLYGON_WS_URL);
-
-    polygonWs.on('open', () => {
-        console.log('[Polygon WS] Connected. Authenticating...');
-        polygonWs.send(JSON.stringify({ action: 'auth', params: POLYGON_API_KEY }));
-    });
-
-    polygonWs.on('message', (data) => {
+async function fetchMarketPrices() {
+    const fetch = (await import('node-fetch')).default;
+    for (const sym of SYMBOLS) {
         try {
-            const messages = JSON.parse(data.toString());
-            messages.forEach(msg => {
-                if (msg.T === 'status' && msg.status === 'auth_success') {
-                    console.log('[Polygon WS] Authenticated successfully. Subscribing...');
-                    polygonWs.send(JSON.stringify({ action: 'subscribe', params: 'AM.*,Q.*,T.*' }));
-                }
-
-                if (msg.T === 'T' || msg.T === 'Q' || msg.T === 'AM') {
-                    const sym = msg.sym || msg.S;
-                    const price = msg.p || msg.bp || msg.c;
-                    if (sym && price) {
-                        latestPrices[sym] = {
-                            price: price,
-                            time: msg.t || Date.now()
-                        };
-                        broadcastToClients({ type: 'STOCK_TICK', symbol: sym, price: price, time: latestPrices[sym].time });
-                    }
-                }
-            });
+            const url = `https://api.polygon.io/v2/aggs/ticker/${sym}/prev?apiKey=${POLYGON_API_KEY}`;
+            const resp = await fetch(url);
+            const data = await resp.json();
+            if (data && data.results && data.results.length > 0) {
+                const resObj = data.results[0];
+                latestPrices[sym] = {
+                    price: resObj.c, // Close price of previous session
+                    high: resObj.h,
+                    low: resObj.l,
+                    volume: resObj.v,
+                    time: Date.now()
+                };
+                broadcastToClients({ type: 'STOCK_TICK', symbol: sym, price: resObj.c, time: Date.now() });
+            }
         } catch (e) {
-            console.error('[Polygon WS] Error parsing message:', e);
+            console.error(`[Market Poller] Error fetching ${sym}:`, e.message);
         }
-    });
-
-    polygonWs.on('error', (err) => {
-        console.error('[Polygon WS] Error:', err.message);
-    });
-
-    polygonWs.on('close', () => {
-        console.warn('[Polygon WS] Disconnected. Reconnecting in 5 seconds...');
-        setTimeout(connectPolygon, 5000);
-    });
+        // فاصل زمني آمن بين الطلبات لتجنب تجاوز حد الطلبات
+        await new Promise(r => setTimeout(r, 800));
+    }
 }
 
 function broadcastToClients(data) {
@@ -82,9 +63,11 @@ wss.on('connection', (ws) => {
     });
 });
 
-connectPolygon();
+// بدء التحديث الدوري للسوق كل 60 ثانية
+setInterval(fetchMarketPrices, 60000);
+setTimeout(fetchMarketPrices, 2000); // تحديث فوري عند الإقلاع
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`[Server] Asiri Capital WebSocket Bridge running on port ${PORT}`);
+    console.log(`[Server] Asiri Capital Market Bridge running on port ${PORT}`);
 });
