@@ -198,15 +198,15 @@
 
     <div class="main-container">
         <div class="notice-banner">
-            <h3>⚡ محطة البث المباشر للأسهم (WebSocket Stream)</h3>
-            <p id="last-sync-label">بانتظار وصول أول حدث سعر حقيقي من الخادم الوسيط...</p>
+            <h3>⚡ محطة الأسعار الموثقة للأسهم</h3>
+            <p id="last-sync-label">بانتظار أول تحديث موثق من محرك السوق...</p>
         </div>
 
         <div id="sec-tools" class="app-section active">
             <div class="card-section">
-                <div class="section-header-meta">REAL-TIME STREAMING • مباشر</div>
+                <div class="section-header-meta">VERIFIED QUOTES • بيانات موثقة</div>
                 <div class="section-title-main">القرار التنفيذي لكل سهم</div>
-                <div class="section-desc">الأسعار تتحدث فورياً عند وصول صفقات جديدة من الخادم الوسيط.</div>
+                <div class="section-desc">تُعرض آخر قراءة موثقة مع المصدر ووقت التحديث؛ لا يتم إنشاء أسعار أو توصيات بديلة عند تعذر المصدر.</div>
 
                 <div class="filter-grid">
                     <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
@@ -295,7 +295,9 @@
         let watchlist = [];
         let stockMarketData = {};
         let currentFilter = 'ALL';
-        let ws = null;
+        let quoteRefreshInFlight = false;
+        const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';
+        const QUOTE_REFRESH_MS = 60000;
 
         function init() {
             const saved = localStorage.getItem('asiri_ws_portfolio_v27');
@@ -313,88 +315,83 @@
                     time: null,
                     updated: false,
                     decision: 'WAIT',
-                    text: 'انتظار البث',
+                    text: 'بانتظار تحديث موثق',
                     cls: 'badge-wait'
                 };
             });
 
             renderTable();
             document.getElementById('portfolio-count').textContent = watchlist.length;
-
-            connectWebSocket();
+            refreshVerifiedQuotes();
+            window.setInterval(refreshVerifiedQuotes, QUOTE_REFRESH_MS);
         }
 
         function saveWatchlist() {
             localStorage.setItem('asiri_ws_portfolio_v27', JSON.stringify(watchlist));
         }
 
-        function connectWebSocket() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}`;
-            
-            console.log('Connecting to WS bridge:', wsUrl);
-            ws = new WebSocket(wsUrl);
+        async function refreshVerifiedQuotes() {
+            if (quoteRefreshInFlight || !watchlist.length) return;
+            quoteRefreshInFlight = true;
+            document.getElementById('sync-status-text').textContent = 'جاري جلب أسعار موثقة…';
+            document.getElementById('ws-dot').style.background = 'var(--warning)';
 
-            ws.onopen = () => {
-                document.getElementById('sync-status-text').textContent = 'متصل بالخادم الوسيط — بانتظار أحداث السوق';
-                document.getElementById('ws-dot').style.background = 'var(--success)';
-            };
+            try {
+                const symbols = [...new Set(watchlist.map(sym => String(sym).trim().toUpperCase()).filter(Boolean))];
+                const response = await fetch(`${VERIFIED_QUOTES_API}?stocks=${encodeURIComponent(symbols.join(','))}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`QUOTE_API_${response.status}`);
+                const payload = await response.json();
+                const rows = Array.isArray(payload.stocks) ? payload.stocks : [];
+                let verified = 0;
 
-            ws.onmessage = (event) => {
-                try {
-                    const msg = JSON.parse(event.data);
-                    if (msg.type === 'INITIAL_PRICES') {
-                        if (msg.data) {
-                            Object.keys(msg.data).forEach(sym => {
-                                updateStockPrice(sym, msg.data[sym].price, msg.data[sym].time);
-                            });
-                        }
-                    } else if (msg.type === 'STOCK_TICK') {
-                        updateStockPrice(msg.symbol, msg.price, msg.time);
+                rows.forEach((row) => {
+                    if (row?.ok && Number.isFinite(Number(row.price))) {
+                        updateVerifiedStockPrice(row);
+                        verified += 1;
                     }
-                } catch (e) {
-                    console.error('Error parsing WS message:', e);
-                }
-            };
+                });
 
-            ws.onclose = () => {
-                document.getElementById('sync-status-text').textContent = 'انقطع الاتصال — جاري إعادة المحاولة...';
+                renderTable();
+                const observedAt = new Date(payload.observedAt || Date.now()).toLocaleTimeString('ar-SA');
+                document.getElementById('sync-status-text').textContent = `أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}`;
+                document.getElementById('ws-dot').style.background = verified ? 'var(--success)' : 'var(--warning)';
+            } catch (error) {
+                console.error('Verified quote refresh failed:', error);
+                watchlist.forEach((symbol) => {
+                    const item = stockMarketData[symbol] || (stockMarketData[symbol] = { symbol });
+                    if (!Number.isFinite(Number(item.price))) {
+                        item.text = 'تعذر التحديث الموثق';
+                        item.cls = 'badge-wait';
+                        item.error = true;
+                    }
+                });
+                renderTable();
+                document.getElementById('sync-status-text').textContent = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً';
                 document.getElementById('ws-dot').style.background = 'var(--danger)';
-                setTimeout(connectWebSocket, 4000);
-            };
-
-            ws.onerror = (err) => {
-                console.error('WS Error:', err);
-            };
+            } finally {
+                quoteRefreshInFlight = false;
+            }
         }
 
-        function updateStockPrice(sym, price, time) {
+        function updateVerifiedStockPrice(row) {
+            const sym = String(row.symbol || '').trim().toUpperCase();
+            if (!sym) return;
             if (!watchlist.includes(sym)) {
                 watchlist.push(sym);
                 saveWatchlist();
                 document.getElementById('portfolio-count').textContent = watchlist.length;
             }
 
-            if (!stockMarketData[sym]) {
-                stockMarketData[sym] = { symbol: sym };
-            }
-
-            const item = stockMarketData[sym];
-            item.price = parseFloat(price);
-            item.time = time;
+            const item = stockMarketData[sym] || (stockMarketData[sym] = { symbol: sym });
+            item.price = Number(row.price);
+            item.time = row.updatedAt || row.observedAt || new Date().toISOString();
+            item.source = row.source || 'Asiri Market Engine';
+            item.isFresh = row.isFresh === true;
             item.updated = true;
-            item.decision = 'BUY';
-            item.text = 'نشط مباشر';
-            item.cls = 'badge-buy';
-
-            renderTable();
-            const dateStr = time ? new Date(time).toLocaleTimeString('ar-SA') : new Date().toLocaleTimeString('ar-SA');
-            document.getElementById('last-sync-label').textContent = `آخر صفقة حية واردة: ${sym} بسعر $${item.price.toFixed(2)} (${dateStr})`;
-
-            setTimeout(() => {
-                const row = document.getElementById(`row-${sym}`);
-                if (row) row.classList.remove('tick-flash');
-            }, 1000);
+            item.error = false;
+            item.decision = 'WAIT';
+            item.text = item.isFresh ? 'مراقبة • بيانات موثقة' : 'مراقبة • آخر قراءة موثقة';
+            item.cls = 'badge-wait';
         }
 
         function renderTable() {
@@ -412,16 +409,16 @@
             wrapper.innerHTML = filtered.map(sym => {
                 const item = stockMarketData[sym] || { symbol: sym, price: null };
                 const hasPrice = item.price !== null && !isNaN(item.price);
-                const priceStr = hasPrice ? `$${item.price.toFixed(2)}` : 'بانتظار تدفق البث...';
+                const priceStr = hasPrice ? `$${item.price.toFixed(2)}` : 'بانتظار تحديث موثق…';
                 const colorCls = hasPrice ? 'val-pos' : 'val-neutral';
                 const flashCls = item.updated ? 'tick-flash' : '';
-                const textStatus = hasPrice ? 'مباشر ⚡' : 'غير متصل الآن';
+                const textStatus = hasPrice ? (item.isFresh ? 'موثق الآن' : 'آخر قراءة موثقة') : (item.error ? 'تعذر التحديث' : 'بانتظار تحديث موثق');
 
                 return `
                     <div class="stock-row ${flashCls}" id="row-${sym}">
                         <div class="stock-col-name">
                             <div class="sym">${sym}</div>
-                            <div class="name">بث حي WebSocket</div>
+                            <div class="name">بيانات أسعار موثقة</div>
                         </div>
                         <div class="stock-col-price ${colorCls}">${priceStr}</div>
                         <div class="stock-col-change val-neutral">${textStatus}</div>
