@@ -141,6 +141,8 @@
         .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
         .badge-wait { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
         .badge-avoid { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .remove-symbol-btn { margin-top: 0.35rem; min-height: 28px; padding: 0.2rem 0.5rem; border: 1px solid rgba(239, 68, 68, 0.42); border-radius: 6px; background: rgba(239, 68, 68, 0.08); color: #fca5a5; font: inherit; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
+        .remove-symbol-btn:active { transform: scale(0.97); background: rgba(239, 68, 68, 0.18); }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -375,12 +377,8 @@
 
         function updateVerifiedStockPrice(row) {
             const sym = String(row.symbol || '').trim().toUpperCase();
-            if (!sym) return;
-            if (!watchlist.includes(sym)) {
-                watchlist.push(sym);
-                saveWatchlist();
-                document.getElementById('portfolio-count').textContent = watchlist.length;
-            }
+            // A response that began before a local deletion must never re-add the removed symbol.
+            if (!sym || !watchlist.includes(sym)) return;
 
             const item = stockMarketData[sym] || (stockMarketData[sym] = { symbol: sym });
             item.price = Number(row.price);
@@ -424,10 +422,28 @@
                         <div class="stock-col-change val-neutral">${textStatus}</div>
                         <div class="stock-col-action">
                             <span class="badge-decision ${item.cls || 'badge-wait'}">${item.text || 'انتظار'}</span>
+                            <button class="remove-symbol-btn" type="button" data-symbol="${sym}" onclick="removeStock(this.dataset.symbol)" aria-label="حذف ${sym} من قائمة المراقبة">حذف</button>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function removeStock(symbol) {
+            const sym = String(symbol || '').trim().toUpperCase();
+            if (!sym || !watchlist.includes(sym)) return;
+            const confirmed = window.confirm(`حذف ${sym} من قائمة المراقبة على هذا الجهاز؟ لن يؤثر ذلك على مصدر الأسعار أو أي قرار أو تنفيذ.`);
+            if (!confirmed) return;
+
+            watchlist = watchlist.filter((item) => item !== sym);
+            delete stockMarketData[sym];
+            saveWatchlist();
+            document.getElementById('portfolio-count').textContent = watchlist.length;
+            if (!watchlist.length) {
+                document.getElementById('sync-status-text').textContent = 'لا توجد رموز في قائمة المراقبة. أضف رمزاً يدوياً للمتابعة.';
+                document.getElementById('ws-dot').style.background = 'var(--text-muted)';
+            }
+            renderTable();
         }
 
         function filterAction(type, btn) {
@@ -466,7 +482,7 @@
             if (!watchlist.includes(sym)) {
                 watchlist.push(sym);
                 saveWatchlist();
-                stockMarketData[sym] = { symbol: sym, price: null, decision: 'WAIT', text: 'بانتظار البث', cls: 'badge-wait' };
+                stockMarketData[sym] = { symbol: sym, price: null, decision: 'WAIT', text: 'بانتظار تحديث موثق', cls: 'badge-wait' };
                 document.getElementById('portfolio-count').textContent = watchlist.length;
             }
             currentFilter = 'ALL';
