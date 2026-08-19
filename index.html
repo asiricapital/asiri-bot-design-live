@@ -299,7 +299,7 @@
         let currentFilter = 'ALL';
         let quoteRefreshInFlight = false;
         const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';
-        const QUOTE_REFRESH_MS = 60000;
+        const QUOTE_REFRESH_MS = 10000; // 10 seconds; quoteRefreshInFlight prevents overlapping requests.
 
         function init() {
             const saved = localStorage.getItem('asiri_ws_portfolio_v27');
