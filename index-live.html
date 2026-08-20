@@ -300,6 +300,8 @@
         let quoteRefreshInFlight = false;
         const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';
         const QUOTE_REFRESH_MS = 10000; // 10 seconds; quoteRefreshInFlight prevents overlapping requests.
+        const QUOTE_SNAPSHOT_KEY = 'asiri_verified_quote_snapshot_v1';
+        const QUOTE_SNAPSHOT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
         function init() {
             const saved = localStorage.getItem('asiri_ws_portfolio_v27');
@@ -322,6 +324,7 @@
                 };
             });
 
+            restoreVerifiedQuoteSnapshot();
             renderTable();
             document.getElementById('portfolio-count').textContent = watchlist.length;
             refreshVerifiedQuotes();
@@ -330,6 +333,40 @@
 
         function saveWatchlist() {
             localStorage.setItem('asiri_ws_portfolio_v27', JSON.stringify(watchlist));
+        }
+
+        function restoreVerifiedQuoteSnapshot() {
+            try {
+                const snapshot = JSON.parse(localStorage.getItem(QUOTE_SNAPSHOT_KEY) || 'null');
+                const storedAtMs = new Date(snapshot?.storedAt || 0).getTime();
+                if (!snapshot?.rows || !Number.isFinite(storedAtMs) || (Date.now() - storedAtMs) > QUOTE_SNAPSHOT_MAX_AGE_MS) return;
+                watchlist.forEach((symbol) => {
+                    const saved = snapshot.rows[symbol];
+                    if (!saved || !Number.isFinite(Number(saved.price))) return;
+                    stockMarketData[symbol] = {
+                        ...stockMarketData[symbol], ...saved, symbol,
+                        isFresh: false,
+                        updated: false,
+                        error: false,
+                        decision: 'WAIT',
+                        text: 'مراقبة • آخر قراءة موثقة',
+                        cls: 'badge-wait'
+                    };
+                });
+            } catch (_) { /* The live refresh remains the source of truth. */ }
+        }
+
+        function saveVerifiedQuoteSnapshot() {
+            const rows = {};
+            watchlist.forEach((symbol) => {
+                const item = stockMarketData[symbol];
+                if (item && Number.isFinite(Number(item.price))) rows[symbol] = {
+                    price: item.price,
+                    time: item.time || null,
+                    source: item.source || 'Asiri Market Engine'
+                };
+            });
+            try { localStorage.setItem(QUOTE_SNAPSHOT_KEY, JSON.stringify({ storedAt: new Date().toISOString(), rows })); } catch (_) {}
         }
 
         async function refreshVerifiedQuotes() {
@@ -353,6 +390,7 @@
                     }
                 });
 
+                saveVerifiedQuoteSnapshot();
                 renderTable();
                 const observedAt = new Date(payload.observedAt || Date.now()).toLocaleTimeString('ar-SA');
                 document.getElementById('sync-status-text').textContent = `أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}`;
