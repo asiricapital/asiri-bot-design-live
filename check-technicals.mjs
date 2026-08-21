@@ -3,7 +3,6 @@ import { buildTechnicalSnapshot, TECHNICALS_MIN_BARS } from './technical-analysi
 
 const ensure = (condition, message) => { if (!condition) throw new Error(message); };
 const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
-const server = fs.readFileSync(new URL('./live-server.js', import.meta.url), 'utf8');
 const makeBar = (index) => ({
   date: new Date(Date.UTC(2025, 0, index + 1)),
   open: 100 + index,
@@ -39,10 +38,9 @@ ensure(researchIndex >= 0 && technicalsIndex > researchIndex && commandIndex > t
 ensure(technicalsStart >= 0 && technicalsEnd > technicalsStart, 'قسم التحليل الفني غير موجود في الصفحة الحالية');
 ensure(technicalsSection.includes('تحليل فني وسياق البيانات'), 'عنوان التحليل الفني غير موجود');
 ensure(technicalsSection.includes('غير متاح'), 'يجب أن تظهر حالة غير متاح عند نقص السجل');
-ensure(html.includes("const TECHNICALS_API = '/api/technicals';"), 'يجب أن تستخدم الواجهة مسار المؤشرات المحكوم');
+ensure(html.includes("const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';"), 'يجب أن تستخدم الواجهة خدمة Asiri Bot الخادمية للتحليل الفني');
 ensure(/if \(tab === 'technicals'\).*document\.getElementById\('sec-technicals'\)\.classList\.add\('active'\)/.test(html), 'التبويب الداخلي للتحليل الفني غير مربوط');
 ensure(html.includes("if (type === 'technicals') switchMainTab('technicals'"), 'التنقل السفلي للتحليل الفني غير مربوط');
-ensure(server.includes("app.get('/api/technicals/:symbol'"), 'مسار المؤشرات الخادمي غير موجود');
-ensure(!/placeOrder|brokerSubmission|\/api\/order|submitOrder/.test(`${technicalsSection}\n${server}`), 'لا ينبغي أن تضيف لوحة التحليل أي مسار أو دالة تنفيذ');
+ensure(!/placeOrder|brokerSubmission|\/api\/order|submitOrder/.test(technicalsSection), 'لا ينبغي أن تضيف لوحة التحليل أي مسار أو دالة تنفيذ');
 
 console.log('Technical analysis checks passed.');
