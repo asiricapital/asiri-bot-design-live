@@ -40,6 +40,9 @@ ensure(technicalsSection.includes('تحليل فني وسياق البيانات
 ensure(technicalsSection.includes('غير متاح'), 'يجب أن تظهر حالة غير متاح عند نقص السجل');
 ensure(technicalsSection.includes('المراجعة التفسيرية للسجل اليومي'), 'قسم المراجعة التفسيرية غير موجود');
 ensure(technicalsSection.includes('شرط إعادة المراجعة'), 'يجب عرض شرط إعادة المراجعة');
+ensure(technicalsSection.includes('بوابة المختبر التجريبي'), 'يجب عرض بوابة المختبر التجريبي المقفلة');
+ensure(technicalsSection.includes('مقفل عمداً') && technicalsSection.includes('صلاحية TRADE غير مفعّلة'), 'يجب أن توضح الواجهة أن صلاحية التداول التجريبية والتنفيذ مقفلان');
+ensure(!/\/api\/testnet-lab|fetch\s*\(|XMLHttpRequest|\.post\s*\(/.test(technicalsSection), 'لا ينبغي أن تنشئ واجهة Live Terminal نية أو طلباً للمختبر من دون جلسة مصادقة محكومة');
 ensure(html.includes("const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';"), 'يجب أن تستخدم الواجهة خدمة Asiri Bot الخادمية للتحليل الفني');
 ensure(/if \(tab === 'technicals'\).*document\.getElementById\('sec-technicals'\)\.classList\.add\('active'\)/.test(html), 'التبويب الداخلي للتحليل الفني غير مربوط');
 ensure(html.includes("if (type === 'technicals') switchMainTab('technicals'"), 'التنقل السفلي للتحليل الفني غير مربوط');
