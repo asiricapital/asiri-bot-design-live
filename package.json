@@ -7,7 +7,8 @@
     "dev": "node live-server.js",
     "start": "node live-server.js",
     "check": "node check-v720.js",
-    "check:research": "node check-research-center.mjs"
+    "check:research": "node check-research-center.mjs",
+    "check:technicals": "node check-technicals.mjs"
   },
   "engines": {
     "node": "22.x"
