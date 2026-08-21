@@ -38,9 +38,17 @@ ensure(researchIndex >= 0 && technicalsIndex > researchIndex && commandIndex > t
 ensure(technicalsStart >= 0 && technicalsEnd > technicalsStart, 'قسم التحليل الفني غير موجود في الصفحة الحالية');
 ensure(technicalsSection.includes('تحليل فني وسياق البيانات'), 'عنوان التحليل الفني غير موجود');
 ensure(technicalsSection.includes('غير متاح'), 'يجب أن تظهر حالة غير متاح عند نقص السجل');
+ensure(technicalsSection.includes('المراجعة التفسيرية للسجل اليومي'), 'قسم المراجعة التفسيرية غير موجود');
+ensure(technicalsSection.includes('شرط إعادة المراجعة'), 'يجب عرض شرط إعادة المراجعة');
 ensure(html.includes("const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';"), 'يجب أن تستخدم الواجهة خدمة Asiri Bot الخادمية للتحليل الفني');
 ensure(/if \(tab === 'technicals'\).*document\.getElementById\('sec-technicals'\)\.classList\.add\('active'\)/.test(html), 'التبويب الداخلي للتحليل الفني غير مربوط');
 ensure(html.includes("if (type === 'technicals') switchMainTab('technicals'"), 'التنقل السفلي للتحليل الفني غير مربوط');
+ensure(html.includes('function renderTechnicalInterpretation('), 'عرض التفسير الفني غير مربوط بالواجهة');
+ensure(html.includes('renderTechnicalInterpretation(payload.interpretation);'), 'يجب أن يستهلك العرض عقد التفسير الخادمي');
 ensure(!/placeOrder|brokerSubmission|\/api\/order|submitOrder/.test(technicalsSection), 'لا ينبغي أن تضيف لوحة التحليل أي مسار أو دالة تنفيذ');
+const interpretationStart = html.indexOf('function renderTechnicalInterpretation(');
+const interpretationEnd = html.indexOf('function technicalSparkline(');
+const interpretationFunctions = html.slice(interpretationStart, interpretationEnd);
+ensure(!/(?:BUY|SELL|entry|stopLoss|target|submitOrder|placeOrder|\/api\/order)/i.test(interpretationFunctions), 'التفسير يجب أن يبقى بلا إشارات أو عناصر تنفيذ');
 
 console.log('Technical analysis checks passed.');
