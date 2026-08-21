@@ -6,6 +6,7 @@
     <title>Asiri Capital | Live Terminal v27</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
+        /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
             --bg-base: #060e18;
             --bg-card: #0c1a2c;
@@ -13,6 +14,8 @@
             --accent-gold: #e2bc53;
             --accent-cyan: #00e5ff;
             --success: #10b981;
+            --green: #25d695;
+            --warning: #f7c948;
             --danger: #ef4444;
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
@@ -148,7 +151,7 @@
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(12, 26, 44, 0.98); backdrop-filter: blur(16px);
             border-top: 1px solid var(--border-color);
-            display: grid; grid-template-columns: repeat(7, 1fr);
+            display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
             padding: 0.6rem 0.4rem; z-index: 1000;
         }
         .nav-item {
@@ -199,10 +202,16 @@
         .research-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }.research-kicker { color:var(--accent-cyan); font-size:.7rem; font-weight:800; letter-spacing:.1em; }.research-topline h2 { margin:6px 0 5px; font-size:1.42rem; }.research-topline p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.8; max-width:650px; }.research-seal { flex:none; padding:9px 11px; border:1px solid rgba(247,201,72,.4); border-radius:12px; color:#ffe7a1; background:rgba(247,201,72,.08); font-size:.67rem; font-weight:800; line-height:1.6; text-align:center; }
         .research-controls { display:grid; grid-template-columns:minmax(160px,1fr) auto auto; gap:9px; margin:16px 0; }.research-select,.research-btn { min-height:42px; border-radius:11px; font:inherit; font-size:.78rem; }.research-select { background:#081321; border:1px solid var(--border-color); color:var(--text-main); padding:0 11px; }.research-btn { border:1px solid var(--border-color); padding:0 13px; color:var(--text-main); background:#10213a; font-weight:800; cursor:pointer; transition:.18s ease; }.research-btn:hover { border-color:var(--accent-cyan); transform:translateY(-1px); }.research-btn.sec { background:rgba(247,201,72,.1); color:#ffe8a3; border-color:rgba(247,201,72,.38); }
         .research-grid { display:grid; grid-template-columns:1.15fr .85fr .85fr; gap:10px; }.research-tile { min-height:175px; position:relative; overflow:hidden; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.48); }.research-tile::before { position:absolute; top:0; right:0; content:''; width:3px; height:100%; background:var(--accent-cyan); }.research-tile.filing::before { background:var(--accent-gold); }.research-tile.event::before { background:var(--green); }.research-tile h3 { margin:0 0 8px; font-size:.88rem; }.research-tile p { margin:0; color:var(--text-muted); font-size:.74rem; line-height:1.75; }.quality-line { display:flex; justify-content:space-between; gap:8px; margin:11px 0 6px; color:var(--text-muted); font-size:.7rem; }.quality-value { color:var(--text-main); font-weight:800; }.quality-status { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:999px; font-size:.66rem; font-weight:800; background:rgba(247,201,72,.1); color:#ffe7a1; border:1px solid rgba(247,201,72,.26); }.quality-status.fresh { color:var(--green); background:rgba(37,214,149,.08); border-color:rgba(37,214,149,.26); }.quality-status.stale { color:#ffcf7a; }.quality-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }.research-link { display:inline-block; margin-top:14px; color:var(--accent-gold); font-size:.72rem; font-weight:800; text-decoration:none; }.research-link:hover { text-decoration:underline; }.research-note-box { grid-column:1 / -1; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.44); }.research-note-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }.research-note-head h3 { margin:0; font-size:.88rem; }.research-note-status { color:var(--text-muted); font-size:.68rem; }.research-textarea { width:100%; min-height:96px; resize:vertical; background:#081321; border:1px solid var(--border-color); border-radius:10px; color:var(--text-main); padding:11px; font:inherit; font-size:.76rem; line-height:1.7; }.research-note-actions { display:flex; gap:8px; margin-top:9px; }.research-note-actions .research-btn { min-height:35px; font-size:.7rem; }.research-safety { grid-column:1 / -1; border-right:2px solid var(--accent-gold); padding:4px 10px 4px 0; color:#e7d7ae; font-size:.73rem; line-height:1.75; }.research-safety b { color:var(--accent-gold); }
+        .nav-pill.technicals-pill { border-color:rgba(37,214,149,.42); color:#b9f7df; }.nav-pill.technicals-pill:hover { background:rgba(37,214,149,.08); border-color:var(--green); }
+        .technicals-card { min-height:0; overflow:hidden; background:radial-gradient(circle at 92% 5%,rgba(37,214,149,.12),transparent 30%),radial-gradient(circle at 8% 0%,rgba(0,229,255,.11),transparent 32%),linear-gradient(145deg,#0d1d32,#091522 70%); }.technicals-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }.technicals-kicker { color:var(--green); font-size:.7rem; font-weight:800; letter-spacing:.1em; }.technicals-topline h2 { margin:6px 0 5px; font-size:1.42rem; }.technicals-topline p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.8; max-width:650px; }.technicals-seal { flex:none; padding:9px 11px; border:1px solid rgba(37,214,149,.4); border-radius:12px; color:#b9f7df; background:rgba(37,214,149,.08); font-size:.67rem; font-weight:800; line-height:1.6; text-align:center; }
+        .technicals-controls { display:grid; grid-template-columns:minmax(160px,1fr) auto; gap:9px; margin:16px 0; }.technicals-select,.technicals-btn { min-height:42px; border-radius:11px; font:inherit; font-size:.78rem; }.technicals-select { background:#081321; border:1px solid var(--border-color); color:var(--text-main); padding:0 11px; }.technicals-btn { border:1px solid rgba(37,214,149,.42); padding:0 14px; color:#c5f9e4; background:rgba(37,214,149,.1); font-weight:800; cursor:pointer; transition:.18s ease; }.technicals-btn:hover { border-color:var(--green); transform:translateY(-1px); }.technicals-btn:active { transform:scale(.97); }
+        .technicals-grid { display:grid; grid-template-columns:1.25fr .75fr .75fr; gap:10px; }.tech-tile { min-height:176px; position:relative; overflow:hidden; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.48); }.tech-tile::before { position:absolute; top:0; right:0; content:''; width:3px; height:100%; background:var(--green); }.tech-tile.data::before { background:var(--accent-cyan); }.tech-tile.momentum::before { background:var(--accent-gold); }.tech-tile h3 { margin:0 0 9px; font-size:.88rem; }.tech-main-reading { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }.tech-main-reading b { color:#fff; font-size:1.35rem; }.tech-main-reading span { color:var(--text-muted); font-size:.7rem; }.tech-sparkline { height:62px; margin:12px 0 4px; border-radius:9px; background:rgba(8,19,33,.75); border:1px solid rgba(30,51,86,.75); padding:7px; }.tech-sparkline svg { width:100%; height:100%; display:block; }.tech-line { display:flex; justify-content:space-between; gap:8px; margin:9px 0 0; color:var(--text-muted); font-size:.7rem; }.tech-line strong { color:var(--text-main); font-weight:800; text-align:left; }.tech-metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px; }.tech-metric { border:1px solid rgba(30,51,86,.8); border-radius:10px; padding:8px; background:#081321; color:var(--text-muted); font-size:.67rem; }.tech-metric b { display:block; margin-top:3px; color:var(--text-main); font-size:.82rem; }.tech-context { grid-column:1 / -1; border:1px solid var(--border-color); border-radius:14px; padding:13px 14px; background:rgba(6,14,24,.44); display:flex; justify-content:space-between; gap:14px; align-items:flex-start; }.tech-context p { margin:0; color:var(--text-muted); font-size:.72rem; line-height:1.75; }.tech-context b { color:var(--accent-gold); }.tech-context .quality-status { flex:none; }.tech-safety { grid-column:1 / -1; border-right:2px solid var(--green); padding:4px 10px 4px 0; color:#c6f3e1; font-size:.73rem; line-height:1.75; }.tech-safety b { color:var(--green); }
         @media(max-width:780px){ .journey-head{flex-direction:column}.journey-grid{grid-template-columns:1fr 1fr}.journey-step{min-height:154px}.bottom-nav{grid-template-columns:repeat(6,1fr)}.nav-item{font-size:.61rem} }
         @media(max-width:780px){ .research-topline{flex-direction:column}.research-grid{grid-template-columns:1fr 1fr}.research-note-box,.research-safety{grid-column:1/-1}.bottom-nav{grid-template-columns:repeat(7,1fr)} }
         @media(max-width:520px){ .journey-grid{grid-template-columns:1fr}.journey-step{min-height:125px}.journey-step b{margin-top:12px}.journey-note{align-items:flex-start}.bottom-nav{padding-inline:0}.nav-item svg{width:19px;height:19px} }
         @media(max-width:520px){ .research-controls,.research-grid{grid-template-columns:1fr}.research-btn{width:100%}.research-tile{min-height:145px}.research-note-box,.research-safety{grid-column:auto}.research-note-head{align-items:flex-start;flex-direction:column} }
+        @media(max-width:780px){ .technicals-topline{flex-direction:column}.technicals-grid{grid-template-columns:1fr 1fr}.tech-context,.tech-safety{grid-column:1/-1}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.55rem} }
+        @media(max-width:520px){ .technicals-controls,.technicals-grid{grid-template-columns:1fr}.technicals-btn{width:100%}.tech-tile{min-height:148px}.tech-context,.tech-safety{grid-column:auto}.tech-context{flex-direction:column}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.5rem} }
     </style>
 </head>
 <body>
@@ -219,6 +228,7 @@
         <button class="nav-pill active" data-tab="tools" onclick="switchMainTab('tools', this)">أدوات القرار</button>
         <button class="nav-pill journey-pill" data-tab="journey" onclick="switchMainTab('journey', this)">مسار العميل ✦</button>
         <button class="nav-pill research-pill" data-tab="research" onclick="switchMainTab('research', this)">مركز الأبحاث</button>
+        <button class="nav-pill technicals-pill" data-tab="technicals" onclick="switchMainTab('technicals', this)">التحليل الفني</button>
         <button class="nav-pill" data-tab="command" onclick="switchMainTab('command', this)">قمة القرار ⚡</button>
         <button class="nav-pill" data-tab="alerts" onclick="switchMainTab('alerts', this)">التنبيهات</button>
         <button class="nav-pill" data-tab="portfolio" onclick="switchMainTab('portfolio', this)">المحفظة الذكية</button>
@@ -290,6 +300,22 @@
             </section>
         </div>
 
+        <div id="sec-technicals" class="app-section">
+            <section class="card-section technicals-card" aria-labelledby="technicals-title">
+                <div class="technicals-topline"><div><div class="technicals-kicker">TECHNICAL CONTEXT · SERVER CALCULATED</div><h2 id="technicals-title">تحليل فني وسياق البيانات</h2><p>تُحسب المؤشرات من شموع يومية تاريخية عبر خدمة Asiri، وتبقى القراءة وصفاً تقنياً للمراجعة لا أمراً ولا توجيهاً تنفيذياً.</p></div><div class="technicals-seal">READ ONLY<br>NO EXECUTION</div></div>
+                <div class="technicals-controls"><select id="technicals-symbol" class="technicals-select" onchange="refreshTechnicalAnalysis()" aria-label="اختيار رمز التحليل الفني"></select><button class="technicals-btn" type="button" onclick="refreshTechnicalAnalysis()">تحديث المؤشرات</button></div>
+                <div class="technicals-grid">
+                    <article class="tech-tile"><h3>بنية الاتجاه</h3><div class="tech-main-reading"><b id="tech-trend-label">غير متاح</b><span id="tech-strength">—</span></div><div id="tech-sparkline" class="tech-sparkline" aria-label="مسار الإغلاق التاريخي"><span style="color:var(--text-muted);font-size:.7rem">بانتظار السجل اليومي</span></div><div class="tech-line"><span>زخم 20 جلسة</span><strong id="tech-momentum20">غير متاح</strong></div><div class="tech-line"><span>تماسك النمط</span><strong id="tech-pattern-quality">غير متاح</strong></div></article>
+                    <article class="tech-tile data"><h3>جودة السجل</h3><span id="tech-history-status" class="quality-status">بانتظار السجل</span><div class="tech-line"><span>المصدر</span><strong id="tech-source">—</strong></div><div class="tech-line"><span>نهاية السجل</span><strong id="tech-history-end">—</strong></div><div class="tech-line"><span>الشموع اليومية</span><strong id="tech-candles">—</strong></div><div class="tech-line"><span>الحالة</span><strong id="tech-cache">—</strong></div></article>
+                    <article class="tech-tile momentum"><h3>الزخم والتقلب</h3><div class="tech-metric-grid"><div class="tech-metric">RSI 14<b id="tech-rsi">غير متاح</b></div><div class="tech-metric">تفسير RSI<b id="tech-rsi-context">غير متاح</b></div><div class="tech-metric">ATR 14<b id="tech-atr">غير متاح</b></div><div class="tech-metric">ATR %<b id="tech-atr-pct">غير متاح</b></div><div class="tech-metric">MACD<b id="tech-macd">غير متاح</b></div><div class="tech-metric">Histogram<b id="tech-histogram">غير متاح</b></div></div></article>
+                    <article class="tech-tile"><h3>المتوسطات المتحركة</h3><div class="tech-metric-grid"><div class="tech-metric">SMA 20<b id="tech-sma20">غير متاح</b></div><div class="tech-metric">SMA 50<b id="tech-sma50">غير متاح</b></div><div class="tech-metric">SMA 200<b id="tech-sma200">غير متاح</b></div><div class="tech-metric">EMA 9<b id="tech-ema9">غير متاح</b></div><div class="tech-metric">EMA 20<b id="tech-ema20">غير متاح</b></div><div class="tech-metric">EMA 50<b id="tech-ema50">غير متاح</b></div></div></article>
+                    <article class="tech-tile data"><h3>الحجم وMACD</h3><div class="tech-metric-grid"><div class="tech-metric">إشارة MACD<b id="tech-signal">غير متاح</b></div><div class="tech-metric">الحجم / متوسط 20<b id="tech-volume-ratio">غير متاح</b></div><div class="tech-metric">قرب قمة 20<b id="tech-breakout">غير متاح</b></div><div class="tech-metric">بعد دعم 20<b id="tech-support">غير متاح</b></div></div></article>
+                    <div class="tech-context"><p id="tech-context-text">اختر رمزاً من قائمة المراقبة لجلب السجل اليومي وحساب المؤشرات. عند نقص الشموع أو تعذر المصدر ستبقى القيم <b>غير متاح</b> بدلاً من أي قيمة بديلة.</p><span id="tech-availability" class="quality-status stale">بانتظار قراءة</span></div>
+                    <div class="tech-safety"><b>بوابة أمان:</b> هذه القراءة تحليل تقني فقط، وليست توصية شراء أو بيع ولا تنشئ أمراً أو اتصالاً بوسيط.</div>
+                </div>
+            </section>
+        </div>
+
         <div id="sec-command" class="app-section">
             <div class="card-section">
                 <div class="section-title-main">قمة القرار الذكي والسيولة</div>
@@ -324,6 +350,10 @@
         <button class="nav-item" onclick="bottomNavClick('research', this)">
             <svg viewBox="0 0 24 24"><path d="M4 3h11a2 2 0 0 1 2 2v12H6a2 2 0 0 0-2 2V3Zm15 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM7 7h7v2H7V7Zm0 4h7v2H7v-2Z"/></svg>
             <span>الأبحاث</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('technicals', this)">
+            <svg viewBox="0 0 24 24"><path d="M3 17h2.5l3-5 3 4 4.5-8 2 3H21v2h-4l-2-3-3.2 5.7-3.1-4.1L6.6 19H3v-2z"/></svg>
+            <span>الفني</span>
         </button>
         <button class="nav-item" onclick="bottomNavClick('alerts', this)">
             <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
@@ -371,6 +401,8 @@
         const QUOTE_SNAPSHOT_KEY = 'asiri_verified_quote_snapshot_v1';
         const QUOTE_SNAPSHOT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
         const RESEARCH_NOTE_KEY = 'asiri_research_notes_v1';
+        const TECHNICALS_API = '/api/technicals';
+        let technicalRequestInFlight = false;
 
         function init() {
             const saved = localStorage.getItem('asiri_ws_portfolio_v27');
@@ -397,6 +429,8 @@
             renderTable();
             document.getElementById('portfolio-count').textContent = watchlist.length;
             renderResearchHub();
+            syncTechnicalSymbolOptions();
+            renderTechnicalUnavailable(null, 'اختر رمزاً من قائمة المراقبة لعرض التحليل التقني.');
             refreshVerifiedQuotes();
             window.setInterval(refreshVerifiedQuotes, QUOTE_REFRESH_MS);
         }
@@ -555,6 +589,8 @@
             }
             renderTable();
             renderResearchHub();
+            syncTechnicalSymbolOptions();
+            renderTechnicalUnavailable(null, 'أضف رمزاً إلى قائمة المراقبة لعرض التحليل التقني.');
         }
 
         function filterAction(type, btn) {
@@ -571,6 +607,7 @@
             if (tab === 'tools') document.getElementById('sec-tools').classList.add('active');
             if (tab === 'journey') document.getElementById('sec-journey').classList.add('active');
             if (tab === 'research') document.getElementById('sec-research').classList.add('active');
+            if (tab === 'technicals') { document.getElementById('sec-technicals').classList.add('active'); refreshTechnicalAnalysis(); }
             if (tab === 'command') document.getElementById('sec-command').classList.add('active');
             if (tab === 'alerts') document.getElementById('sec-alerts').classList.add('active');
             if (tab === 'portfolio') document.getElementById('sec-portfolio').classList.add('active');
@@ -582,6 +619,7 @@
             if (type === 'tools') switchMainTab('tools', document.querySelector('[data-tab="tools"]'));
             if (type === 'journey') switchMainTab('journey', document.querySelector('[data-tab="journey"]'));
             if (type === 'research') switchMainTab('research', document.querySelector('[data-tab="research"]'));
+            if (type === 'technicals') switchMainTab('technicals', document.querySelector('[data-tab="technicals"]'));
             if (type === 'alerts') switchMainTab('alerts', document.querySelector('[data-tab="alerts"]'));
             if (type === 'opportunities') switchMainTab('command', document.querySelector('[data-tab="command"]'));
             if (type === 'portfolio') switchMainTab('portfolio', document.querySelector('[data-tab="portfolio"]'));
@@ -651,6 +689,50 @@
             renderResearchHub();
         }
 
+        function syncTechnicalSymbolOptions() {
+            const select = document.getElementById('technicals-symbol');
+            if (!select) return '';
+            const previous = select.value;
+            const options = watchlist.map(symbol => `<option value="${symbol}">${symbol}</option>`).join('');
+            if (select.innerHTML !== options) select.innerHTML = options;
+            if (previous && watchlist.includes(previous)) select.value = previous;
+            return String(select.value || watchlist[0] || '').trim().toUpperCase();
+        }
+
+        function technicalNumber(value, digits = 2, suffix = '') { return Number.isFinite(Number(value)) ? `${Number(value).toFixed(digits)}${suffix}` : 'غير متاح'; }
+        function setTechnicalText(id, value) { const element = document.getElementById(id); if (element) element.textContent = value; }
+        function rsiContext(value) { if (!Number.isFinite(Number(value))) return 'غير متاح'; if (value >= 70) return 'مرتفع فنياً'; if (value <= 30) return 'منخفض فنياً'; return 'ضمن النطاق المحايد'; }
+
+        function technicalSparkline(points) {
+            const values = (Array.isArray(points) ? points : []).map(point => Number(point?.close)).filter(Number.isFinite);
+            if (values.length < 2) return '<span style="color:var(--text-muted);font-size:.7rem">غير متاح</span>';
+            const min = Math.min(...values), max = Math.max(...values), span = (max - min) || 1;
+            const path = values.map((value, index) => { const x = (index / (values.length - 1)) * 100; const y = 34 - (((value - min) / span) * 30); return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`; }).join(' ');
+            return `<svg viewBox="0 0 100 40" preserveAspectRatio="none" role="img" aria-label="مسار الإغلاق اليومي"><path d="${path}" fill="none" stroke="#25d695" stroke-width="2" vector-effect="non-scaling-stroke"/><path d="M0,36 H100" fill="none" stroke="#1e3356" stroke-width="1" vector-effect="non-scaling-stroke"/></svg>`;
+        }
+
+        function renderTechnicalUnavailable(payload, message) {
+            const status = document.getElementById('tech-history-status'); status.textContent = payload?.reason === 'SOURCE_UNAVAILABLE' ? 'المصدر غير متاح' : 'غير متاح'; status.className = 'quality-status stale';
+            setTechnicalText('tech-trend-label', 'غير متاح'); setTechnicalText('tech-strength', '—'); document.getElementById('tech-sparkline').innerHTML = '<span style="color:var(--text-muted);font-size:.7rem">غير متاح</span>';
+            ['tech-momentum20','tech-pattern-quality','tech-rsi','tech-rsi-context','tech-atr','tech-atr-pct','tech-macd','tech-histogram','tech-sma20','tech-sma50','tech-sma200','tech-ema9','tech-ema20','tech-ema50','tech-signal','tech-volume-ratio','tech-breakout','tech-support'].forEach(id => setTechnicalText(id, 'غير متاح'));
+            setTechnicalText('tech-source', payload?.source || '—'); setTechnicalText('tech-history-end', payload?.endOfHistory ? new Date(payload.endOfHistory).toLocaleDateString('ar-SA') : '—'); setTechnicalText('tech-candles', Number.isFinite(Number(payload?.candles)) ? `${payload.candles} شمعة` : '—'); setTechnicalText('tech-cache', payload?.cache?.status === 'HIT' ? 'ذاكرة مؤقتة' : '—');
+            document.getElementById('tech-availability').textContent = 'غير متاح'; document.getElementById('tech-availability').className = 'quality-status stale'; setTechnicalText('tech-context-text', message || 'لا تتوفر شموع تاريخية كافية لحساب هذه المؤشرات.');
+        }
+
+        function renderTechnicalAnalysis(payload) {
+            if (payload?.availability !== 'available' || !payload.indicators) { const reason = payload?.reason === 'INSUFFICIENT_HISTORY' ? `غير متاح: السجل يحتوي ${payload.candles || 0} شمعة، بينما يلزم ${payload.minimumCandles || 35} شمعة على الأقل لحساب القراءة الأساسية.` : null; renderTechnicalUnavailable(payload, reason || 'تعذر الحصول على سجل تاريخي موثوق؛ لم تُعرض أي قيم بديلة.'); return; }
+            const indicators = payload.indicators, stale = payload.historyStatus === 'STALE', historyStatus = document.getElementById('tech-history-status'); historyStatus.textContent = stale ? 'السجل متأخر' : 'سجل يومي متاح'; historyStatus.className = `quality-status ${stale ? 'stale' : 'fresh'}`;
+            setTechnicalText('tech-trend-label', indicators.trendLabel || 'غير متاح'); setTechnicalText('tech-strength', Number.isFinite(Number(indicators.trendStrength)) ? `${indicators.trendStrength}/100` : 'غير متاح'); document.getElementById('tech-sparkline').innerHTML = technicalSparkline(indicators.sparkline); setTechnicalText('tech-momentum20', technicalNumber(indicators.momentum20, 2, '%')); setTechnicalText('tech-pattern-quality', technicalNumber(indicators.quality, 0, '/100'));
+            setTechnicalText('tech-source', payload.source || '—'); setTechnicalText('tech-history-end', payload.endOfHistory ? new Date(payload.endOfHistory).toLocaleDateString('ar-SA') : '—'); setTechnicalText('tech-candles', `${payload.candles} شمعة`); setTechnicalText('tech-cache', payload.cache?.status === 'HIT' ? 'ذاكرة مؤقتة' : 'تحديث جديد'); setTechnicalText('tech-rsi', technicalNumber(indicators.rsi14)); setTechnicalText('tech-rsi-context', rsiContext(indicators.rsi14)); setTechnicalText('tech-atr', technicalNumber(indicators.atr14)); setTechnicalText('tech-atr-pct', technicalNumber(indicators.atrPct, 2, '%')); setTechnicalText('tech-macd', technicalNumber(indicators.macd, 3)); setTechnicalText('tech-histogram', technicalNumber(indicators.histogram, 3));
+            setTechnicalText('tech-sma20', technicalNumber(indicators.sma20)); setTechnicalText('tech-sma50', technicalNumber(indicators.sma50)); setTechnicalText('tech-sma200', technicalNumber(indicators.sma200)); setTechnicalText('tech-ema9', technicalNumber(indicators.ema9)); setTechnicalText('tech-ema20', technicalNumber(indicators.ema20)); setTechnicalText('tech-ema50', technicalNumber(indicators.ema50)); setTechnicalText('tech-signal', technicalNumber(indicators.signal, 3)); setTechnicalText('tech-volume-ratio', technicalNumber(indicators.historicalVolumeRatio, 2, '×')); setTechnicalText('tech-breakout', technicalNumber(indicators.breakoutDistancePct, 2, '%')); setTechnicalText('tech-support', technicalNumber(indicators.supportDistancePct, 2, '%'));
+            document.getElementById('tech-availability').textContent = stale ? 'مراجعة التأخر' : 'قراءة متاحة'; document.getElementById('tech-availability').className = `quality-status ${stale ? 'stale' : 'fresh'}`; setTechnicalText('tech-context-text', `${payload.symbol} • ${payload.interval} • نهاية السجل ${payload.endOfHistory ? new Date(payload.endOfHistory).toLocaleDateString('ar-SA') : '—'} • ${stale ? 'البيانات متأخرة؛ راجع المصدر قبل استخدامها.' : 'السجل اليومي ضمن نافذة الحداثة.'} المؤشرات تصف البيانات ولا تنشئ أمراً أو توصية تنفيذية.`);
+        }
+
+        async function refreshTechnicalAnalysis() {
+            if (technicalRequestInFlight) return; const symbol = syncTechnicalSymbolOptions(); if (!symbol) { renderTechnicalUnavailable(null, 'أضف رمزاً إلى قائمة المراقبة لعرض التحليل التقني.'); return; } technicalRequestInFlight = true; document.getElementById('tech-availability').textContent = 'جاري الحساب'; document.getElementById('tech-availability').className = 'quality-status';
+            try { const response = await fetch(`${TECHNICALS_API}/${encodeURIComponent(symbol)}?_=${Date.now()}`, { cache: 'no-store' }); const payload = await response.json(); renderTechnicalAnalysis(payload); } catch (_) { renderTechnicalUnavailable({ symbol, reason: 'SOURCE_UNAVAILABLE' }, 'تعذر الاتصال بخدمة التحليل؛ لم تُعرض أي قيم بديلة.'); } finally { technicalRequestInFlight = false; }
+        }
+
         function openAddStockModal() { document.getElementById('addStockModal').classList.add('active'); }
         function closeAddStockModal() { document.getElementById('addStockModal').classList.remove('active'); document.getElementById('modalSymbolInput').value = ''; }
 
@@ -662,6 +744,7 @@
                 saveWatchlist();
                 stockMarketData[sym] = { symbol: sym, price: null, decision: 'WAIT', text: 'بانتظار تحديث موثق', cls: 'badge-wait' };
                 document.getElementById('portfolio-count').textContent = watchlist.length;
+                syncTechnicalSymbolOptions();
             }
             currentFilter = 'ALL';
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
