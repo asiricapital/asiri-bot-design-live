@@ -148,7 +148,7 @@
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(12, 26, 44, 0.98); backdrop-filter: blur(16px);
             border-top: 1px solid var(--border-color);
-            display: grid; grid-template-columns: repeat(5, 1fr);
+            display: grid; grid-template-columns: repeat(7, 1fr);
             padding: 0.6rem 0.4rem; z-index: 1000;
         }
         .nav-item {
@@ -194,8 +194,15 @@
         .journey-number { display: block; color: var(--accent-cyan); font-size: .66rem; font-weight: 800; letter-spacing: .1em; }.journey-step.review .journey-number { color: var(--accent-gold); }.journey-step.safe .journey-number { color: var(--green); }
         .journey-step b { display: block; margin-top: 18px; font-size: .96rem; }.journey-step p { margin: 7px 0 0; color: var(--text-muted); font-size: .75rem; line-height: 1.7; }.journey-step small { position: absolute; left: 14px; bottom: 13px; color: var(--text-muted); font-size: .65rem; }
         .journey-note { display: flex; align-items: center; gap: 9px; margin-top: 15px; border-right: 2px solid var(--accent-gold); padding: 3px 10px 3px 0; color: #e7d7ae; font-size: .74rem; line-height: 1.7; }.journey-note span { color: var(--accent-gold); font-weight: 800; }
+        .nav-pill.research-pill { border-color: rgba(0,229,255,.43); color: #b9f7ff; }.nav-pill.research-pill:hover { background: rgba(0,229,255,.1); border-color: var(--accent-cyan); }
+        .research-card { min-height: 0; overflow: hidden; background: radial-gradient(circle at 10% 3%, rgba(247,201,72,.14), transparent 28%),radial-gradient(circle at 95% 0%, rgba(0,229,255,.12), transparent 35%),linear-gradient(145deg,#0d1d32,#091522 70%); }
+        .research-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }.research-kicker { color:var(--accent-cyan); font-size:.7rem; font-weight:800; letter-spacing:.1em; }.research-topline h2 { margin:6px 0 5px; font-size:1.42rem; }.research-topline p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.8; max-width:650px; }.research-seal { flex:none; padding:9px 11px; border:1px solid rgba(247,201,72,.4); border-radius:12px; color:#ffe7a1; background:rgba(247,201,72,.08); font-size:.67rem; font-weight:800; line-height:1.6; text-align:center; }
+        .research-controls { display:grid; grid-template-columns:minmax(160px,1fr) auto auto; gap:9px; margin:16px 0; }.research-select,.research-btn { min-height:42px; border-radius:11px; font:inherit; font-size:.78rem; }.research-select { background:#081321; border:1px solid var(--border-color); color:var(--text-main); padding:0 11px; }.research-btn { border:1px solid var(--border-color); padding:0 13px; color:var(--text-main); background:#10213a; font-weight:800; cursor:pointer; transition:.18s ease; }.research-btn:hover { border-color:var(--accent-cyan); transform:translateY(-1px); }.research-btn.sec { background:rgba(247,201,72,.1); color:#ffe8a3; border-color:rgba(247,201,72,.38); }
+        .research-grid { display:grid; grid-template-columns:1.15fr .85fr .85fr; gap:10px; }.research-tile { min-height:175px; position:relative; overflow:hidden; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.48); }.research-tile::before { position:absolute; top:0; right:0; content:''; width:3px; height:100%; background:var(--accent-cyan); }.research-tile.filing::before { background:var(--accent-gold); }.research-tile.event::before { background:var(--green); }.research-tile h3 { margin:0 0 8px; font-size:.88rem; }.research-tile p { margin:0; color:var(--text-muted); font-size:.74rem; line-height:1.75; }.quality-line { display:flex; justify-content:space-between; gap:8px; margin:11px 0 6px; color:var(--text-muted); font-size:.7rem; }.quality-value { color:var(--text-main); font-weight:800; }.quality-status { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:999px; font-size:.66rem; font-weight:800; background:rgba(247,201,72,.1); color:#ffe7a1; border:1px solid rgba(247,201,72,.26); }.quality-status.fresh { color:var(--green); background:rgba(37,214,149,.08); border-color:rgba(37,214,149,.26); }.quality-status.stale { color:#ffcf7a; }.quality-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }.research-link { display:inline-block; margin-top:14px; color:var(--accent-gold); font-size:.72rem; font-weight:800; text-decoration:none; }.research-link:hover { text-decoration:underline; }.research-note-box { grid-column:1 / -1; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.44); }.research-note-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }.research-note-head h3 { margin:0; font-size:.88rem; }.research-note-status { color:var(--text-muted); font-size:.68rem; }.research-textarea { width:100%; min-height:96px; resize:vertical; background:#081321; border:1px solid var(--border-color); border-radius:10px; color:var(--text-main); padding:11px; font:inherit; font-size:.76rem; line-height:1.7; }.research-note-actions { display:flex; gap:8px; margin-top:9px; }.research-note-actions .research-btn { min-height:35px; font-size:.7rem; }.research-safety { grid-column:1 / -1; border-right:2px solid var(--accent-gold); padding:4px 10px 4px 0; color:#e7d7ae; font-size:.73rem; line-height:1.75; }.research-safety b { color:var(--accent-gold); }
         @media(max-width:780px){ .journey-head{flex-direction:column}.journey-grid{grid-template-columns:1fr 1fr}.journey-step{min-height:154px}.bottom-nav{grid-template-columns:repeat(6,1fr)}.nav-item{font-size:.61rem} }
+        @media(max-width:780px){ .research-topline{flex-direction:column}.research-grid{grid-template-columns:1fr 1fr}.research-note-box,.research-safety{grid-column:1/-1}.bottom-nav{grid-template-columns:repeat(7,1fr)} }
         @media(max-width:520px){ .journey-grid{grid-template-columns:1fr}.journey-step{min-height:125px}.journey-step b{margin-top:12px}.journey-note{align-items:flex-start}.bottom-nav{padding-inline:0}.nav-item svg{width:19px;height:19px} }
+        @media(max-width:520px){ .research-controls,.research-grid{grid-template-columns:1fr}.research-btn{width:100%}.research-tile{min-height:145px}.research-note-box,.research-safety{grid-column:auto}.research-note-head{align-items:flex-start;flex-direction:column} }
     </style>
 </head>
 <body>
@@ -211,6 +218,7 @@
     <div class="nav-pills-container">
         <button class="nav-pill active" data-tab="tools" onclick="switchMainTab('tools', this)">أدوات القرار</button>
         <button class="nav-pill journey-pill" data-tab="journey" onclick="switchMainTab('journey', this)">مسار العميل ✦</button>
+        <button class="nav-pill research-pill" data-tab="research" onclick="switchMainTab('research', this)">مركز الأبحاث</button>
         <button class="nav-pill" data-tab="command" onclick="switchMainTab('command', this)">قمة القرار ⚡</button>
         <button class="nav-pill" data-tab="alerts" onclick="switchMainTab('alerts', this)">التنبيهات</button>
         <button class="nav-pill" data-tab="portfolio" onclick="switchMainTab('portfolio', this)">المحفظة الذكية</button>
@@ -268,6 +276,20 @@
             </section>
         </div>
 
+        <div id="sec-research" class="app-section">
+            <section class="card-section research-card" aria-labelledby="research-title">
+                <div class="research-topline"><div><div class="research-kicker">RESEARCH CENTER · EVIDENCE FIRST</div><h2 id="research-title">مركز أبحاث وقرار موثّق</h2><p>اجمع قراءة السعر ومصدرها ووقتها مع رابط الملف الرسمي ومذكرتك البحثية في نقطة مراجعة واحدة. لا تنشئ هذه اللوحة توصية أو أمراً أو بديلاً عن المصدر.</p></div><div class="research-seal">READ ONLY<br>NO BROKER LINK</div></div>
+                <div class="research-controls"><select id="research-symbol" class="research-select" onchange="renderResearchHub()" aria-label="اختيار رمز البحث"></select><button class="research-btn" type="button" onclick="renderResearchHub()">تحديث القراءة</button><button class="research-btn sec" type="button" onclick="openOfficialFiling()">فتح SEC EDGAR ↗</button></div>
+                <div class="research-grid">
+                    <article class="research-tile"><h3>جودة قراءة السوق</h3><span id="research-quality-status" class="quality-status">بانتظار قراءة</span><div class="quality-line"><span>المصدر</span><strong id="research-source" class="quality-value">—</strong></div><div class="quality-line"><span>وقت القراءة</span><strong id="research-time" class="quality-value">—</strong></div><div class="quality-line"><span>حالة الجلسة</span><strong id="research-session" class="quality-value">—</strong></div><p id="research-price-note">تستخدم هذه اللوحة عقد الأسعار الموثقة نفسه؛ لا يوجد مصدر بديل صامت.</p></article>
+                    <article class="research-tile filing"><h3>الملفات الرسمية</h3><p>يوجه الرابط إلى بحث EDGAR الرسمي بحسب الرمز المختار. لم تُحمّل ملفات أو ملخصات آلية بعد؛ تبقى الوثيقة الأصلية هي مرجع المراجعة.</p><a id="research-filing-link" class="research-link" target="_blank" rel="noopener noreferrer">بحث في ملفات SEC ↗</a></article>
+                    <article class="research-tile event"><h3>الأحداث والتنبيهات</h3><p>قناة الأحداث الآلية غير متصلة بعد. ستظهر هنا فقط أحداث مصدرها معروف ووقت استلامها واضح؛ لا تملأ المنصة هذه المساحة بتوقعات.</p><div class="quality-line"><span>الحالة</span><strong class="quality-value">جاهز للتكامل</strong></div><div class="quality-line"><span>تنفيذ وسيط</span><strong class="quality-value" style="color:var(--green)">مقفل</strong></div></article>
+                    <section class="research-note-box"><div class="research-note-head"><h3>مذكرة بحث للمراجعة اللاحقة</h3><span id="research-note-status" class="research-note-status">محفوظة على هذا الجهاز فقط</span></div><textarea id="research-note" class="research-textarea" placeholder="سجّل الفرضية، رابط المصدر، شرط الإبطال، وما الذي يحتاج تحققاً إضافياً…"></textarea><div class="research-note-actions"><button class="research-btn" type="button" onclick="saveResearchNote()">حفظ المذكرة محلياً</button><button class="research-btn" type="button" onclick="clearResearchNote()">مسح المذكرة</button></div></section>
+                    <div class="research-safety"><b>بوابة أمان:</b> لا يعني سعر موثق أو ملف رسمي أن القرار صالح تلقائياً. راجع المصدر والوقت والحالة، ثم دوّن شرط الإبطال قبل أي إجراء خارج المنصة.</div>
+                </div>
+            </section>
+        </div>
+
         <div id="sec-command" class="app-section">
             <div class="card-section">
                 <div class="section-title-main">قمة القرار الذكي والسيولة</div>
@@ -298,6 +320,10 @@
         <button class="nav-item" onclick="bottomNavClick('journey', this)">
             <svg viewBox="0 0 24 24"><path d="M5 3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM5 15a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2Z"/></svg>
             <span>المسار</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('research', this)">
+            <svg viewBox="0 0 24 24"><path d="M4 3h11a2 2 0 0 1 2 2v12H6a2 2 0 0 0-2 2V3Zm15 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM7 7h7v2H7V7Zm0 4h7v2H7v-2Z"/></svg>
+            <span>الأبحاث</span>
         </button>
         <button class="nav-item" onclick="bottomNavClick('alerts', this)">
             <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
@@ -344,6 +370,7 @@
         const QUOTE_REFRESH_MS = 10000; // 10 seconds; quoteRefreshInFlight prevents overlapping requests.
         const QUOTE_SNAPSHOT_KEY = 'asiri_verified_quote_snapshot_v1';
         const QUOTE_SNAPSHOT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+        const RESEARCH_NOTE_KEY = 'asiri_research_notes_v1';
 
         function init() {
             const saved = localStorage.getItem('asiri_ws_portfolio_v27');
@@ -369,6 +396,7 @@
             restoreVerifiedQuoteSnapshot();
             renderTable();
             document.getElementById('portfolio-count').textContent = watchlist.length;
+            renderResearchHub();
             refreshVerifiedQuotes();
             window.setInterval(refreshVerifiedQuotes, QUOTE_REFRESH_MS);
         }
@@ -434,6 +462,7 @@
 
                 saveVerifiedQuoteSnapshot();
                 renderTable();
+                renderResearchHub();
                 const observedAt = new Date(payload.observedAt || Date.now()).toLocaleTimeString('ar-SA');
                 document.getElementById('sync-status-text').textContent = `أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}`;
                 document.getElementById('ws-dot').style.background = verified ? 'var(--success)' : 'var(--warning)';
@@ -448,6 +477,7 @@
                     }
                 });
                 renderTable();
+                renderResearchHub();
                 document.getElementById('sync-status-text').textContent = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً';
                 document.getElementById('ws-dot').style.background = 'var(--danger)';
             } finally {
@@ -524,6 +554,7 @@
                 document.getElementById('ws-dot').style.background = 'var(--text-muted)';
             }
             renderTable();
+            renderResearchHub();
         }
 
         function filterAction(type, btn) {
@@ -539,6 +570,7 @@
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             if (tab === 'tools') document.getElementById('sec-tools').classList.add('active');
             if (tab === 'journey') document.getElementById('sec-journey').classList.add('active');
+            if (tab === 'research') document.getElementById('sec-research').classList.add('active');
             if (tab === 'command') document.getElementById('sec-command').classList.add('active');
             if (tab === 'alerts') document.getElementById('sec-alerts').classList.add('active');
             if (tab === 'portfolio') document.getElementById('sec-portfolio').classList.add('active');
@@ -549,6 +581,7 @@
             if (btn) btn.classList.add('active');
             if (type === 'tools') switchMainTab('tools', document.querySelector('[data-tab="tools"]'));
             if (type === 'journey') switchMainTab('journey', document.querySelector('[data-tab="journey"]'));
+            if (type === 'research') switchMainTab('research', document.querySelector('[data-tab="research"]'));
             if (type === 'alerts') switchMainTab('alerts', document.querySelector('[data-tab="alerts"]'));
             if (type === 'opportunities') switchMainTab('command', document.querySelector('[data-tab="command"]'));
             if (type === 'portfolio') switchMainTab('portfolio', document.querySelector('[data-tab="portfolio"]'));
@@ -558,6 +591,64 @@
         function openJourneyDestination(tab) {
             switchMainTab(tab, document.querySelector(`[data-tab="${tab}"]`));
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectedResearchSymbol() {
+            const select = document.getElementById('research-symbol');
+            return String(select?.value || watchlist[0] || '').trim().toUpperCase();
+        }
+
+        function researchNotes() {
+            try { return JSON.parse(localStorage.getItem(RESEARCH_NOTE_KEY) || '{}') || {}; } catch (_) { return {}; }
+        }
+
+        function renderResearchHub() {
+            const select = document.getElementById('research-symbol');
+            if (!select) return;
+            const prior = select.value;
+            const options = watchlist.map(symbol => `<option value="${symbol}">${symbol}</option>`).join('');
+            if (select.innerHTML !== options) select.innerHTML = options;
+            if (prior && watchlist.includes(prior)) select.value = prior;
+            const symbol = selectedResearchSymbol();
+            const item = stockMarketData[symbol] || { symbol };
+            const hasPrice = Number.isFinite(Number(item.price));
+            const fresh = item.isFresh === true && item.error !== true;
+            const status = document.getElementById('research-quality-status');
+            status.textContent = !hasPrice ? 'بانتظار قراءة موثقة' : (fresh ? 'قراءة موثقة الآن' : 'آخر قراءة موثقة');
+            status.className = `quality-status ${fresh ? 'fresh' : 'stale'}`;
+            document.getElementById('research-source').textContent = item.source || 'Asiri Market Engine';
+            document.getElementById('research-time').textContent = item.time ? new Date(item.time).toLocaleTimeString('ar-SA') : '—';
+            document.getElementById('research-session').textContent = item.error ? 'تعذر التحديث' : (item.isFresh ? 'طازجة' : 'مراجعة مطلوبة');
+            document.getElementById('research-price-note').textContent = hasPrice ? `آخر سعر ظاهر: $${Number(item.price).toFixed(2)} • يعتمد العرض على المصدر والوقت أعلاه.` : 'لا تعرض المنصة سعراً حتى تصل قراءة موثقة من المصدر الحالي.';
+            const secUrl = `https://www.sec.gov/edgar/search/#/q=${encodeURIComponent(symbol)}`;
+            document.getElementById('research-filing-link').href = secUrl;
+            const notes = researchNotes();
+            const noteEl = document.getElementById('research-note');
+            const note = notes[symbol] || {};
+            if (document.activeElement !== noteEl) noteEl.value = note.text || '';
+            document.getElementById('research-note-status').textContent = note.savedAt ? `آخر حفظ محلي: ${new Date(note.savedAt).toLocaleString('ar-SA')}` : 'محفوظة على هذا الجهاز فقط';
+        }
+
+        function openOfficialFiling() {
+            const symbol = selectedResearchSymbol();
+            if (symbol) window.open(`https://www.sec.gov/edgar/search/#/q=${encodeURIComponent(symbol)}`, '_blank', 'noopener');
+        }
+
+        function saveResearchNote() {
+            const symbol = selectedResearchSymbol();
+            if (!symbol) return;
+            const notes = researchNotes();
+            notes[symbol] = { text: document.getElementById('research-note').value, savedAt: new Date().toISOString() };
+            try { localStorage.setItem(RESEARCH_NOTE_KEY, JSON.stringify(notes)); } catch (_) {}
+            renderResearchHub();
+        }
+
+        function clearResearchNote() {
+            const symbol = selectedResearchSymbol();
+            const notes = researchNotes();
+            delete notes[symbol];
+            try { localStorage.setItem(RESEARCH_NOTE_KEY, JSON.stringify(notes)); } catch (_) {}
+            renderResearchHub();
         }
 
         function openAddStockModal() { document.getElementById('addStockModal').classList.add('active'); }
