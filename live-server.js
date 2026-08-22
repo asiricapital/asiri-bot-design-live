@@ -37,12 +37,15 @@ function broadcast(symbol, payload) {
   for (const [socket, wanted] of clients) if (wanted.has(symbol)) send(socket, payload);
 }
 function statusPayload() {
+  const websocketLive = providerState === 'authenticated' || providerState === 'subscribed';
   return {
     type: 'status',
     provider: providerKey ? 'massive_polygon' : 'server_polling',
     state: providerState,
+    dataMode: websocketLive ? 'live' : providerState === 'polling_fallback' || providerState === 'polling' ? 'fallback_polling' : 'unavailable',
     readOnly: true,
     executionAllowed: false,
+    automaticTrading: false,
     lastEventAt: providerLastEventAt,
     at: new Date().toISOString(),
   };
@@ -73,7 +76,12 @@ function connectProvider() {
         const text = String(message.message || message.status || '').toLowerCase();
         if (text.includes('authenticated')) providerState = 'authenticated';
         if (text.includes('subscribed')) providerState = 'subscribed';
-        if (text.includes('error') || text.includes('forbidden')) providerState = 'provider_error';
+        const websocketUnavailable = text.includes('auth_failed') || text.includes('authentication') || text.includes('plan') || text.includes('upgrade') || text.includes("doesn't include") || text.includes('forbidden');
+        if (websocketUnavailable) {
+          providerState = 'polling_fallback';
+          pollQuotes();
+          console.error(JSON.stringify({ event: 'provider_fallback', mode: 'server_polling', reason: 'websocket_access_unavailable', readOnly: true }));
+        } else if (text.includes('error')) providerState = 'provider_error';
         for (const socket of clients.keys()) send(socket, statusPayload());
         console.log(JSON.stringify({ event: 'provider_status', status: message.status, message: message.message }));
         continue;
@@ -88,14 +96,16 @@ function connectProvider() {
   });
   provider.on('error', error => console.error(JSON.stringify({ event: 'provider_error', message: error.message })));
   provider.on('close', (code, reason) => {
-    providerState = 'disconnected';
-    console.error(JSON.stringify({ event: 'provider_closed', code, reason: String(reason) }));
+    providerState = 'polling_fallback';
+    console.error(JSON.stringify({ event: 'provider_closed', code, reason: String(reason), fallback: 'server_polling', readOnly: true }));
+    pollQuotes();
     for (const socket of clients.keys()) send(socket, statusPayload());
     reconnectTimer = setTimeout(connectProvider, 5000);
   });
 }
 async function pollQuotes() {
-  if (pollBusy || providerKey || !symbols.size) return;
+  const websocketLive = providerState === 'authenticated' || providerState === 'subscribed';
+  if (pollBusy || websocketLive || !symbols.size) return;
   pollBusy = true;
   try {
     const rows = await getQuotes([...symbols]);
@@ -115,10 +125,10 @@ function subscribe(socket, requested) {
   if (provider?.readyState === WebSocket.OPEN && providerKey) {
     for (const symbol of wanted) provider.send(JSON.stringify({ action: 'subscribe', params: `T.${symbol},Q.${symbol}` }));
   }
-  if (!providerKey) pollQuotes();
+  if (!providerKey || providerState === 'polling_fallback' || providerState === 'polling' || providerState === 'disconnected') pollQuotes();
 }
 
-app.get('/health', (_req, res) => res.json({ ok: true, service: 'asiri-capital-monitoring', version: '8.0.0-read-only-websocket', transport: 'websocket', provider: providerKey ? 'massive_polygon' : 'server_polling', providerState, readOnly: true, executionAllowed: false, automaticTrading: false, lastEventAt: providerLastEventAt, time: new Date().toISOString() }));
+app.get('/health', (_req, res) => res.json({ ok: true, service: 'asiri-capital-monitoring', version: '8.0.1-read-only-websocket-fallback', transport: 'websocket', provider: providerKey ? 'massive_polygon' : 'server_polling', providerState, dataMode: providerState === 'authenticated' || providerState === 'subscribed' ? 'live' : providerState === 'polling_fallback' || providerState === 'polling' ? 'fallback_polling' : 'unavailable', readOnly: true, executionAllowed: false, automaticTrading: false, lastEventAt: providerLastEventAt, time: new Date().toISOString() }));
 app.get('/api/quote/:symbol', async (req, res) => { const symbol = cleanSymbol(req.params.symbol); if (!symbol) return res.status(400).json({ error: 'رمز غير صالح' }); try { res.set('Cache-Control', 'no-store'); res.json(await getQuote(symbol)); } catch (error) { res.status(502).json({ symbol, error: error.message || 'تعذر جلب السعر' }); } });
 app.get('/api/quotes', async (req, res) => { const requested = [...new Set(String(req.query.symbols || '').split(',').map(cleanSymbol).filter(Boolean))].slice(0, 40); if (!requested.length) return res.json([]); try { res.set('Cache-Control', 'no-store'); const rows = await getQuotes(requested); const map = new Map(rows.map(row => [row.symbol, row])); res.json(requested.map(symbol => map.get(symbol) || { symbol, error: 'تعذر جلب السعر' })); } catch (error) { res.status(502).json({ error: error.message || 'تعذر جلب الأسعار' }); } });
 app.get('/api/market', async (_req, res) => { try { res.set('Cache-Control', 'no-store'); res.json(await getMarketPulse()); } catch (error) { res.status(502).json({ error: error.message || 'تعذر جلب حالة السوق' }); } });
