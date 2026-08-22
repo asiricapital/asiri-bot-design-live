@@ -42,6 +42,8 @@ ensure(technicalsSection.includes('المراجعة التفسيرية للسج�
 ensure(technicalsSection.includes('شرط إعادة المراجعة'), 'يجب عرض شرط إعادة المراجعة');
 ensure(technicalsSection.includes('بوابة المختبر التجريبي'), 'يجب عرض بوابة المختبر التجريبي المقفلة');
 ensure(technicalsSection.includes('مقفل عمداً') && technicalsSection.includes('صلاحية TRADE غير مفعّلة'), 'يجب أن توضح الواجهة أن صلاحية التداول التجريبية والتنفيذ مقفلان');
+ensure(technicalsSection.includes('مراجعة نية الأمر التجريبي'), 'يجب عرض بطاقة مراجعة نية Testnet داخل التحليل الفني');
+ensure(technicalsSection.includes('لا يوجد أمر جاهز للمراجعة') && technicalsSection.includes('مقفل عمداً'), 'يجب أن تعرض بطاقة مراجعة Testnet حالة القفل الصريحة');
 ensure(!/\/api\/testnet-lab|fetch\s*\(|XMLHttpRequest|\.post\s*\(/.test(technicalsSection), 'لا ينبغي أن تنشئ واجهة Live Terminal نية أو طلباً للمختبر من دون جلسة مصادقة محكومة');
 ensure(html.includes("const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';"), 'يجب أن تستخدم الواجهة خدمة Asiri Bot الخادمية للتحليل الفني');
 ensure(/if \(tab === 'technicals'\).*document\.getElementById\('sec-technicals'\)\.classList\.add\('active'\)/.test(html), 'التبويب الداخلي للتحليل الفني غير مربوط');
@@ -53,5 +55,7 @@ const interpretationStart = html.indexOf('function renderTechnicalInterpretation
 const interpretationEnd = html.indexOf('function technicalSparkline(');
 const interpretationFunctions = html.slice(interpretationStart, interpretationEnd);
 ensure(!/(?:BUY|SELL|entry|stopLoss|target|submitOrder|placeOrder|\/api\/order)/i.test(interpretationFunctions), 'التفسير يجب أن يبقى بلا إشارات أو عناصر تنفيذ');
+ensure(!/\/api\/testnet-bridge|createIntent|approveIntent|submitOrder|placeOrder|\.post\s*\(/.test(technicalsSection), 'بطاقة Testnet المرئية يجب ألا تنشئ نية أو تعتمدها أو ترسل أمراً');
+ensure(html.includes('function renderTestnetIntentReview()'), 'بطاقة مراجعة Testnet يجب أن تحدّث الرمز الظاهر محلياً فقط');
 
 console.log('Technical analysis checks passed.');
