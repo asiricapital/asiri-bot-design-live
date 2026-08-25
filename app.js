@@ -271,7 +271,7 @@ function initializePortfolioChart() {
         pointBackgroundColor: 'rgba(38, 230, 161, 1)',
         pointBorderColor: '#05080D',
         pointBorderWidth: 2
-      }];
+      }]
     };
 
     appState.charts.portfolio = new Chart(ctx, {
