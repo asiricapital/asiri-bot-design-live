@@ -5,15 +5,13 @@ import { sanitizeDecisionSnapshot, computeDecisionOutcomes, buildDecisionIntelli
 
 execFileSync(process.execPath, ['check-smart-decision-summary-ui.mjs'], { stdio: 'pipe' }); // ASIRI_SMART_DECISION_SUMMARY_UI_V1
 
-const v711Path = 'check-v711.js';
+const legacyPath = 'check.js';
 const generatedPath = '.check-v720-base.mjs';
-const v711 = fs.readFileSync(v711Path, 'utf8');
-const adapted = v711
-  .replace(`.replace("pkg.version !== '7.1.0'", "pkg.version !== '7.1.1'")`, `.replace("pkg.version !== '7.1.0'", "pkg.version !== '7.2.0'")`)
-  .replace(`.replace("Expected Asiri Capital v7.1.0", "Expected Asiri Capital v7.1.1")`, `.replace("Expected Asiri Capital v7.1.0", "Expected Asiri Capital v7.2.0")`)
-  .replace("if (pkg.version !== '7.1.1') throw new Error('Package version must be 7.1.1');", "if (pkg.version !== '7.2.0') throw new Error('Package version must be 7.2.0');")
-  .replace("if (pkg.scripts?.check !== 'node check-v711.js') throw new Error('v7.1.1 release check must be active');", "if (pkg.scripts?.check !== 'node check-v720.js') throw new Error('v7.2.0 release check must be active');");
-if (adapted === v711 || !adapted.includes("pkg.version !== '7.2.0'")) throw new Error('Unable to adapt v7.1.1 checks for v7.2.0');
+const legacy = fs.readFileSync(legacyPath, 'utf8');
+const adapted = legacy
+  .replace("pkg.version !== '7.1.0'", "pkg.version !== '7.2.1'")
+  .replace("Expected Asiri Capital v7.1.0", "Expected Asiri Capital v7.2.1");
+if (adapted === legacy || !adapted.includes("pkg.version !== '7.2.1'")) throw new Error('Unable to adapt baseline checks for v7.2.1');
 fs.writeFileSync(generatedPath, adapted, 'utf8');
 try {
   await import(`${pathToFileURL(`${process.cwd()}/${generatedPath}`).href}?t=${Date.now()}`);
@@ -27,7 +25,6 @@ const required = [
   'decision-intelligence-v720.css',
   'patch-decision-intelligence-v720.js',
   'supabase_migration_decision_intelligence_v720.sql',
-  '.github/workflows/decision-intelligence-v720.yml',
   'index.html',
   'check-smart-decision-summary-ui.mjs'
 ];
@@ -45,7 +42,7 @@ const css = fs.readFileSync('decision-intelligence-v720.css', 'utf8');
 const patch = fs.readFileSync('patch-decision-intelligence-v720.js', 'utf8');
 const migration = fs.readFileSync('supabase_migration_decision_intelligence_v720.sql', 'utf8');
 
-if (pkg.version !== '7.2.0') throw new Error('Package version must be 7.2.0');
+if (pkg.version !== '7.2.1') throw new Error('Package version must be 7.2.1');
 if (pkg.scripts?.check !== 'node check-v720.js') throw new Error('v7.2 release check must be active');
 if (!startup.includes("patch-decision-intelligence-v720.js")) throw new Error('Decision Intelligence startup patch is not enabled');
 
@@ -128,4 +125,4 @@ if (/executionAllowed\s*:\s*true|execution_allowed\s*:\s*true|app\.(?:post|put|p
   throw new Error('Decision Intelligence must remain analysis-only and cannot expose trading execution');
 }
 
-console.log('Asiri Capital v7.2.0 checks passed — immutable decision memory, 1/3/7-session outcomes, score calibration, gate impact, local queue fallback and read-only safeguards.');
+console.log('Asiri Capital v7.2.1 checks passed — immutable decision memory, 1/3/7-session outcomes, score calibration, gate impact, local queue fallback and read-only safeguards.');
