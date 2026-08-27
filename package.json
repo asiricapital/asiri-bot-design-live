@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node live-server.js",
     "start": "node live-server.js",
-    "check": "node check-v720.js"
+    "check": "node check-v720.js",
+    "check:lens": "node --check live-server.js && node --check smart-decision-lens.js && node check-smart-decision-lens.mjs"
   },
   "engines": {
     "node": "22.x"
