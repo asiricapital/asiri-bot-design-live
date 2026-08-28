@@ -18,6 +18,10 @@ for (const marker of [
   'رحلة السهم',
   'لا تنفيذ آلي',
   'المراجعة البشرية إلزامية',
+  'مؤشر ثقة الأدلة',
+  'ليس احتمال ربح',
+  'isCalibrated: false',
+  'Math.min(rawScore, 39)',
   'asiriSmartDecisionLens'
 ]) {
   if (!script.includes(marker)) throw new Error(`Static lens script marker missing: ${marker}`);
@@ -27,7 +31,10 @@ for (const marker of [
   'env(safe-area-inset-bottom)',
   '@media (max-width: 520px)',
   '.smart-lens-state.ready',
-  '.smart-lens-state.attention'
+  '.smart-lens-state.attention',
+  '.smart-lens-confidence',
+  '.smart-lens-meter',
+  '.smart-lens-confidence-details'
 ]) {
   if (!css.includes(marker)) throw new Error(`Static lens CSS marker missing: ${marker}`);
 }

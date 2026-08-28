@@ -49,6 +49,50 @@
     };
   }
 
+  function evidenceConfidence(item, view) {
+    const priceAvailable = Number.isFinite(Number(item?.price));
+    const sourceKnown = Boolean(String(item?.source || '').trim());
+    const timeKnown = Boolean(String(item?.time || item?.updatedAt || item?.observedAt || '').trim());
+    const fresh = item?.isFresh === true;
+    const noError = item?.error !== true;
+    const ready = view?.tone === 'ready';
+    const components = {
+      freshness: fresh ? 30 : 0,
+      completeness: (priceAvailable ? 8 : 0) + (sourceKnown ? 6 : 0) + (timeKnown ? 3 : 0) + (noError ? 3 : 0),
+      consistency: fresh && noError ? 20 : 0,
+      reviewGates: ready ? 15 : 0,
+      stability: fresh && noError ? 10 : 0,
+      reviewability: fresh && priceAvailable ? 5 : 0
+    };
+    const rawScore = Object.values(components).reduce((total, value) => total + value, 0);
+    const score = item?.error === true ? 0 : (fresh ? rawScore : Math.min(rawScore, 39));
+    let band = 'UNAVAILABLE';
+    let label = 'لا تعتمد القراءة الآن';
+    let reason = 'الثقة غير مكتملة لأن القراءة لا تحمل أدلة موثقة وحديثة كافية.';
+    if (ready && score >= 85) {
+      band = 'REVIEWABLE';
+      label = 'أدلة قوية للمراجعة';
+      reason = 'جودة الأدلة مرتفعة، لكن المراجعة البشرية تبقى إلزامية قبل أي قرار يدوي.';
+    } else if (score >= 85) {
+      band = 'STRONG_INCOMPLETE';
+      label = 'أدلة قوية لكن غير مكتملة';
+      reason = 'جودة القراءة مرتفعة، لكن بوابة المراجعة الحالية لم تكتمل بعد.';
+    } else if (score >= 65) {
+      band = 'MONITORED';
+      label = 'مراقبة موثوقة';
+      reason = 'تتوفر أدلة مناسبة للمتابعة، لكنها لا تكفي وحدها لتغيير حالة السهم.';
+    } else if (score >= 40) {
+      band = 'PARTIAL';
+      label = 'أدلة جزئية';
+      reason = 'توجد معلومات قابلة للعرض، لكن جودة الأدلة لا تكفي لمراجعة قرار جديد.';
+    }
+    return { score, band, label, reason, components, isCalibrated: false };
+  }
+
+  function confidenceLine(label, score, max, detail) {
+    return `<li><span>${text(label)}</span><strong>${score} / ${max}</strong><small>${text(detail)}</small></li>`;
+  }
+
   function stage(label, state, current) {
     return `<li class="lens-stage ${state}${current ? ' is-current' : ''}"><span class="lens-stage-dot" aria-hidden="true"></span><span>${text(label)}</span></li>`;
   }
@@ -97,6 +141,7 @@
     const lens = lensRoot();
     const item = marketItem(normalized);
     const view = decisionView(item);
+    const confidence = evidenceConfidence(item, view);
     const source = safe(item?.source, 'Asiri Market Engine');
     const observedAt = readingTime(item?.time || item?.updatedAt || item?.observedAt);
     const price = Number(item?.price);
@@ -114,6 +159,20 @@
         <p class="smart-lens-eyebrow">الحالة الآن</p>
         <h3>${text(view.label)}</h3>
         <p>${text(view.reason)}</p>
+      </section>
+      <section class="smart-lens-confidence ${confidence.band.toLowerCase()}" aria-label="مؤشر ثقة الأدلة">
+        <div class="smart-lens-confidence-head"><div><p class="smart-lens-eyebrow">EVIDENCE CONFIDENCE · EXPLAINABLE</p><h3>مؤشر ثقة الأدلة</h3></div><div class="smart-lens-score"><strong>${confidence.score}</strong><span>/ 100</span></div></div>
+        <div class="smart-lens-meter" role="progressbar" aria-label="درجة ثقة الأدلة" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${confidence.score}"><span style="width:${confidence.score}%"></span></div>
+        <p class="smart-lens-confidence-label">${text(confidence.label)}</p><p class="smart-lens-confidence-reason">${text(confidence.reason)}</p>
+        <details class="smart-lens-confidence-details"><summary>عرض مكوّنات الدرجة</summary><ul>
+          ${confidenceLine('حداثة القراءة', confidence.components.freshness, 30, item?.isFresh === true ? 'المصدر والقراءة معلنان كحديثين.' : 'القراءة المتأخرة لا تمنح نقاط حداثة.')}
+          ${confidenceLine('اكتمال الأدلة', confidence.components.completeness, 20, 'سعر ومصدر ووقت وحالة قراءة متاحة.')}
+          ${confidenceLine('اتساق القراءة', confidence.components.consistency, 20, 'لا تُمنح النقاط إلا للقراءة الحديثة الخالية من خطأ معلن.')}
+          ${confidenceLine('بوابات المراجعة', confidence.components.reviewGates, 15, 'لا تُمنح إلا عند حالة جاهز للمراجعة البشرية.')}
+          ${confidenceLine('استقرار القراءة', confidence.components.stability, 10, 'مؤشر عرضي لسلامة القراءة الحالية، لا توقع للسعر.')}
+          ${confidenceLine('قابلية المراجعة', confidence.components.reviewability, 5, 'قراءة حديثة مع سعر قابل للتحقق.')}
+        </ul></details>
+        <p class="smart-lens-confidence-disclaimer">مقياس لجودة الأدلة الحالية فقط · <b>ليس احتمال ربح</b> · المعايرة الإحصائية غير مفعّلة.</p>
       </section>
       <div class="smart-lens-grid">
         <section class="smart-lens-block"><h3>ثقة البيانات</h3><dl><div><dt>المصدر</dt><dd>${text(source)}</dd></div><div><dt>وقت القراءة</dt><dd>${text(observedAt)}</dd></div><div><dt>الحالة</dt><dd>${item?.isFresh === true ? 'موثقة الآن' : 'تحتاج تحديثًا'}</dd></div></dl></section>
