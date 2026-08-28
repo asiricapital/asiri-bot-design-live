@@ -526,7 +526,13 @@
                 renderTable();
                 renderResearchHub();
                 const observedAt = new Date(payload.observedAt || Date.now()).toLocaleTimeString('ar-SA');
-                document.getElementById('sync-status-text').textContent = `أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}`;
+                const statusText = verified
+                    ? `أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}`
+                    : 'لم تصل قراءة موثقة بعد — ستتم المحاولة تلقائياً';
+                document.getElementById('sync-status-text').textContent = statusText;
+                document.getElementById('last-sync-label').textContent = verified
+                    ? `آخر تحديث موثق من محرك السوق • ${verified} أصل • ${observedAt}`
+                    : 'لم تصل قراءة موثقة بعد — ستتم المحاولة تلقائياً';
                 document.getElementById('ws-dot').style.background = verified ? 'var(--success)' : 'var(--warning)';
             } catch (error) {
                 console.error('Verified quote refresh failed:', error);
@@ -540,7 +546,9 @@
                 });
                 renderTable();
                 renderResearchHub();
-                document.getElementById('sync-status-text').textContent = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً';
+                const retryText = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً';
+                document.getElementById('sync-status-text').textContent = retryText;
+                document.getElementById('last-sync-label').textContent = retryText;
                 document.getElementById('ws-dot').style.background = 'var(--danger)';
             } finally {
                 quoteRefreshInFlight = false;
