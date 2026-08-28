@@ -5,6 +5,43 @@
   const LENS_ID = 'asiri-smart-decision-lens-static';
   const safe = (value, fallback = '—') => String(value ?? '').trim() || fallback;
   const text = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[char]));
+  const SCENARIOS = Object.freeze({
+    current: Object.freeze({
+      label: 'القراءة الحالية',
+      description: 'تعرض بيانات البطاقة الحالية كما هي، من دون أي محاكاة.'
+    }),
+    stale: Object.freeze({
+      label: 'قراءة متأخرة',
+      description: 'محاكاة محلية: المصدر معروف، لكن القراءة متأخرة؛ تُقيَّد الثقة تحت 39 ولا تصلح للمراجعة.',
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', observedAt: '2026-08-28T08:00:00Z', isFresh: false, decision: 'BUY', error: false })
+    }),
+    failedSource: Object.freeze({
+      label: 'فشل المصدر',
+      description: 'محاكاة محلية: لا سعر موثّق ولا وقت قراءة؛ تتوقف بوابات المراجعة وتصبح الثقة صفرًا.',
+      item: Object.freeze({ price: null, source: 'Asiri Market Engine — محاكاة', observedAt: null, isFresh: false, decision: 'WAIT', error: true })
+    }),
+    gatesPending: Object.freeze({
+      label: 'بوابات غير مكتملة',
+      description: 'محاكاة محلية: البيانات قوية وحديثة، لكن حالة المراجعة لم تكتمل؛ لا تتحول إلى جاهز للمراجعة.',
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'WAIT', error: false })
+    }),
+    reviewReady: Object.freeze({
+      label: 'جاهز للمراجعة',
+      description: 'محاكاة محلية: اكتملت بيانات وبوابات القراءة؛ تبقى المراجعة البشرية إلزامية ولا يُنشأ أي إجراء.',
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'BUY', error: false })
+    })
+  });
+  let activeScenario = 'current';
+
+  function scenarioFor(key) {
+    return SCENARIOS[key] || SCENARIOS.current;
+  }
+
+  function scenarioItem(item) {
+    const scenario = scenarioFor(activeScenario);
+    if (!scenario.item) return { ...item, simulation: false };
+    return { ...item, ...scenario.item, simulation: true };
+  }
 
   function marketItem(symbol) {
     try {
@@ -97,6 +134,32 @@
     return `<li class="lens-stage ${state}${current ? ' is-current' : ''}"><span class="lens-stage-dot" aria-hidden="true"></span><span>${text(label)}</span></li>`;
   }
 
+  function gate(label, passed, detail, required = true) {
+    const state = passed ? 'passed' : (required ? 'blocked' : 'required');
+    const marker = passed ? 'مكتمل' : (required ? 'غير مكتمل' : 'مراجعة بشرية');
+    return `<li class="smart-lens-gate ${state}"><span aria-hidden="true">${passed ? '✓' : required ? '!' : '•'}</span><div><b>${text(label)}</b><small>${text(detail)}</small></div><em>${marker}</em></li>`;
+  }
+
+  function reviewGates(item, view) {
+    const priceAvailable = Number.isFinite(Number(item?.price));
+    const sourceKnown = Boolean(String(item?.source || '').trim());
+    const fresh = item?.isFresh === true;
+    const noError = item?.error !== true;
+    const ready = view?.tone === 'ready';
+    return [
+      gate('حداثة القراءة', fresh, fresh ? 'القراءة معلنة كحديثة.' : 'القراءة متأخرة أو غير متاحة.'),
+      gate('قابلية التحقق', priceAvailable && sourceKnown && noError, priceAvailable && sourceKnown && noError ? 'السعر والمصدر متاحان للعرض.' : 'السعر أو المصدر أو سلامة القراءة غير مكتملة.'),
+      gate('بوابات المراجعة', ready, ready ? 'اكتملت شروط الرفع للمراجع البشري.' : 'لا تُرفع الحالة قبل اكتمال الحكم القائم.'),
+      gate('قرار المراجع', false, 'هذه البوابة لا تُحاكى ولا تُتخذ من داخل العدسة.', false)
+    ].join('');
+  }
+
+  function scenarioControls() {
+    const current = scenarioFor(activeScenario);
+    const controls = Object.entries(SCENARIOS).map(([key, scenario]) => `<button type="button" data-lens-scenario="${key}" aria-pressed="${key === activeScenario ? 'true' : 'false'}">${text(scenario.label)}</button>`).join('');
+    return `<section class="smart-lens-simulator" aria-label="مختبر سيناريوهات الثقة"><div class="smart-lens-simulator-head"><div><p class="smart-lens-eyebrow">TEST SCENARIOS · LOCAL ONLY</p><h3>مختبر سيناريوهات الثقة</h3></div><span>محاكاة محلية</span></div><p>تغيّر هذه الأزرار ما يظهر داخل العدسة فقط؛ لا تُعدّل بيانات السوق أو حالة السهم أو التنبيهات.</p><div class="smart-lens-scenario-buttons" role="group" aria-label="اختر سيناريو محاكاة">${controls}</div><p class="smart-lens-scenario-note"><b>${text(current.label)}:</b> ${text(current.description)}</p></section>`;
+  }
+
   function createLens() {
     const lens = document.createElement('section');
     lens.id = LENS_ID;
@@ -118,6 +181,12 @@
         <div class="smart-lens-content" id="smart-lens-content"></div>
       </article>`;
     lens.addEventListener('click', (event) => {
+      const scenarioButton = event.target.closest('[data-lens-scenario]');
+      if (scenarioButton) {
+        activeScenario = scenarioButton.dataset.lensScenario in SCENARIOS ? scenarioButton.dataset.lensScenario : 'current';
+        renderLens(lens.dataset.symbol || '');
+        return;
+      }
       if (event.target.closest('[data-lens-close="true"]')) closeLens();
     });
     document.body.appendChild(lens);
@@ -136,10 +205,16 @@
   }
 
   function openLens(symbol) {
+    activeScenario = 'current';
+    renderLens(symbol);
+  }
+
+  function renderLens(symbol) {
     const normalized = safe(symbol, '').toUpperCase();
     if (!normalized) return;
     const lens = lensRoot();
-    const item = marketItem(normalized);
+    lens.dataset.symbol = normalized;
+    const item = scenarioItem(marketItem(normalized));
     const view = decisionView(item);
     const confidence = evidenceConfidence(item, view);
     const source = safe(item?.source, 'Asiri Market Engine');
@@ -178,6 +253,8 @@
         <section class="smart-lens-block"><h3>ثقة البيانات</h3><dl><div><dt>المصدر</dt><dd>${text(source)}</dd></div><div><dt>وقت القراءة</dt><dd>${text(observedAt)}</dd></div><div><dt>الحالة</dt><dd>${item?.isFresh === true ? 'موثقة الآن' : 'تحتاج تحديثًا'}</dd></div></dl></section>
         <section class="smart-lens-block"><h3>ما الذي ننتظره؟</h3><p>${text(view.next)}</p><span class="smart-lens-next">${isReady ? 'المراجعة البشرية هي الخطوة التالية' : isAttention ? 'التحديث الموثق هو الخطوة التالية' : 'اكتمال بوابات المراجعة هو الخطوة التالية'}</span></section>
       </div>
+      ${scenarioControls()}
+      <section class="smart-lens-review-gates" aria-label="بوابات المراجعة"><div class="smart-lens-journey-head"><h3>بوابات المراجعة</h3><span>تفسير للحالة لا إنشاء لقرار</span></div><ul>${reviewGates(item, view)}</ul></section>
       <section class="smart-lens-journey" aria-label="رحلة السهم">
         <div class="smart-lens-journey-head"><h3>رحلة السهم</h3><span>شرح الحالة لا توصية تنفيذ</span></div>
         <ol>

@@ -22,6 +22,16 @@ for (const marker of [
   'ليس احتمال ربح',
   'isCalibrated: false',
   'Math.min(rawScore, 39)',
+  'TEST SCENARIOS · LOCAL ONLY',
+  'مختبر سيناريوهات الثقة',
+  "stale: Object.freeze",
+  "failedSource: Object.freeze",
+  "gatesPending: Object.freeze",
+  "reviewReady: Object.freeze",
+  'محاكاة محلية',
+  'لا تُعدّل بيانات السوق أو حالة السهم أو التنبيهات',
+  'reviewGates(item, view)',
+  'هذه البوابة لا تُحاكى',
   'asiriSmartDecisionLens'
 ]) {
   if (!script.includes(marker)) throw new Error(`Static lens script marker missing: ${marker}`);
@@ -34,10 +44,16 @@ for (const marker of [
   '.smart-lens-state.attention',
   '.smart-lens-confidence',
   '.smart-lens-meter',
-  '.smart-lens-confidence-details'
+  '.smart-lens-confidence-details',
+  '.smart-lens-simulator',
+  '.smart-lens-scenario-buttons',
+  '.smart-lens-review-gates',
+  '.smart-lens-gate.passed',
+  '.smart-lens-gate.blocked'
 ]) {
   if (!css.includes(marker)) throw new Error(`Static lens CSS marker missing: ${marker}`);
 }
 if (/\b(fetch|XMLHttpRequest)\s*\(/.test(script)) throw new Error('Static lens must not make network calls.');
 if (/\b(order|trade|broker|execute|submit)\b/i.test(script)) throw new Error('Static lens must not expose trading or broker actions.');
-console.log('Static smart decision lens checks passed: v27 binding, mobile safety and read-only boundaries verified.');
+if (/\b(fetch|XMLHttpRequest|localStorage|sessionStorage)\s*\(/.test(script)) throw new Error('Static lens simulation must remain local and network-free.');
+console.log('Static smart decision lens checks passed: v27 binding, evidence-confidence simulator, review gates, mobile safety and read-only boundaries verified.');
