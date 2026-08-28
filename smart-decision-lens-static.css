@@ -1,0 +1,35 @@
+/* ASIRI Smart Decision Lens · static v27 UI layer · presentation only. */
+.smart-decision-lens-static[hidden] { display: none; }
+.smart-decision-lens-static { position: fixed; inset: 0; z-index: 3200; display: grid; align-items: end; color: #f1f5f9; }
+.smart-lens-backdrop { position: absolute; inset: 0; background: rgba(2, 8, 17, .72); backdrop-filter: blur(5px); }
+.smart-lens-sheet { position: relative; width: min(680px, 100%); max-height: min(88vh, 760px); overflow: auto; margin-inline: auto; padding-bottom: max(18px, env(safe-area-inset-bottom)); border: 1px solid rgba(0, 229, 255, .34); border-bottom: 0; border-radius: 24px 24px 0 0; background: radial-gradient(circle at 92% 0%, rgba(0, 229, 255, .13), transparent 28%), radial-gradient(circle at 7% 18%, rgba(226, 188, 83, .09), transparent 33%), #081321; box-shadow: 0 -22px 60px rgba(0, 0, 0, .42); }
+.smart-lens-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 14px; border-bottom: 1px solid rgba(30, 51, 86, .94); }
+.smart-lens-kicker, .smart-lens-eyebrow { margin: 0; color: #62e8f9; font-size: .64rem; font-weight: 900; letter-spacing: .11em; }
+.smart-lens-head h2 { margin: 5px 0 0; color: #fff; font-size: 1.15rem; }
+.smart-lens-close { min-height: 34px; border: 1px solid rgba(148, 163, 184, .35); border-radius: 9px; padding: 0 11px; background: rgba(6, 14, 24, .85); color: #cbd5e1; font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+.smart-lens-close:focus-visible, .smart-lens-close:hover { outline: none; border-color: #00e5ff; color: #fff; }
+.smart-lens-content { padding: 15px 18px 6px; }
+.smart-lens-symbol-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.smart-lens-symbol { color: #67e8f9; font-size: 1.15rem; font-weight: 900; letter-spacing: .03em; }
+.smart-lens-price { display: inline-block; margin-inline-start: 9px; color: #f8fafc; font-size: .85rem; font-weight: 800; direction: ltr; }
+.smart-lens-state { flex: none; border: 1px solid rgba(247, 201, 72, .38); border-radius: 999px; padding: 5px 9px; background: rgba(247, 201, 72, .1); color: #ffe29a; font-size: .67rem; font-weight: 900; }
+.smart-lens-state.ready { border-color: rgba(37, 214, 149, .42); background: rgba(37, 214, 149, .1); color: #bbf7d8; }
+.smart-lens-state.attention { border-color: rgba(239, 68, 68, .4); background: rgba(239, 68, 68, .1); color: #fecaca; }
+.smart-lens-primary { position: relative; overflow: hidden; border: 1px solid rgba(0, 229, 255, .26); border-radius: 15px; padding: 15px; background: rgba(7, 23, 39, .88); }
+.smart-lens-primary::before { position: absolute; inset: 0 auto 0 0; width: 3px; background: #00e5ff; content: ''; }
+.smart-lens-primary h3 { margin: 7px 0 7px; color: #fff; font-size: 1rem; }
+.smart-lens-primary p, .smart-lens-block p { margin: 0; color: #b4c1d3; font-size: .76rem; line-height: 1.85; }
+.smart-lens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.smart-lens-block { min-height: 154px; border: 1px solid rgba(30, 51, 86, .9); border-radius: 13px; padding: 13px; background: rgba(6, 14, 24, .54); }
+.smart-lens-block h3, .smart-lens-journey h3 { margin: 0 0 10px; color: #f1f5f9; font-size: .78rem; }
+.smart-lens-block dl { margin: 0; }.smart-lens-block dl > div { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(30, 51, 86, .53); }.smart-lens-block dl > div:last-child { border-bottom: 0; }
+.smart-lens-block dt { color: #94a3b8; font-size: .67rem; }.smart-lens-block dd { max-width: 62%; margin: 0; color: #e2e8f0; font-size: .68rem; font-weight: 800; overflow-wrap: anywhere; text-align: left; }
+.smart-lens-next { display: inline-block; margin-top: 12px; border-right: 2px solid #e2bc53; padding-right: 8px; color: #f4dda2; font-size: .69rem; font-weight: 800; line-height: 1.6; }
+.smart-lens-journey { margin-top: 10px; border: 1px solid rgba(30, 51, 86, .86); border-radius: 14px; padding: 13px; background: rgba(6, 14, 24, .42); }
+.smart-lens-journey-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }.smart-lens-journey-head span { color: #94a3b8; font-size: .63rem; }
+.smart-lens-journey ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 11px 0 0; padding: 0; list-style: none; }
+.lens-stage { min-height: 76px; position: relative; padding: 20px 7px 7px; border: 1px solid rgba(30, 51, 86, .85); border-radius: 10px; color: #94a3b8; font-size: .64rem; font-weight: 700; line-height: 1.55; }.lens-stage-dot { position: absolute; top: 8px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: #64748b; }.lens-stage.complete { color: #c9f7e0; border-color: rgba(37, 214, 149, .35); }.lens-stage.complete .lens-stage-dot { background: #25d695; }.lens-stage.watch { color: #bdeff8; border-color: rgba(0, 229, 255, .35); }.lens-stage.watch .lens-stage-dot { background: #00e5ff; }.lens-stage.ready { color: #ffe4a3; border-color: rgba(226, 188, 83, .45); }.lens-stage.ready .lens-stage-dot { background: #e2bc53; }.lens-stage.attention { color: #fecaca; border-color: rgba(239, 68, 68, .38); }.lens-stage.attention .lens-stage-dot { background: #ef4444; }.lens-stage.is-current { box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+.smart-lens-safety { margin: 12px 0 0; border-right: 2px solid #25d695; padding: 5px 10px 5px 0; color: #c7f9e3; font-size: .69rem; line-height: 1.8; }.smart-lens-safety b { color: #25d695; }
+body.smart-lens-open { overflow: hidden; }
+@media (min-width: 760px) { .smart-decision-lens-static { align-items: center; padding: 24px; }.smart-lens-sheet { border: 1px solid rgba(0,229,255,.34); border-radius: 22px; } }
+@media (max-width: 520px) { .smart-lens-sheet { max-height: 90vh; border-radius: 21px 21px 0 0; }.smart-lens-head { padding: 15px 15px 12px; }.smart-lens-content { padding: 13px 15px 4px; }.smart-lens-grid { grid-template-columns: 1fr; }.smart-lens-block { min-height: 0; }.smart-lens-journey ol { grid-template-columns: 1fr 1fr; }.lens-stage { min-height: 62px; }.smart-lens-symbol-row { align-items: flex-start; flex-direction: column; }.smart-lens-price { margin-inline-start: 6px; } }
