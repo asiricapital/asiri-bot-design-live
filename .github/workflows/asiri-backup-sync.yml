@@ -48,5 +48,10 @@ jobs:
           git remote add backup \
             "https://x-access-token:${BACKUP_TOKEN}@github.com/vip7733661/${repo_name}.git"
 
-          git push backup --all
+          # احتفظ بسجل VIP الحالي كما هو؛ لا تكتب فوق main أو أي فرع فيه.
+          # تحفظ فروع المصدر تحت مساحة أسماء منفصلة قابلة للتدقيق.
+          git for-each-ref --format='%(refname)' refs/heads/ | while IFS= read -r ref; do
+            branch="${ref#refs/heads/}"
+            git push backup "$ref:refs/heads/asiricapital-backup/$branch"
+          done
           git push backup --tags
