@@ -98,40 +98,30 @@
     };
   }
 
-  function evidenceConfidence(item, view) {
+  function dataCompleteness(item, view) {
     const priceAvailable = numericPrice(item?.price) !== null;
     const sourceKnown = Boolean(String(item?.source || '').trim());
     const timeKnown = Number.isFinite(new Date(item?.time || item?.updatedAt || item?.observedAt || '').getTime());
-    const complete = priceAvailable && sourceKnown && timeKnown;
-    const noError = item?.error !== true;
-    const fresh = complete && item?.isFresh === true && noError;
-    const components = {
-      freshness: fresh ? 30 : 0,
-      completeness: (priceAvailable ? 10 : 0) + (sourceKnown ? 6 : 0) + (timeKnown ? 4 : 0),
-      consistency: fresh ? 20 : 0,
-      traceability: sourceKnown && timeKnown ? 15 : 0,
-      stability: complete && noError ? 10 : 0,
-      reviewability: fresh ? 5 : 0
+    const checks = { price: priceAvailable, source: sourceKnown, time: timeKnown };
+    const availableCount = Object.values(checks).filter(Boolean).length;
+    const state = view?.state || dataView(item).state;
+    if (state === 'FRESH') return {
+      state, tone: 'ready', label: 'مكتملة الآن', summary: '3 حقول موثقة', availableCount, total: 3, checks,
+      reason: 'السعر والمصدر ووقت القراءة متاحة، والخدمة تعلن أن القراءة حديثة.'
     };
-    const rawScore = Object.values(components).reduce((total, value) => total + value, 0);
-    const score = fresh ? rawScore : Math.min(rawScore, 39);
-    let band = 'UNAVAILABLE';
-    let label = 'لا تعتمد القراءة الآن';
-    let reason = 'الثقة غير مكتملة لأن القراءة لا تحمل أدلة موثقة وحديثة كافية.';
-    if (fresh && score >= 85) {
-      band = 'REVIEWABLE';
-      label = 'قراءة مكتملة للمراجعة';
-      reason = 'السعر والمصدر والوقت مكتملة وحديثة؛ لا يحول ذلك القراءة إلى توصية.';
-    } else if (view?.state === 'CACHED') {
-      band = 'CACHED';
-      label = 'آخر قراءة مكتملة';
-      reason = 'الأدلة الأساسية مكتملة، لكن حداثة القراءة غير مؤكدة أو تعذر التحديث الأخير.';
-    }
-    return { score, band, label, reason, components, isCalibrated: false };
+    if (state === 'CACHED') return {
+      state, tone: 'cached', label: 'مكتملة ومحفوظة', summary: '3 حقول متاحة', availableCount, total: 3, checks,
+      reason: 'الحقول الأساسية مكتملة، لكن القراءة تحتاج تحديثًا قبل اعتبارها حديثة.'
+    };
+    return {
+      state: 'UNAVAILABLE', tone: 'unavailable', label: 'غير مكتملة',
+      summary: `${availableCount} من 3 حقول متاحة`, availableCount, total: 3, checks,
+      reason: 'لا تُعرض قراءة موثقة حتى تكتمل حقول السعر والمصدر والوقت.'
+    };
   }
 
-  function confidenceLine(label, score, max, detail) {
-    return `<li><span>${text(label)}</span><strong>${score} / ${max}</strong><small>${text(detail)}</small></li>`;
+  function completenessField(label, available, detail) {
+    return `<li class="${available ? 'available' : 'missing'}"><span class="smart-lens-field-icon" aria-hidden="true">${available ? '✓' : '—'}</span><div><b>${text(label)}</b><small>${text(detail)}</small></div><strong>${available ? 'متوفر' : 'غير متوفر'}</strong></li>`;
   }
 
   function stage(label, state, current) {
@@ -242,7 +232,7 @@
     lens.dataset.symbol = normalized;
     const item = scenarioItem(marketItem(normalized));
     const view = dataView(item);
-    const confidence = evidenceConfidence(item, view);
+    const completeness = dataCompleteness(item, view);
     const source = safe(item?.source, 'غير متاح');
     const observedAt = readingTime(item?.time || item?.updatedAt || item?.observedAt);
     const price = numericPrice(item?.price);
@@ -262,19 +252,16 @@
         <h3>${text(view.label)}</h3>
         <p>${text(view.reason)}</p>
       </section>
-      <section class="smart-lens-confidence ${confidence.band.toLowerCase()}" aria-label="مؤشر ثقة الأدلة">
-        <div class="smart-lens-confidence-head"><div><p class="smart-lens-eyebrow">EVIDENCE CONFIDENCE · EXPLAINABLE</p><h3>مؤشر ثقة الأدلة</h3></div><div class="smart-lens-score"><strong>${confidence.score}</strong><span>/ 100</span></div></div>
-        <div class="smart-lens-meter" role="progressbar" aria-label="درجة ثقة الأدلة" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${confidence.score}"><span style="width:${confidence.score}%"></span></div>
-        <p class="smart-lens-confidence-label">${text(confidence.label)}</p><p class="smart-lens-confidence-reason">${text(confidence.reason)}</p>
-        <details class="smart-lens-confidence-details"><summary>عرض مكوّنات الدرجة</summary><ul>
-          ${confidenceLine('حداثة القراءة', confidence.components.freshness, 30, isFresh ? 'القراءة مكتملة ومعلنة كحديثة.' : 'القراءة غير المكتملة أو المتأخرة لا تمنح نقاط حداثة.')}
-          ${confidenceLine('اكتمال الأدلة', confidence.components.completeness, 20, 'سعر ومصدر ووقت وحالة قراءة متاحة.')}
-          ${confidenceLine('اتساق القراءة', confidence.components.consistency, 20, 'لا تُمنح النقاط إلا للقراءة الحديثة الخالية من خطأ معلن.')}
-          ${confidenceLine('قابلية التتبع', confidence.components.traceability, 15, 'وجود المصدر ووقت القراءة معًا.')}
-          ${confidenceLine('استقرار القراءة', confidence.components.stability, 10, 'مؤشر عرضي لسلامة القراءة الحالية، لا توقع للسعر.')}
-          ${confidenceLine('قابلية المراجعة', confidence.components.reviewability, 5, 'قراءة حديثة مع سعر قابل للتحقق.')}
-        </ul></details>
-        <p class="smart-lens-confidence-disclaimer">مقياس لجودة الأدلة الحالية فقط · <b>ليس احتمال ربح</b> · المعايرة الإحصائية غير مفعّلة.</p>
+      <section class="smart-lens-completeness ${completeness.tone}" aria-label="اكتمال بيانات السعر">
+        <div class="smart-lens-completeness-head"><div><p class="smart-lens-eyebrow">QUOTE DATA CHECK · VERIFIED FIELDS</p><h3>اكتمال بيانات السعر</h3></div><span class="smart-lens-completeness-badge">${text(completeness.label)}</span></div>
+        <div class="smart-lens-completeness-summary"><strong>${text(completeness.summary)}</strong><span>${text(completeness.reason)}</span></div>
+        <ul class="smart-lens-field-grid" aria-label="حقول قراءة السعر">
+          ${completenessField('السعر', completeness.checks.price, completeness.checks.price ? 'قيمة رقمية صالحة' : 'القيمة مفقودة أو غير صالحة')}
+          ${completenessField('المصدر', completeness.checks.source, completeness.checks.source ? 'هوية المصدر ظاهرة' : 'اسم المصدر غير متاح')}
+          ${completenessField('وقت القراءة', completeness.checks.time, completeness.checks.time ? 'وقت صالح وقابل للتتبع' : 'وقت القراءة مفقود')}
+        </ul>
+        <aside class="smart-lens-analysis-status" aria-label="حالة جودة التحليل"><div><p class="smart-lens-eyebrow">ANALYSIS QUALITY</p><h4>جودة التحليل</h4></div><span>غير محسوبة</span><p>تحتاج سجلًا سعريًا وسيولة ومؤشرات فنية وأخبارًا ومخاطر؛ لذلك لا نعرض درجة تقديرية من بيانات السعر وحدها.</p></aside>
+        <p class="smart-lens-completeness-disclaimer"><b>هذا فحص لنقل البيانات فقط.</b> لا يقيس قوة السهم أو احتمال الربح ولا يصدر توصية.</p>
       </section>
       <div class="smart-lens-grid">
         <section class="smart-lens-block"><h3>ثقة البيانات</h3><dl><div><dt>المصدر</dt><dd>${text(source)}</dd></div><div><dt>وقت القراءة</dt><dd>${text(observedAt)}</dd></div><div><dt>الحالة</dt><dd>${view.state === 'FRESH' ? 'موثقة الآن' : view.state === 'CACHED' ? 'آخر قراءة' : 'غير متاحة'}</dd></div></dl></section>

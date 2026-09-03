@@ -108,7 +108,7 @@ assert.ok(!html.includes('user-scalable=no') && !html.includes('maximum-scale=1'
 assert.ok(html.includes('env(safe-area-inset-bottom)'), 'Bottom content and navigation must respect the iPhone safe area');
 assert.ok(/\.nav-item\s*\{[^}]*min-height:\s*44px/s.test(html), 'Bottom navigation touch targets must be at least 44px high');
 assert.ok(lensCss.includes('.smart-lens-close { min-height: 44px;'), 'The decision lens close action must be touch-safe');
-assert.ok(html.includes('smart-decision-lens-static.css?v=3') && html.includes('smart-decision-lens-static.js?v=3'), 'Safari must receive cache-busted quote-quality assets');
+assert.ok(html.includes('smart-decision-lens-static.css?v=4') && html.includes('smart-decision-lens-static.js?v=4'), 'Safari must receive cache-busted quote-quality assets');
 assert.ok(html.includes('repeat(8,minmax(44px,1fr))'), 'Narrow iPhones must keep bottom navigation targets at least 44px wide');
 
 assert.ok(html.includes('>تفاصيل القراءة</button>'), 'The stock action must describe the local quote-quality details');

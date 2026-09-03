@@ -57,16 +57,24 @@ assert.equal(normalizeDataFilter('unknown'), 'ALL', 'An unknown filter must safe
 
 const numericPrice = vm.runInNewContext(`(${extractFunction(lens, 'numericPrice')})`);
 const dataView = vm.runInNewContext(`(${extractFunction(lens, 'dataView')})`, { numericPrice });
-const evidenceConfidence = vm.runInNewContext(`(${extractFunction(lens, 'evidenceConfidence')})`, { numericPrice, Math, Object, Number, Date, String, Boolean });
+const dataCompleteness = vm.runInNewContext(`(${extractFunction(lens, 'dataCompleteness')})`, { numericPrice, Object, Number, Date, String, Boolean, dataView });
 assert.equal(dataView({ ...complete, isFresh: true, error: false }).state, 'FRESH');
 assert.equal(dataView({ ...complete, isFresh: false, error: false }).state, 'CACHED');
 assert.equal(dataView({ ...complete, source: null, isFresh: true, error: false }).state, 'UNAVAILABLE');
 assert.equal(numericPrice('   '), null, 'The lens must reject a whitespace quote');
 assert.equal(numericPrice(0), null, 'The lens must reject a zero quote');
 assert.equal(numericPrice(-1), null, 'The lens must reject a negative quote');
-assert.equal(evidenceConfidence({ ...complete, isFresh: true, error: false }, {}).score, 100, 'A complete fresh reading should receive the full explainable quality score');
-assert.ok(evidenceConfidence({ ...complete, isFresh: false, error: false }, {}).score <= 39, 'A stale reading must be capped below 40');
-assert.equal(evidenceConfidence({ ...complete, isFresh: false, error: false }, { state: 'CACHED' }).band, 'CACHED', 'A cached reading must use a warning band, not an unavailable band');
+const freshCompleteness = dataCompleteness({ ...complete, isFresh: true, error: false }, { state: 'FRESH' });
+assert.equal(freshCompleteness.label, 'مكتملة الآن');
+assert.equal(freshCompleteness.availableCount, 3);
+assert.deepEqual({ ...freshCompleteness.checks }, { price: true, source: true, time: true });
+assert.equal('score' in freshCompleteness, false, 'Quote completeness must not expose an investment-like numeric score');
+const cachedCompleteness = dataCompleteness({ ...complete, isFresh: false, error: false }, { state: 'CACHED' });
+assert.equal(cachedCompleteness.tone, 'cached', 'A cached reading must use a warning tone');
+assert.equal(cachedCompleteness.label, 'مكتملة ومحفوظة');
+const incompleteCompleteness = dataCompleteness({ ...complete, source: '', time: null, isFresh: true }, { state: 'UNAVAILABLE' });
+assert.equal(incompleteCompleteness.availableCount, 1);
+assert.equal(incompleteCompleteness.label, 'غير مكتملة');
 
 const parityFixtures = [
   { ...complete, isFresh: true, error: false },
@@ -80,6 +88,9 @@ const parityFixtures = [
 for (const fixture of parityFixtures) {
   assert.equal(dataView(fixture).state, quoteDataState(fixture), 'Table and quality lens must classify the same quote identically');
 }
+
+assert.ok(lens.includes('اكتمال بيانات السعر') && lens.includes('جودة التحليل') && lens.includes('غير محسوبة'), 'The lens must separate quote completeness from analytical quality');
+assert.ok(!lens.includes('مؤشر ثقة الأدلة') && !lens.includes('/ 100'), 'The quote lens must not present a repeated 100-point confidence score');
 
 const makeClassList = () => {
   const values = new Set();

@@ -5,8 +5,8 @@ const script = readFileSync(new URL('./smart-decision-lens-static.js', import.me
 const css = readFileSync(new URL('./smart-decision-lens-static.css', import.meta.url), 'utf8');
 
 for (const marker of [
-  'smart-decision-lens-static.css?v=3',
-  'smart-decision-lens-static.js?v=3',
+  'smart-decision-lens-static.css?v=4',
+  'smart-decision-lens-static.js?v=4',
   'class="smart-summary-btn"'
 ]) {
   if (!index.includes(marker)) throw new Error(`Static lens index marker missing: ${marker}`);
@@ -19,10 +19,11 @@ for (const marker of [
   'مسار حالة القراءة',
   'لا تنفيذ آلي',
   'لا توصية',
-  'مؤشر ثقة الأدلة',
-  'ليس احتمال ربح',
-  'isCalibrated: false',
-  'Math.min(rawScore, 39)',
+  'اكتمال بيانات السعر',
+  'جودة التحليل',
+  'غير محسوبة',
+  'احتمال الربح',
+  'هذا فحص لنقل البيانات فقط',
   'DATA QUALITY SCENARIOS · LOCAL ONLY',
   'مختبر حالات جودة القراءة',
   "stale: Object.freeze",
@@ -43,9 +44,9 @@ for (const marker of [
   '.smart-lens-state.ready',
   '.smart-lens-state.cached',
   '.smart-lens-state.unavailable',
-  '.smart-lens-confidence',
-  '.smart-lens-meter',
-  '.smart-lens-confidence-details',
+  '.smart-lens-completeness',
+  '.smart-lens-field-grid',
+  '.smart-lens-analysis-status',
   '.smart-lens-simulator',
   '.smart-lens-scenario-buttons',
   '.smart-lens-review-gates',
@@ -54,8 +55,9 @@ for (const marker of [
 ]) {
   if (!css.includes(marker)) throw new Error(`Static lens CSS marker missing: ${marker}`);
 }
+if (script.includes('مؤشر ثقة الأدلة') || script.includes('/ 100')) throw new Error('Quote completeness must not be presented as a 100-point confidence score.');
 if (/\b(fetch|XMLHttpRequest)\s*\(/.test(script)) throw new Error('Static lens must not make network calls.');
 if (script.includes('event.stopImmediatePropagation()')) throw new Error('Static lens must not suppress unrelated click handlers.');
 if (/\b(order|trade|broker|execute|submit)\b/i.test(script)) throw new Error('Static lens must not expose trading or broker actions.');
 if (/\b(fetch|XMLHttpRequest|localStorage|sessionStorage)\s*\(/.test(script)) throw new Error('Static lens simulation must remain local and network-free.');
-console.log('Static quote-quality lens checks passed: v27 binding, evidence-confidence simulator, completeness checks, mobile safety and read-only boundaries verified.');
+console.log('Static quote-quality lens checks passed: v27 binding, honest completeness display, analysis separation, mobile safety and read-only boundaries verified.');
