@@ -2,10 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Asiri Capital | Live Terminal v27</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link href="./smart-decision-lens-static.css?v=1" rel="stylesheet">
+    <link href="./smart-decision-lens-static.css?v=2" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -32,14 +32,14 @@
             background-color: var(--bg-base);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 100px;
+            padding-bottom: calc(100px + env(safe-area-inset-bottom));
             overflow-x: hidden;
         }
 
         .account-bar {
             background: rgba(12, 26, 44, 0.98);
             border-bottom: 1px solid var(--border-color);
-            padding: 0.9rem 1.2rem;
+            padding: calc(0.9rem + env(safe-area-inset-top)) 1.2rem 0.9rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -66,7 +66,7 @@
             overflow-x: auto; background: rgba(6, 14, 24, 0.95);
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap; scrollbar-width: none;
-            position: sticky; top: 57px; z-index: 99;
+            position: sticky; top: calc(57px + env(safe-area-inset-top)); z-index: 99;
         }
         .nav-pills-container::-webkit-scrollbar { display: none; }
 
@@ -148,21 +148,46 @@
         .remove-symbol-btn { margin-top: 0.35rem; min-height: 28px; padding: 0.2rem 0.5rem; border: 1px solid rgba(239, 68, 68, 0.42); border-radius: 6px; background: rgba(239, 68, 68, 0.08); color: #fca5a5; font: inherit; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
         .remove-symbol-btn:active { transform: scale(0.97); background: rgba(239, 68, 68, 0.18); }
 
-        /* ASIRI_SMART_DECISION_SUMMARY_UI_V1 · on-demand research only, no execution path. */
+        /* ASIRI_SMART_DECISION_SUMMARY_UI_V1 · local evidence lens only, no network or execution path. */
         .smart-summary-btn { margin-top: 0.35rem; min-height: 28px; padding: 0.2rem 0.5rem; border: 1px solid rgba(0, 229, 255, 0.45); border-radius: 6px; background: rgba(0, 229, 255, 0.08); color: #a5f3fc; font: inherit; font-size: 0.68rem; font-weight: 800; cursor: pointer; }
         .smart-summary-btn:hover { border-color: var(--accent-cyan); background: rgba(0, 229, 255, 0.15); }.smart-summary-btn:active { transform: scale(0.97); }
-        .smart-summary-modal-card { width: 100%; max-width: 720px; max-height: calc(100vh - 2rem); overflow: auto; padding: 0; background: radial-gradient(circle at 94% 2%, rgba(0,229,255,.14), transparent 30%), linear-gradient(145deg,#0d1d32,#081321 72%); }.smart-summary-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:18px 18px 14px; border-bottom:1px solid var(--border-color); }.smart-summary-kicker { color:var(--accent-cyan); font-size:.68rem; font-weight:900; letter-spacing:.1em; }.smart-summary-head h2 { margin:5px 0 0; font-size:1.12rem; }.smart-summary-close { min-height:32px; border:1px solid var(--border-color); border-radius:8px; padding:0 10px; background:#081321; color:var(--text-muted); font:inherit; font-size:.72rem; font-weight:800; cursor:pointer; }.smart-summary-close:hover { color:#fff; border-color:var(--accent-cyan); }.smart-summary-body { padding:16px 18px 18px; }.smart-summary-status-row { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:13px; }.smart-summary-state { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; border:1px solid rgba(247,201,72,.3); background:rgba(247,201,72,.08); color:#ffe7a1; font-size:.66rem; font-weight:900; }.smart-summary-state.available { border-color:rgba(37,214,149,.35); background:rgba(37,214,149,.08); color:#b9f7df; }.smart-summary-state.unavailable { border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.08); color:#fecaca; }.smart-summary-symbol { color:var(--accent-cyan); font-size:.78rem; font-weight:900; }.smart-summary-main { border:1px solid rgba(0,229,255,.27); border-radius:14px; padding:14px; background:rgba(6,14,24,.5); }.smart-summary-main h3 { margin:0 0 8px; color:#fff; font-size:.98rem; }.smart-summary-main p { margin:0; color:var(--text-muted); font-size:.78rem; line-height:1.85; }.smart-summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }.smart-summary-block { min-height:132px; border:1px solid var(--border-color); border-radius:12px; padding:12px; background:rgba(6,14,24,.45); }.smart-summary-block b { display:block; margin-bottom:8px; color:var(--text-main); font-size:.78rem; }.smart-summary-list { margin:0; padding:0 16px 0 0; color:var(--text-muted); font-size:.72rem; line-height:1.75; }.smart-summary-list li { margin-bottom:5px; }.smart-summary-meta { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }.smart-summary-meta-row { border:1px solid rgba(30,51,86,.8); border-radius:10px; padding:8px; background:#081321; color:var(--text-muted); font-size:.67rem; }.smart-summary-meta-row strong { display:block; margin-top:3px; color:var(--text-main); font-size:.74rem; overflow-wrap:anywhere; }.smart-summary-trigger { margin-top:10px; border-right:2px solid var(--accent-gold); padding:5px 10px 5px 0; color:#e7d7ae; font-size:.72rem; line-height:1.75; }.smart-summary-trigger b { color:var(--accent-gold); }.smart-summary-safety { margin-top:12px; border-right:2px solid var(--green); padding:5px 10px 5px 0; color:#b9f7df; font-size:.71rem; line-height:1.75; }.smart-summary-safety b { color:var(--green); }
+        /* ASIRI_BATCH1_PORTFOLIO_V1 · truthful local watchlist summary, read only. */
+        .portfolio-card { min-height: 0; overflow: hidden; background: radial-gradient(circle at 92% 0%, rgba(0,229,255,.13), transparent 34%), linear-gradient(145deg,#0d1d32,#091522 70%); }
+        .portfolio-head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }
+        .portfolio-kicker { color:var(--accent-cyan); font-size:.7rem; font-weight:900; letter-spacing:.1em; }
+        .portfolio-head h2 { margin:6px 0 5px; font-size:1.35rem; }
+        .portfolio-head p { max-width:680px; margin:0; color:var(--text-muted); font-size:.78rem; line-height:1.75; }
+        .portfolio-seal { flex:none; padding:9px 11px; border:1px solid rgba(37,214,149,.34); border-radius:12px; color:var(--green); background:rgba(37,214,149,.07); font-size:.67rem; font-weight:900; line-height:1.55; text-align:center; }
+        .portfolio-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; margin:15px 0; }
+        .portfolio-kpi { border:1px solid var(--border-color); border-radius:12px; padding:11px; background:rgba(6,14,24,.5); }
+        .portfolio-kpi span { display:block; color:var(--text-muted); font-size:.66rem; }
+        .portfolio-kpi strong { display:block; margin-top:5px; color:#fff; font-size:1rem; overflow-wrap:anywhere; }
+        .portfolio-kpi.fresh strong { color:var(--green); }.portfolio-kpi.stale strong { color:var(--accent-gold); }.portfolio-kpi.unavailable strong { color:#fca5a5; }
+        .portfolio-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:11px; }
+        .portfolio-toolbar p { margin:0; color:var(--text-muted); font-size:.7rem; line-height:1.6; }
+        .portfolio-refresh { min-height:44px; flex:none; border:1px solid rgba(0,229,255,.4); border-radius:11px; padding:0 13px; background:rgba(0,229,255,.09); color:#a5f3fc; font:inherit; font-size:.72rem; font-weight:900; cursor:pointer; }
+        .portfolio-refresh:focus-visible,.portfolio-refresh:hover { outline:none; border-color:var(--accent-cyan); background:rgba(0,229,255,.15); }
+        .portfolio-list { display:grid; gap:8px; }
+        .portfolio-row { display:grid; grid-template-columns:minmax(72px,.65fr) minmax(110px,.9fr) minmax(125px,1.25fr) auto; gap:10px; align-items:center; border:1px solid var(--border-color); border-radius:12px; padding:11px; background:rgba(6,14,24,.5); }
+        .portfolio-symbol strong,.portfolio-price strong { display:block; color:#fff; font-size:.9rem; }.portfolio-symbol small,.portfolio-price small,.portfolio-source small { display:block; margin-top:3px; color:var(--text-muted); font-size:.62rem; line-height:1.5; }
+        .portfolio-price strong { direction:ltr; text-align:right; color:var(--green); }.portfolio-price.unavailable strong { color:var(--text-muted); }
+        .portfolio-source b { display:block; color:#dce7f4; font-size:.7rem; overflow-wrap:anywhere; }.portfolio-status { display:inline-flex; align-items:center; width:max-content; margin-top:4px; border:1px solid rgba(247,201,72,.3); border-radius:999px; padding:3px 7px; color:#ffe4a3; background:rgba(247,201,72,.08); font-size:.61rem; font-weight:900; }.portfolio-status.fresh { border-color:rgba(37,214,149,.32); color:#b9f7df; background:rgba(37,214,149,.08); }.portfolio-status.unavailable { border-color:rgba(239,68,68,.32); color:#fecaca; background:rgba(239,68,68,.08); }
+        .portfolio-open { min-height:44px; border:1px solid rgba(226,188,83,.4); border-radius:10px; padding:0 11px; background:rgba(226,188,83,.08); color:#ffe4a3; font:inherit; font-size:.67rem; font-weight:900; cursor:pointer; }
+        .portfolio-open:focus-visible,.portfolio-open:hover { outline:none; border-color:var(--accent-gold); background:rgba(226,188,83,.14); }
+        .portfolio-empty { border:1px dashed rgba(148,163,184,.35); border-radius:13px; padding:25px 14px; color:var(--text-muted); text-align:center; font-size:.76rem; line-height:1.75; }
+        .portfolio-safety { margin-top:13px; border-right:2px solid var(--green); padding:5px 10px 5px 0; color:#b9f7df; font-size:.7rem; line-height:1.75; }.portfolio-safety b { color:var(--green); }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(12, 26, 44, 0.98); backdrop-filter: blur(16px);
             border-top: 1px solid var(--border-color);
             display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
-            padding: 0.6rem 0.4rem; z-index: 1000;
+            padding: 0.6rem 0.4rem max(0.6rem, env(safe-area-inset-bottom)); z-index: 1000;
         }
         .nav-item {
             background: none; border: none; color: var(--text-muted);
             display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 44px;
             gap: 0.2rem; font-size: 0.7rem; font-weight: 600; cursor: pointer;
         }
         .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
@@ -220,7 +245,8 @@
         @media(max-width:520px){ .research-controls,.research-grid{grid-template-columns:1fr}.research-btn{width:100%}.research-tile{min-height:145px}.research-note-box,.research-safety{grid-column:auto}.research-note-head{align-items:flex-start;flex-direction:column} }
         @media(max-width:780px){ .technicals-topline{flex-direction:column}.technicals-grid{grid-template-columns:1fr 1fr}.tech-context,.tech-safety{grid-column:1/-1}.testnet-review-grid{grid-template-columns:1fr 1fr}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.55rem} }
         @media(max-width:520px){ .technicals-controls,.technicals-grid{grid-template-columns:1fr}.technicals-btn{width:100%}.tech-tile{min-height:148px}.tech-context,.tech-safety{grid-column:auto}.tech-context{flex-direction:column}.testnet-review-grid{grid-template-columns:1fr}.testnet-review-guard{grid-template-columns:1fr;align-items:start}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.5rem} }
-        @media(max-width:520px){ .smart-summary-grid,.smart-summary-meta{grid-template-columns:1fr}.smart-summary-head{padding:15px}.smart-summary-body{padding:13px}.smart-summary-status-row{align-items:flex-start;flex-direction:column} }
+        @media(max-width:780px){ .portfolio-head{flex-direction:column}.portfolio-kpis{grid-template-columns:1fr 1fr}.portfolio-row{grid-template-columns:minmax(70px,.7fr) 1fr minmax(120px,1.2fr) auto} }
+        @media(max-width:520px){ .portfolio-toolbar{align-items:stretch;flex-direction:column}.portfolio-refresh{width:100%}.portfolio-row{grid-template-columns:1fr 1fr}.portfolio-source{grid-column:1/-1}.portfolio-open{grid-column:1/-1;width:100%}.nav-pill,.filter-btn,.smart-summary-btn,.remove-symbol-btn,.modal-btn{min-height:44px}.modal-card{max-height:calc(100dvh - 2rem);overflow:auto}.bottom-nav{grid-template-columns:repeat(8,minmax(44px,1fr));overflow-x:auto;scrollbar-width:none}.bottom-nav::-webkit-scrollbar{display:none} }
     </style>
 </head>
 <body>
@@ -240,7 +266,7 @@
         <button class="nav-pill technicals-pill" data-tab="technicals" onclick="switchMainTab('technicals', this)">التحليل الفني</button>
         <button class="nav-pill" data-tab="command" onclick="switchMainTab('command', this)">قمة القرار ⚡</button>
         <button class="nav-pill" data-tab="alerts" onclick="switchMainTab('alerts', this)">التنبيهات</button>
-        <button class="nav-pill" data-tab="portfolio" onclick="switchMainTab('portfolio', this)">المحفظة الذكية</button>
+        <button class="nav-pill" data-tab="portfolio" onclick="switchMainTab('portfolio', this)">محفظتي</button>
     </div>
 
     <div class="main-container">
@@ -343,66 +369,63 @@
         </div>
 
         <div id="sec-portfolio" class="app-section">
-            <div class="card-section">
-                <div class="section-title-main">ملخص المحفظة النشطة</div>
-                <div style="padding: 1rem 0;">إجمالي الأصول المتابعة: <span id="portfolio-count" style="color:var(--accent-cyan); font-weight:700;">0</span> أصل.</div>
-            </div>
+            <section class="card-section portfolio-card" aria-labelledby="portfolio-title">
+                <header class="portfolio-head">
+                    <div><div class="portfolio-kicker">MY WATCHLIST · VERIFIED READINGS</div><h2 id="portfolio-title">محفظتي وقائمة المتابعة</h2><p>تعرض الرموز المحفوظة على هذا الجهاز وآخر قراءة موثقة لكل رمز. لا تُحسب قيمة استثمارية أو ربح وخسارة قبل ربط كميات وتكلفة مراكز موثقة.</p></div>
+                    <div class="portfolio-seal">READ ONLY<br>NO BROKER</div>
+                </header>
+                <div class="portfolio-kpis" aria-label="ملخص حالة قائمة المتابعة">
+                    <article class="portfolio-kpi"><span>إجمالي الرموز</span><strong id="portfolio-count">0</strong></article>
+                    <article class="portfolio-kpi fresh"><span>موثقة الآن</span><strong id="portfolio-fresh-count">0</strong></article>
+                    <article class="portfolio-kpi stale"><span>آخر قراءة محفوظة</span><strong id="portfolio-cached-count">0</strong></article>
+                    <article class="portfolio-kpi unavailable"><span>بانتظار قراءة</span><strong id="portfolio-unavailable-count">0</strong></article>
+                </div>
+                <div class="portfolio-toolbar"><p id="portfolio-updated-at">سيظهر وقت أحدث قراءة موثقة عند وصول البيانات.</p><button class="portfolio-refresh" type="button" onclick="refreshVerifiedQuotes()">تحديث القراءات</button></div>
+                <div id="portfolio-list" class="portfolio-list" aria-live="polite"><div class="portfolio-empty">جارٍ تجهيز قائمة المتابعة…</div></div>
+                <p class="portfolio-safety"><b>حدود الأمان:</b> هذه قائمة متابعة محلية وليست كشف حساب وسيط، ولا تنشئ أمر شراء أو بيع أو اتصالًا تنفيذيًا.</p>
+            </section>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="bottomNavClick('tools', this)">
+        <button class="nav-item active" type="button" data-tab="tools" onclick="bottomNavClick('tools', this)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
             <span>الأدوات</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('journey', this)">
+        <button class="nav-item" type="button" data-tab="journey" onclick="bottomNavClick('journey', this)">
             <svg viewBox="0 0 24 24"><path d="M5 3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM5 15a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2Z"/></svg>
             <span>المسار</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('research', this)">
+        <button class="nav-item" type="button" data-tab="research" onclick="bottomNavClick('research', this)">
             <svg viewBox="0 0 24 24"><path d="M4 3h11a2 2 0 0 1 2 2v12H6a2 2 0 0 0-2 2V3Zm15 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM7 7h7v2H7V7Zm0 4h7v2H7v-2Z"/></svg>
             <span>الأبحاث</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('technicals', this)">
+        <button class="nav-item" type="button" data-tab="technicals" onclick="bottomNavClick('technicals', this)">
             <svg viewBox="0 0 24 24"><path d="M3 17h2.5l3-5 3 4 4.5-8 2 3H21v2h-4l-2-3-3.2 5.7-3.1-4.1L6.6 19H3v-2z"/></svg>
             <span>الفني</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('alerts', this)">
+        <button class="nav-item" type="button" data-tab="alerts" onclick="bottomNavClick('alerts', this)">
             <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
             <span>التنبيهات</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('opportunities', this)">
+        <button class="nav-item" type="button" data-tab="command" onclick="bottomNavClick('opportunities', this)">
             <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
             <span>الفرص</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('portfolio', this)">
+        <button class="nav-item" type="button" data-tab="portfolio" onclick="bottomNavClick('portfolio', this)">
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-            <span>المحفظة</span>
+            <span>محفظتي</span>
         </button>
-        <button class="nav-item" onclick="bottomNavClick('back', this)">
+        <button class="nav-item" type="button" data-action="back" onclick="bottomNavClick('back', this)">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             <span>السابق</span>
         </button>
     </nav>
 
-    <div class="modal-overlay" id="smartDecisionSummaryModal" role="dialog" aria-modal="true" aria-labelledby="smart-summary-title">
-        <section class="modal-card smart-summary-modal-card">
-            <header class="smart-summary-head"><div><div class="smart-summary-kicker">AI-ASSISTED RESEARCH · ON DEMAND</div><h2 id="smart-summary-title">ملخص القرار الذكي</h2></div><button class="smart-summary-close" type="button" onclick="closeSmartDecisionSummary()">إغلاق</button></header>
-            <div class="smart-summary-body">
-                <div class="smart-summary-status-row"><span id="smart-summary-state" class="smart-summary-state">بانتظار الطلب</span><span id="smart-summary-symbol" class="smart-summary-symbol">—</span></div>
-                <article class="smart-summary-main"><h3 id="smart-summary-headline">اختر رمزاً من قائمة المراقبة</h3><p id="smart-summary-reading">يعمل هذا الملخص عند الطلب فقط، ويعتمد على سعر موثق وسجل يومي حديث. لا ينشئ توصية شراء أو بيع ولا يتصل بالوسيط.</p></article>
-                <div class="smart-summary-grid"><article class="smart-summary-block"><b>الأدلة الظاهرة</b><ul id="smart-summary-evidence" class="smart-summary-list"><li>بانتظار بيانات موثقة.</li></ul></article><article class="smart-summary-block"><b>نقاط المراجعة والمخاطر</b><ul id="smart-summary-risks" class="smart-summary-list"><li>بانتظار بيانات موثقة.</li></ul></article></div>
-                <div class="smart-summary-meta"><div class="smart-summary-meta-row">مصدر السعر<strong id="smart-summary-quote-source">—</strong></div><div class="smart-summary-meta-row">وقت قراءة السعر<strong id="smart-summary-quote-time">—</strong></div><div class="smart-summary-meta-row">مصدر السجل الفني<strong id="smart-summary-tech-source">—</strong></div><div class="smart-summary-meta-row">حالة السجل<strong id="smart-summary-tech-status">—</strong></div></div>
-                <div class="smart-summary-trigger"><b>شرط إعادة المراجعة:</b> <span id="smart-summary-trigger">تُعاد المراجعة عند وصول بيانات موثقة كافية.</span></div>
-                <div class="smart-summary-safety"><b>حدود الأمان:</b> تحليل بحثي مساعد فقط؛ `executionAllowed=false` و`automaticTrading=false` ولا يوجد إرسال للوسيط أو أمر تداول.</div>
-            </div>
-        </section>
-    </div>
-
     <div class="modal-overlay" id="addStockModal">
         <div class="modal-card">
             <div class="modal-title">إضافة أصل جديد للمحفظة</div>
-            <input type="text" id="modalSymbolInput" class="modal-input" placeholder="مثال: AAPL">
+            <input type="text" id="modalSymbolInput" class="modal-input" placeholder="مثال: AAPL" maxlength="10" pattern="[A-Za-z][A-Za-z0-9.-]{0,9}" autocapitalize="characters" autocomplete="off" spellcheck="false">
             <div class="modal-actions">
                 <button class="modal-btn btn-confirm" onclick="confirmAddStock()">إضافة</button>
                 <button class="modal-btn btn-cancel" onclick="closeAddStockModal()">إلغاء</button>
@@ -427,15 +450,44 @@
         const QUOTE_SNAPSHOT_KEY = 'asiri_verified_quote_snapshot_v1';
         const QUOTE_SNAPSHOT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
         const RESEARCH_NOTE_KEY = 'asiri_research_notes_v1';
+        const WATCHLIST_KEY = 'asiri_ws_portfolio_v27';
         const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
-        const SMART_SUMMARY_API = 'https://asiri-bot.onrender.com/api/live-terminal/smart-summary';
         let technicalRequestInFlight = false;
-        let smartSummaryRequestId = 0;
+        let activeMainTab = 'tools';
+        const mainTabHistory = ['tools'];
+
+        function normalizeSymbol(value) {
+            const symbol = String(value || '').trim().toUpperCase();
+            return /^[A-Z][A-Z0-9.-]{0,9}$/.test(symbol) ? symbol : '';
+        }
+
+        function normalizeWatchlist(value) {
+            const values = Array.isArray(value) ? value : (Array.isArray(value?.symbols) ? value.symbols : (Array.isArray(value?.watchlist) ? value.watchlist : null));
+            if (!values) return null;
+            return [...new Set(values.map(normalizeSymbol).filter(Boolean))].slice(0, 80);
+        }
+
+        function escapeMarkup(value) {
+            return String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[char]));
+        }
+
+        function finiteNumber(value) {
+            if (value === null || value === undefined || value === '') return null;
+            const number = Number(value);
+            return Number.isFinite(number) ? number : null;
+        }
 
         function init() {
-            const saved = localStorage.getItem('asiri_ws_portfolio_v27');
-            if (saved) {
-                try { watchlist = JSON.parse(saved); } catch(e) { watchlist = [...INITIAL_STOCKS]; }
+            const saved = localStorage.getItem(WATCHLIST_KEY);
+            if (saved !== null) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    watchlist = normalizeWatchlist(parsed) ?? [...INITIAL_STOCKS];
+                    if (JSON.stringify(parsed) !== JSON.stringify(watchlist)) saveWatchlist();
+                } catch(e) {
+                    watchlist = [...INITIAL_STOCKS];
+                    saveWatchlist();
+                }
             } else {
                 watchlist = [...INITIAL_STOCKS];
                 saveWatchlist();
@@ -455,16 +507,16 @@
 
             restoreVerifiedQuoteSnapshot();
             renderTable();
-            document.getElementById('portfolio-count').textContent = watchlist.length;
             renderResearchHub();
             syncTechnicalSymbolOptions();
             renderTechnicalUnavailable(null, 'اختر رمزاً من قائمة المراقبة لعرض التحليل التقني.');
+            switchMainTab('tools', document.querySelector('.nav-pill[data-tab="tools"]'), { fromHistory: true });
             refreshVerifiedQuotes();
             window.setInterval(refreshVerifiedQuotes, QUOTE_REFRESH_MS);
         }
 
         function saveWatchlist() {
-            localStorage.setItem('asiri_ws_portfolio_v27', JSON.stringify(watchlist));
+            try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist)); } catch (_) {}
         }
 
         function restoreVerifiedQuoteSnapshot() {
@@ -474,9 +526,10 @@
                 if (!snapshot?.rows || !Number.isFinite(storedAtMs) || (Date.now() - storedAtMs) > QUOTE_SNAPSHOT_MAX_AGE_MS) return;
                 watchlist.forEach((symbol) => {
                     const saved = snapshot.rows[symbol];
-                    if (!saved || !Number.isFinite(Number(saved.price))) return;
+                    if (!saved || !portfolioHasPrice(saved)) return;
                     stockMarketData[symbol] = {
                         ...stockMarketData[symbol], ...saved, symbol,
+                        price: finiteNumber(saved.price),
                         isFresh: false,
                         updated: false,
                         error: false,
@@ -492,10 +545,10 @@
             const rows = {};
             watchlist.forEach((symbol) => {
                 const item = stockMarketData[symbol];
-                if (item && Number.isFinite(Number(item.price))) rows[symbol] = {
-                    price: item.price,
+                if (item && portfolioHasPrice(item)) rows[symbol] = {
+                    price: finiteNumber(item.price),
                     time: item.time || null,
-                    source: item.source || 'Asiri Market Engine'
+                    source: item.source || null
                 };
             });
             try { localStorage.setItem(QUOTE_SNAPSHOT_KEY, JSON.stringify({ storedAt: new Date().toISOString(), rows })); } catch (_) {}
@@ -513,14 +566,21 @@
                 if (!response.ok) throw new Error(`QUOTE_API_${response.status}`);
                 const payload = await response.json();
                 const rows = Array.isArray(payload.stocks) ? payload.stocks : [];
+                const receivedSymbols = new Set();
                 let verified = 0;
 
                 rows.forEach((row) => {
-                    if (row?.ok && Number.isFinite(Number(row.price))) {
+                    const symbol = normalizeSymbol(row?.symbol);
+                    if (!symbol || !watchlist.includes(symbol)) return;
+                    receivedSymbols.add(symbol);
+                    if (row?.ok && finiteNumber(row.price) !== null) {
                         updateVerifiedStockPrice(row);
                         verified += 1;
+                    } else {
+                        markQuoteUnavailable(symbol);
                     }
                 });
+                symbols.filter((symbol) => !receivedSymbols.has(symbol)).forEach(markQuoteUnavailable);
 
                 saveVerifiedQuoteSnapshot();
                 renderTable();
@@ -536,14 +596,7 @@
                 document.getElementById('ws-dot').style.background = verified ? 'var(--success)' : 'var(--warning)';
             } catch (error) {
                 console.error('Verified quote refresh failed:', error);
-                watchlist.forEach((symbol) => {
-                    const item = stockMarketData[symbol] || (stockMarketData[symbol] = { symbol });
-                    if (!Number.isFinite(Number(item.price))) {
-                        item.text = 'تعذر التحديث الموثق';
-                        item.cls = 'badge-wait';
-                        item.error = true;
-                    }
-                });
+                watchlist.forEach(markQuoteUnavailable);
                 renderTable();
                 renderResearchHub();
                 const retryText = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً';
@@ -561,9 +614,9 @@
             if (!sym || !watchlist.includes(sym)) return;
 
             const item = stockMarketData[sym] || (stockMarketData[sym] = { symbol: sym });
-            item.price = Number(row.price);
+            item.price = finiteNumber(row.price);
             item.time = row.updatedAt || row.observedAt || new Date().toISOString();
-            item.source = row.source || 'Asiri Market Engine';
+            item.source = row.source || null;
             item.isFresh = row.isFresh === true;
             item.updated = true;
             item.error = false;
@@ -572,7 +625,82 @@
             item.cls = 'badge-wait';
         }
 
+        function markQuoteUnavailable(symbol) {
+            const normalized = normalizeSymbol(symbol);
+            if (!normalized || !watchlist.includes(normalized)) return;
+            const item = stockMarketData[normalized] || (stockMarketData[normalized] = { symbol: normalized, price: null });
+            const hasLastPrice = portfolioHasPrice(item);
+            item.isFresh = false;
+            item.updated = false;
+            item.error = true;
+            item.decision = 'WAIT';
+            item.text = hasLastPrice ? 'مراقبة • آخر قراءة موثقة' : 'تعذر التحديث الموثق';
+            item.cls = 'badge-wait';
+        }
+
+        function portfolioHasPrice(item) {
+            return finiteNumber(item?.price) !== null;
+        }
+
+        function portfolioTime(value) {
+            const date = new Date(value || '');
+            return Number.isNaN(date.getTime()) ? 'غير متاح' : date.toLocaleString('ar-SA');
+        }
+
+        function renderPortfolioSummary() {
+            const list = document.getElementById('portfolio-list');
+            if (!list) return;
+
+            const rows = watchlist.map((symbol) => {
+                const item = stockMarketData[symbol] || { symbol };
+                const hasPrice = portfolioHasPrice(item);
+                const fresh = hasPrice && item.isFresh === true && item.error !== true;
+                return { symbol, item, hasPrice, fresh, cached: hasPrice && !fresh };
+            });
+            const freshCount = rows.filter((row) => row.fresh).length;
+            const cachedCount = rows.filter((row) => row.cached).length;
+            const unavailableCount = rows.length - freshCount - cachedCount;
+            const observedTimes = rows.map(({ item }) => new Date(item.time || '').getTime()).filter(Number.isFinite);
+            const latestTime = observedTimes.length ? new Date(Math.max(...observedTimes)).toLocaleString('ar-SA') : null;
+
+            document.getElementById('portfolio-count').textContent = rows.length;
+            document.getElementById('portfolio-fresh-count').textContent = freshCount;
+            document.getElementById('portfolio-cached-count').textContent = cachedCount;
+            document.getElementById('portfolio-unavailable-count').textContent = unavailableCount;
+            document.getElementById('portfolio-updated-at').textContent = latestTime ? `أحدث قراءة ظاهرة: ${latestTime}` : 'سيظهر وقت أحدث قراءة موثقة عند وصول البيانات.';
+
+            if (!rows.length) {
+                list.innerHTML = '<div class="portfolio-empty">قائمة المتابعة فارغة. استخدم «إضافة أصل» لإضافة أول رمز على هذا الجهاز.</div>';
+                return;
+            }
+
+            list.innerHTML = rows.map(({ symbol, item, hasPrice, fresh }) => {
+                const state = fresh ? 'fresh' : (hasPrice ? 'cached' : 'unavailable');
+                const status = fresh ? 'موثق الآن' : (hasPrice ? 'آخر قراءة موثقة' : (item.error ? 'تعذر التحديث' : 'بانتظار قراءة'));
+                const price = hasPrice ? `$${Number(item.price).toFixed(2)}` : 'غير متاح';
+                const source = item.source || 'غير متاح';
+                return `<article class="portfolio-row" data-portfolio-symbol="${escapeMarkup(symbol)}">
+                    <div class="portfolio-symbol"><strong>${escapeMarkup(symbol)}</strong><small>رمز محفوظ محليًا</small></div>
+                    <div class="portfolio-price ${hasPrice ? '' : 'unavailable'}"><strong>${escapeMarkup(price)}</strong><span class="portfolio-status ${state}">${escapeMarkup(status)}</span></div>
+                    <div class="portfolio-source"><b>${escapeMarkup(source)}</b><small>${escapeMarkup(portfolioTime(item.time))}</small></div>
+                    <button class="portfolio-open" type="button" data-symbol="${escapeMarkup(symbol)}" onclick="openPortfolioSymbol(this.dataset.symbol)">عرض بطاقة السهم</button>
+                </article>`;
+            }).join('');
+        }
+
+        function openPortfolioSymbol(symbol) {
+            const normalized = normalizeSymbol(symbol);
+            if (!normalized || !watchlist.includes(normalized)) return;
+            currentFilter = 'ALL';
+            document.querySelectorAll('.filter-btn').forEach((button) => button.classList.remove('active'));
+            document.querySelector('.filter-btn')?.classList.add('active');
+            renderTable();
+            switchMainTab('tools', document.querySelector('[data-tab="tools"].nav-pill'));
+            window.requestAnimationFrame(() => document.getElementById(`row-${normalized}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+        }
+
         function renderTable() {
+            renderPortfolioSummary();
             const wrapper = document.getElementById('stocks-list-wrapper');
             const filtered = watchlist.filter(sym => {
                 if (currentFilter === 'ALL') return true;
@@ -586,8 +714,8 @@
 
             wrapper.innerHTML = filtered.map(sym => {
                 const item = stockMarketData[sym] || { symbol: sym, price: null };
-                const hasPrice = item.price !== null && !isNaN(item.price);
-                const priceStr = hasPrice ? `$${item.price.toFixed(2)}` : 'بانتظار تحديث موثق…';
+                const hasPrice = portfolioHasPrice(item);
+                const priceStr = hasPrice ? `$${finiteNumber(item.price).toFixed(2)}` : 'بانتظار تحديث موثق…';
                 const colorCls = hasPrice ? 'val-pos' : 'val-neutral';
                 const flashCls = item.updated ? 'tick-flash' : '';
                 const textStatus = hasPrice ? (item.isFresh ? 'موثق الآن' : 'آخر قراءة موثقة') : (item.error ? 'تعذر التحديث' : 'بانتظار تحديث موثق');
@@ -602,7 +730,7 @@
                         <div class="stock-col-change val-neutral">${textStatus}</div>
                         <div class="stock-col-action">
                             <span class="badge-decision ${item.cls || 'badge-wait'}">${item.text || 'انتظار'}</span>
-                            <button class="smart-summary-btn" type="button" data-symbol="${sym}" onclick="openSmartDecisionSummary(this.dataset.symbol)" aria-label="فتح ملخص القرار الذكي لـ ${sym}">ملخص ذكي</button>
+                            <button class="smart-summary-btn" type="button" data-symbol="${sym}" aria-label="فتح عدسة القرار التفسيرية لـ ${sym}">عدسة القرار</button>
                             <button class="remove-symbol-btn" type="button" data-symbol="${sym}" onclick="removeStock(this.dataset.symbol)" aria-label="حذف ${sym} من قائمة المراقبة">حذف</button>
                         </div>
                     </div>
@@ -610,39 +738,8 @@
             }).join('');
         }
 
-        function setSmartSummaryText(id, value) { const element = document.getElementById(id); if (element) element.textContent = value; }
-        function renderSmartSummaryList(id, entries, fallback) { const list = document.getElementById(id); if (!list) return; list.replaceChildren(); const values = Array.isArray(entries) && entries.length ? entries : [fallback]; values.slice(0, 3).forEach((value) => { const item = document.createElement('li'); item.textContent = String(value || fallback); list.appendChild(item); }); }
-        function smartSummaryTime(value) { const date = new Date(value || ''); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('ar-SA'); }
-        function smartSummaryReason(reason) { const reasons = { QUOTE_UNAVAILABLE_OR_STALE: 'لا يتوفر سعر موثق وحديث كافٍ لبناء الملخص.', TECHNICAL_CONTEXT_UNAVAILABLE_OR_STALE: 'لا يتوفر سجل فني يومي حديث ومكتمل لبناء الملخص.', AI_NOT_CONFIGURED: 'خدمة التحليل الذكي غير مهيأة بعد؛ لم تُعرض قراءة بديلة.', AI_SERVICE_UNAVAILABLE: 'خدمة التحليل الذكي غير متاحة حاليًا؛ لم تُعرض قراءة بديلة.', MODEL_OUTPUT_REJECTED: 'تم رفض مخرجات غير مطابقة لحدود البحث الآمن.', SOURCE_UNAVAILABLE: 'تعذر الوصول إلى مصادر القراءة الموثقة.', INVALID_SYMBOL: 'رمز السهم غير صالح.' }; return reasons[reason] || 'لا تتوفر بيانات موثقة كافية لبناء الملخص.'; }
-        function setSmartSummaryState(label, tone) { const state = document.getElementById('smart-summary-state'); state.textContent = label; state.className = `smart-summary-state ${tone || ''}`; }
-        function renderSmartDecisionSummaryUnavailable(payload, message) { setSmartSummaryState('غير متاح', 'unavailable'); setSmartSummaryText('smart-summary-headline', 'ملخص القرار الذكي غير متاح'); setSmartSummaryText('smart-summary-reading', message || smartSummaryReason(payload?.reason)); renderSmartSummaryList('smart-summary-evidence', [], 'لا تظهر أدلة بديلة عند نقص البيانات.'); renderSmartSummaryList('smart-summary-risks', [], 'تحقق من المصدر ووقت آخر تحديث قبل إعادة المحاولة.'); setSmartSummaryText('smart-summary-quote-source', payload?.sources?.quote?.source || '—'); setSmartSummaryText('smart-summary-quote-time', smartSummaryTime(payload?.sources?.quote?.observedAt)); setSmartSummaryText('smart-summary-tech-source', payload?.sources?.technicals?.source || '—'); setSmartSummaryText('smart-summary-tech-status', payload?.sources?.technicals?.historyStatus || 'غير متاح'); setSmartSummaryText('smart-summary-trigger', 'تُستأنف المراجعة عند توفر سعر موثق وسجل يومي حديث وخدمة تحليل مهيأة.'); }
-        function renderSmartDecisionSummary(payload) {
-            const safety = payload?.safety || {};
-            if (payload?.availability !== 'available') {
-                renderSmartDecisionSummaryUnavailable(payload);
-                return;
-            }
-            if (safety.researchOnly !== true || safety.executionAllowed !== false || safety.automaticTrading !== false || safety.tradingEnabled !== false || safety.brokerSubmission !== false) {
-                renderSmartDecisionSummaryUnavailable(payload, 'حدود الأمان في الاستجابة غير مكتملة؛ لم تُعرض قراءة بديلة.');
-                return;
-            }
-            const summary = payload.summary || {};
-            setSmartSummaryState('متاح للمراجعة', 'available');
-            setSmartSummaryText('smart-summary-headline', summary.headline || 'ملخص موثق');
-            setSmartSummaryText('smart-summary-reading', summary.marketReading || 'لا تتوفر قراءة وصفية.');
-            renderSmartSummaryList('smart-summary-evidence', summary.evidence, 'لا تتوفر أدلة منظمة.');
-            renderSmartSummaryList('smart-summary-risks', summary.risks, 'لا تتوفر نقاط مراجعة منظمة.');
-            setSmartSummaryText('smart-summary-quote-source', payload.sources?.quote?.source || '—');
-            setSmartSummaryText('smart-summary-quote-time', smartSummaryTime(payload.sources?.quote?.observedAt));
-            setSmartSummaryText('smart-summary-tech-source', payload.sources?.technicals?.source || '—');
-            setSmartSummaryText('smart-summary-tech-status', payload.sources?.technicals?.historyStatus || 'غير متاح');
-            setSmartSummaryText('smart-summary-trigger', summary.reviewTrigger || 'راجع المصدر ووقت التحديث عند تغير حالة البيانات.');
-        }
-        async function openSmartDecisionSummary(symbol) { const normalized = String(symbol || '').trim().toUpperCase(); if (!normalized || !watchlist.includes(normalized)) return; const item = stockMarketData[normalized] || { symbol: normalized }; const modal = document.getElementById('smartDecisionSummaryModal'); modal.classList.add('active'); setSmartSummaryText('smart-summary-symbol', normalized); setSmartSummaryState('جاري إعداد الملخص', ''); setSmartSummaryText('smart-summary-headline', `جاري قراءة الأدلة المتاحة لـ ${normalized}`); setSmartSummaryText('smart-summary-reading', 'لن يبدأ التحليل قبل التحقق من السعر الموثق والسجل اليومي الحديث.'); renderSmartSummaryList('smart-summary-evidence', [], 'جاري التحقق من المصادر.'); renderSmartSummaryList('smart-summary-risks', [], 'جاري التحقق من حدود البيانات.'); if (!Number.isFinite(Number(item.price)) || item.isFresh !== true || item.error === true) { renderSmartDecisionSummaryUnavailable({ reason: 'QUOTE_UNAVAILABLE_OR_STALE', sources: { quote: { source: item.source || 'Asiri Market Engine', observedAt: item.time } } }); return; } const requestId = ++smartSummaryRequestId; try { const response = await fetch(`${SMART_SUMMARY_API}/${encodeURIComponent(normalized)}?_=${Date.now()}`, { cache: 'no-store' }); const payload = await response.json(); if (requestId !== smartSummaryRequestId) return; renderSmartDecisionSummary(payload); } catch (_) { if (requestId !== smartSummaryRequestId) return; renderSmartDecisionSummaryUnavailable({ reason: 'AI_SERVICE_UNAVAILABLE', sources: { quote: { source: item.source || 'Asiri Market Engine', observedAt: item.time } } }); } }
-        function closeSmartDecisionSummary() { smartSummaryRequestId += 1; document.getElementById('smartDecisionSummaryModal').classList.remove('active'); }
-
         function removeStock(symbol) {
-            const sym = String(symbol || '').trim().toUpperCase();
+            const sym = normalizeSymbol(symbol);
             if (!sym || !watchlist.includes(sym)) return;
             const confirmed = window.confirm(`حذف ${sym} من قائمة المراقبة على هذا الجهاز؟ لن يؤثر ذلك على مصدر الأسعار أو أي قرار أو تنفيذ.`);
             if (!confirmed) return;
@@ -650,7 +747,6 @@
             watchlist = watchlist.filter((item) => item !== sym);
             delete stockMarketData[sym];
             saveWatchlist();
-            document.getElementById('portfolio-count').textContent = watchlist.length;
             if (!watchlist.length) {
                 document.getElementById('sync-status-text').textContent = 'لا توجد رموز في قائمة المراقبة. أضف رمزاً يدوياً للمتابعة.';
                 document.getElementById('ws-dot').style.background = 'var(--text-muted)';
@@ -668,30 +764,45 @@
             renderTable();
         }
 
-        function switchMainTab(tab, btn) {
-            document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
-            if (tab === 'tools') document.getElementById('sec-tools').classList.add('active');
-            if (tab === 'journey') document.getElementById('sec-journey').classList.add('active');
-            if (tab === 'research') document.getElementById('sec-research').classList.add('active');
-            if (tab === 'technicals') { document.getElementById('sec-technicals').classList.add('active'); refreshTechnicalAnalysis(); }
-            if (tab === 'command') document.getElementById('sec-command').classList.add('active');
-            if (tab === 'alerts') document.getElementById('sec-alerts').classList.add('active');
-            if (tab === 'portfolio') document.getElementById('sec-portfolio').classList.add('active');
+        function switchMainTab(tab, btn, options = {}) {
+            const section = document.getElementById(`sec-${tab}`);
+            if (!section) return false;
+
+            if (!options.fromHistory && activeMainTab !== tab) {
+                mainTabHistory.push(tab);
+                if (mainTabHistory.length > 20) mainTabHistory.shift();
+            }
+            activeMainTab = tab;
+
+            document.querySelectorAll('.nav-pill').forEach((pill) => {
+                const selected = pill.dataset.tab === tab;
+                pill.classList.toggle('active', selected);
+                pill.setAttribute('aria-selected', String(selected));
+            });
+            document.querySelectorAll('.nav-item[data-tab]').forEach((item) => {
+                const selected = item.dataset.tab === tab;
+                item.classList.toggle('active', selected);
+                if (selected) item.setAttribute('aria-current', 'page'); else item.removeAttribute('aria-current');
+            });
+            document.querySelectorAll('.app-section').forEach((item) => item.classList.remove('active'));
+            section.classList.add('active');
+
+            if (tab === 'technicals') refreshTechnicalAnalysis();
+            if (tab === 'portfolio') renderPortfolioSummary();
+            if (!options.preserveScroll) window.scrollTo({ top: 0, behavior: 'auto' });
+            return true;
         }
 
         function bottomNavClick(type, btn) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-            if (type === 'tools') switchMainTab('tools', document.querySelector('[data-tab="tools"]'));
-            if (type === 'journey') switchMainTab('journey', document.querySelector('[data-tab="journey"]'));
-            if (type === 'research') switchMainTab('research', document.querySelector('[data-tab="research"]'));
-            if (type === 'technicals') switchMainTab('technicals', document.querySelector('[data-tab="technicals"]'));
-            if (type === 'alerts') switchMainTab('alerts', document.querySelector('[data-tab="alerts"]'));
-            if (type === 'opportunities') switchMainTab('command', document.querySelector('[data-tab="command"]'));
-            if (type === 'portfolio') switchMainTab('portfolio', document.querySelector('[data-tab="portfolio"]'));
-            if (type === 'back') window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (type === 'back') {
+                if (mainTabHistory.length > 1) mainTabHistory.pop();
+                const previous = mainTabHistory.at(-1) || 'tools';
+                switchMainTab(previous, document.querySelector(`.nav-pill[data-tab="${previous}"]`), { fromHistory: true });
+                return;
+            }
+            const targets = { tools: 'tools', journey: 'journey', research: 'research', technicals: 'technicals', alerts: 'alerts', opportunities: 'command', portfolio: 'portfolio' };
+            const target = targets[type];
+            if (target) switchMainTab(target, document.querySelector(`.nav-pill[data-tab="${target}"]`));
         }
 
         function openJourneyDestination(tab) {
@@ -717,12 +828,12 @@
             if (prior && watchlist.includes(prior)) select.value = prior;
             const symbol = selectedResearchSymbol();
             const item = stockMarketData[symbol] || { symbol };
-            const hasPrice = Number.isFinite(Number(item.price));
+            const hasPrice = finiteNumber(item.price) !== null;
             const fresh = item.isFresh === true && item.error !== true;
             const status = document.getElementById('research-quality-status');
             status.textContent = !hasPrice ? 'بانتظار قراءة موثقة' : (fresh ? 'قراءة موثقة الآن' : 'آخر قراءة موثقة');
             status.className = `quality-status ${fresh ? 'fresh' : 'stale'}`;
-            document.getElementById('research-source').textContent = item.source || 'Asiri Market Engine';
+            document.getElementById('research-source').textContent = item.source || 'غير متاح';
             document.getElementById('research-time').textContent = item.time ? new Date(item.time).toLocaleTimeString('ar-SA') : '—';
             document.getElementById('research-session').textContent = item.error ? 'تعذر التحديث' : (item.isFresh ? 'طازجة' : 'مراجعة مطلوبة');
             document.getElementById('research-price-note').textContent = hasPrice ? `آخر سعر ظاهر: $${Number(item.price).toFixed(2)} • يعتمد العرض على المصدر والوقت أعلاه.` : 'لا تعرض المنصة سعراً حتى تصل قراءة موثقة من المصدر الحالي.';
@@ -775,9 +886,9 @@
             setTechnicalText('testnet-review-state', 'لا توجد نية جاهزة');
         }
 
-        function technicalNumber(value, digits = 2, suffix = '') { return Number.isFinite(Number(value)) ? `${Number(value).toFixed(digits)}${suffix}` : 'غير متاح'; }
+        function technicalNumber(value, digits = 2, suffix = '') { const number = finiteNumber(value); return number === null ? 'غير متاح' : `${number.toFixed(digits)}${suffix}`; }
         function setTechnicalText(id, value) { const element = document.getElementById(id); if (element) element.textContent = value; }
-        function rsiContext(value) { if (!Number.isFinite(Number(value))) return 'غير متاح'; if (value >= 70) return 'مرتفع فنياً'; if (value <= 30) return 'منخفض فنياً'; return 'ضمن النطاق المحايد'; }
+        function rsiContext(value) { const number = finiteNumber(value); if (number === null) return 'غير متاح'; if (number >= 70) return 'مرتفع فنياً'; if (number <= 30) return 'منخفض فنياً'; return 'ضمن النطاق المحايد'; }
 
         function renderInterpretationList(id, entries, fallback) {
             const target = document.getElementById(id); if (!target) return;
@@ -804,7 +915,7 @@
             const confidence = interpretation.confidence || {};
             const status = document.getElementById('tech-interpretation-status'); status.textContent = 'متاح للمراجعة'; status.className = 'quality-status fresh';
             setTechnicalText('tech-interpretation-context', interpretation.context || 'وصف تقني للسجل اليومي.');
-            setTechnicalText('tech-interpretation-confidence', Number.isFinite(Number(confidence.score)) ? `${confidence.score}/100` : 'غير متاح');
+            setTechnicalText('tech-interpretation-confidence', finiteNumber(confidence.score) === null ? 'غير متاح' : `${confidence.score}/100`);
             setTechnicalText('tech-interpretation-confidence-label', confidence.label || 'اكتمال غير محدد');
             renderInterpretationList('tech-interpretation-evidence', interpretation.evidence, 'لا تظهر أدلة بديلة.');
             renderInterpretationList('tech-interpretation-risks', interpretation.risks, 'لا تزال المراجعة البشرية مطلوبة.');
@@ -812,7 +923,7 @@
         }
 
         function technicalSparkline(points) {
-            const values = (Array.isArray(points) ? points : []).map(point => Number(point?.close)).filter(Number.isFinite);
+            const values = (Array.isArray(points) ? points : []).map(point => finiteNumber(point?.close)).filter(value => value !== null);
             if (values.length < 2) return '<span style="color:var(--text-muted);font-size:.7rem">غير متاح</span>';
             const min = Math.min(...values), max = Math.max(...values), span = (max - min) || 1;
             const path = values.map((value, index) => { const x = (index / (values.length - 1)) * 100; const y = 34 - (((value - min) / span) * 30); return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`; }).join(' ');
@@ -823,7 +934,7 @@
             const status = document.getElementById('tech-history-status'); status.textContent = payload?.reason === 'SOURCE_UNAVAILABLE' ? 'المصدر غير متاح' : 'غير متاح'; status.className = 'quality-status stale';
             setTechnicalText('tech-trend-label', 'غير متاح'); setTechnicalText('tech-strength', '—'); document.getElementById('tech-sparkline').innerHTML = '<span style="color:var(--text-muted);font-size:.7rem">غير متاح</span>';
             ['tech-momentum20','tech-pattern-quality','tech-rsi','tech-rsi-context','tech-atr','tech-atr-pct','tech-macd','tech-histogram','tech-sma20','tech-sma50','tech-sma200','tech-ema9','tech-ema20','tech-ema50','tech-signal','tech-volume-ratio','tech-breakout','tech-support'].forEach(id => setTechnicalText(id, 'غير متاح'));
-            setTechnicalText('tech-source', payload?.source || '—'); setTechnicalText('tech-history-end', payload?.endOfHistory ? new Date(payload.endOfHistory).toLocaleDateString('ar-SA') : '—'); setTechnicalText('tech-candles', Number.isFinite(Number(payload?.candles)) ? `${payload.candles} شمعة` : '—'); setTechnicalText('tech-cache', payload?.cache?.status === 'HIT' ? 'ذاكرة مؤقتة' : '—');
+            setTechnicalText('tech-source', payload?.source || '—'); setTechnicalText('tech-history-end', payload?.endOfHistory ? new Date(payload.endOfHistory).toLocaleDateString('ar-SA') : '—'); setTechnicalText('tech-candles', finiteNumber(payload?.candles) === null ? '—' : `${payload.candles} شمعة`); setTechnicalText('tech-cache', payload?.cache?.status === 'HIT' ? 'ذاكرة مؤقتة' : '—');
             document.getElementById('tech-availability').textContent = 'غير متاح'; document.getElementById('tech-availability').className = 'quality-status stale'; setTechnicalText('tech-context-text', message || 'لا تتوفر شموع تاريخية كافية لحساب هذه المؤشرات.');
             renderTechnicalInterpretationUnavailable(payload?.interpretation, message);
         }
@@ -831,7 +942,7 @@
         function renderTechnicalAnalysis(payload) {
             if (payload?.availability !== 'available' || !payload.indicators) { const reason = payload?.reason === 'INSUFFICIENT_HISTORY' ? `غير متاح: السجل يحتوي ${payload.candles || 0} شمعة، بينما يلزم ${payload.minimumCandles || 35} شمعة على الأقل لحساب القراءة الأساسية.` : null; renderTechnicalUnavailable(payload, reason || 'تعذر الحصول على سجل تاريخي موثوق؛ لم تُعرض أي قيم بديلة.'); return; }
             const indicators = payload.indicators, stale = payload.historyStatus === 'STALE', historyStatus = document.getElementById('tech-history-status'); historyStatus.textContent = stale ? 'السجل متأخر' : 'سجل يومي متاح'; historyStatus.className = `quality-status ${stale ? 'stale' : 'fresh'}`;
-            setTechnicalText('tech-trend-label', indicators.trendLabel || 'غير متاح'); setTechnicalText('tech-strength', Number.isFinite(Number(indicators.trendStrength)) ? `${indicators.trendStrength}/100` : 'غير متاح'); document.getElementById('tech-sparkline').innerHTML = technicalSparkline(indicators.sparkline); setTechnicalText('tech-momentum20', technicalNumber(indicators.momentum20, 2, '%')); setTechnicalText('tech-pattern-quality', technicalNumber(indicators.quality, 0, '/100'));
+            setTechnicalText('tech-trend-label', indicators.trendLabel || 'غير متاح'); setTechnicalText('tech-strength', finiteNumber(indicators.trendStrength) === null ? 'غير متاح' : `${indicators.trendStrength}/100`); document.getElementById('tech-sparkline').innerHTML = technicalSparkline(indicators.sparkline); setTechnicalText('tech-momentum20', technicalNumber(indicators.momentum20, 2, '%')); setTechnicalText('tech-pattern-quality', technicalNumber(indicators.quality, 0, '/100'));
             setTechnicalText('tech-source', payload.source || '—'); setTechnicalText('tech-history-end', payload.endOfHistory ? new Date(payload.endOfHistory).toLocaleDateString('ar-SA') : '—'); setTechnicalText('tech-candles', `${payload.candles} شمعة`); setTechnicalText('tech-cache', payload.cache?.status === 'HIT' ? 'ذاكرة مؤقتة' : 'تحديث جديد'); setTechnicalText('tech-rsi', technicalNumber(indicators.rsi14)); setTechnicalText('tech-rsi-context', rsiContext(indicators.rsi14)); setTechnicalText('tech-atr', technicalNumber(indicators.atr14)); setTechnicalText('tech-atr-pct', technicalNumber(indicators.atrPct, 2, '%')); setTechnicalText('tech-macd', technicalNumber(indicators.macd, 3)); setTechnicalText('tech-histogram', technicalNumber(indicators.histogram, 3));
             setTechnicalText('tech-sma20', technicalNumber(indicators.sma20)); setTechnicalText('tech-sma50', technicalNumber(indicators.sma50)); setTechnicalText('tech-sma200', technicalNumber(indicators.sma200)); setTechnicalText('tech-ema9', technicalNumber(indicators.ema9)); setTechnicalText('tech-ema20', technicalNumber(indicators.ema20)); setTechnicalText('tech-ema50', technicalNumber(indicators.ema50)); setTechnicalText('tech-signal', technicalNumber(indicators.signal, 3)); setTechnicalText('tech-volume-ratio', technicalNumber(indicators.historicalVolumeRatio, 2, '×')); setTechnicalText('tech-breakout', technicalNumber(indicators.breakoutDistancePct, 2, '%')); setTechnicalText('tech-support', technicalNumber(indicators.supportDistancePct, 2, '%'));
             document.getElementById('tech-availability').textContent = stale ? 'مراجعة التأخر' : 'قراءة متاحة'; document.getElementById('tech-availability').className = `quality-status ${stale ? 'stale' : 'fresh'}`; setTechnicalText('tech-context-text', `${payload.symbol} • ${payload.interval} • نهاية السجل ${payload.endOfHistory ? new Date(payload.endOfHistory).toLocaleDateString('ar-SA') : '—'} • ${stale ? 'البيانات متأخرة؛ راجع المصدر قبل استخدامها.' : 'السجل اليومي ضمن نافذة الحداثة.'} المؤشرات تصف البيانات ولا تنشئ أمراً أو توصية تنفيذية.`);
@@ -843,17 +954,18 @@
             try { const response = await fetch(`${TECHNICALS_API}/${encodeURIComponent(symbol)}?_=${Date.now()}`, { cache: 'no-store' }); const payload = await response.json(); renderTechnicalAnalysis(payload); } catch (_) { renderTechnicalUnavailable({ symbol, reason: 'SOURCE_UNAVAILABLE' }, 'تعذر الاتصال بخدمة التحليل؛ لم تُعرض أي قيم بديلة.'); } finally { technicalRequestInFlight = false; }
         }
 
-        function openAddStockModal() { document.getElementById('addStockModal').classList.add('active'); }
-        function closeAddStockModal() { document.getElementById('addStockModal').classList.remove('active'); document.getElementById('modalSymbolInput').value = ''; }
+        function openAddStockModal() { const input = document.getElementById('modalSymbolInput'); input.setCustomValidity(''); document.getElementById('addStockModal').classList.add('active'); window.requestAnimationFrame(() => input.focus()); }
+        function closeAddStockModal() { const input = document.getElementById('modalSymbolInput'); document.getElementById('addStockModal').classList.remove('active'); input.value = ''; input.setCustomValidity(''); }
 
         function confirmAddStock() {
-            const sym = document.getElementById('modalSymbolInput').value.toUpperCase().trim();
-            if (!sym) return;
+            const input = document.getElementById('modalSymbolInput');
+            const sym = normalizeSymbol(input.value);
+            input.setCustomValidity(sym ? '' : 'أدخل رمزًا صحيحًا من 1 إلى 10 أحرف مثل AAPL.');
+            if (!sym) { input.reportValidity(); return; }
             if (!watchlist.includes(sym)) {
                 watchlist.push(sym);
                 saveWatchlist();
                 stockMarketData[sym] = { symbol: sym, price: null, decision: 'WAIT', text: 'بانتظار تحديث موثق', cls: 'badge-wait' };
-                document.getElementById('portfolio-count').textContent = watchlist.length;
                 syncTechnicalSymbolOptions();
             }
             currentFilter = 'ALL';
@@ -865,6 +977,6 @@
 
         init();
     </script>
-    <script src="./smart-decision-lens-static.js?v=1"></script>
+    <script src="./smart-decision-lens-static.js?v=2"></script>
 </body>
 </html>

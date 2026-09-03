@@ -1,10 +1,17 @@
-/* ASIRI Smart Decision Lens · static v27 UI layer · read-only. */
+/* ASIRI Smart Decision Lens · static v27 UI layer · local, explainable and read-only. */
 (() => {
   'use strict';
 
   const LENS_ID = 'asiri-smart-decision-lens-static';
   const safe = (value, fallback = '—') => String(value ?? '').trim() || fallback;
   const text = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[char]));
+  function numericPrice(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const normalized = typeof value === 'string' ? value.replace(/[$,\s]/g, '') : value;
+    if (normalized === '') return null;
+    const number = Number(normalized);
+    return Number.isFinite(number) ? number : null;
+  }
   const SCENARIOS = Object.freeze({
     current: Object.freeze({
       label: 'القراءة الحالية',
@@ -13,22 +20,22 @@
     stale: Object.freeze({
       label: 'قراءة متأخرة',
       description: 'محاكاة محلية: المصدر معروف، لكن القراءة متأخرة؛ تُقيَّد الثقة تحت 39 ولا تصلح للمراجعة.',
-      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', observedAt: '2026-08-28T08:00:00Z', isFresh: false, decision: 'BUY', error: false })
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: '2026-08-28T08:00:00Z', isFresh: false, decision: 'BUY', error: false })
     }),
     failedSource: Object.freeze({
       label: 'فشل المصدر',
       description: 'محاكاة محلية: لا سعر موثّق ولا وقت قراءة؛ تتوقف بوابات المراجعة وتصبح الثقة صفرًا.',
-      item: Object.freeze({ price: null, source: 'Asiri Market Engine — محاكاة', observedAt: null, isFresh: false, decision: 'WAIT', error: true })
+      item: Object.freeze({ price: null, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: null, isFresh: false, decision: 'WAIT', error: true })
     }),
     gatesPending: Object.freeze({
       label: 'بوابات غير مكتملة',
       description: 'محاكاة محلية: البيانات قوية وحديثة، لكن حالة المراجعة لم تكتمل؛ لا تتحول إلى جاهز للمراجعة.',
-      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'WAIT', error: false })
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'WAIT', error: false })
     }),
     reviewReady: Object.freeze({
       label: 'جاهز للمراجعة',
       description: 'محاكاة محلية: اكتملت بيانات وبوابات القراءة؛ تبقى المراجعة البشرية إلزامية ولا يُنشأ أي إجراء.',
-      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'BUY', error: false })
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'BUY', error: false })
     })
   });
   let activeScenario = 'current';
@@ -51,7 +58,7 @@
     return {
       symbol,
       price: row?.querySelector('.stock-col-price')?.textContent?.trim() || null,
-      source: row?.querySelector('.stock-col-name .name')?.textContent?.trim() || 'Asiri Market Engine',
+      source: null,
       isFresh: /موثق الآن/.test(row?.textContent || ''),
       decision: /شراء/.test(row?.textContent || '') ? 'BUY' : 'WAIT'
     };
@@ -87,7 +94,7 @@
   }
 
   function evidenceConfidence(item, view) {
-    const priceAvailable = Number.isFinite(Number(item?.price));
+    const priceAvailable = numericPrice(item?.price) !== null;
     const sourceKnown = Boolean(String(item?.source || '').trim());
     const timeKnown = Boolean(String(item?.time || item?.updatedAt || item?.observedAt || '').trim());
     const fresh = item?.isFresh === true;
@@ -141,7 +148,7 @@
   }
 
   function reviewGates(item, view) {
-    const priceAvailable = Number.isFinite(Number(item?.price));
+    const priceAvailable = numericPrice(item?.price) !== null;
     const sourceKnown = Boolean(String(item?.source || '').trim());
     const fresh = item?.isFresh === true;
     const noError = item?.error !== true;
@@ -217,10 +224,10 @@
     const item = scenarioItem(marketItem(normalized));
     const view = decisionView(item);
     const confidence = evidenceConfidence(item, view);
-    const source = safe(item?.source, 'Asiri Market Engine');
+    const source = safe(item?.source, 'غير متاح');
     const observedAt = readingTime(item?.time || item?.updatedAt || item?.observedAt);
-    const price = Number(item?.price);
-    const priceDisplay = Number.isFinite(price) ? `$${price.toFixed(2)}` : safe(item?.price, 'بانتظار قراءة موثقة');
+    const price = numericPrice(item?.price);
+    const priceDisplay = price === null ? 'بانتظار قراءة موثقة' : `$${price.toFixed(2)}`;
     const isReady = view.tone === 'ready';
     const isAttention = view.tone === 'attention';
 
@@ -230,6 +237,7 @@
         <div><span class="smart-lens-symbol">${text(normalized)}</span><span class="smart-lens-price">${text(priceDisplay)}</span></div>
         <span class="smart-lens-state ${view.tone}">${text(view.label)}</span>
       </div>
+      <p class="smart-lens-local-note">قراءة تفسيرية محلية من البيانات الظاهرة · لا تستخدم نموذج ذكاء اصطناعي ولا تجري اتصالًا شبكيًا.</p>
       <section class="smart-lens-primary" aria-label="حالة القرار">
         <p class="smart-lens-eyebrow">الحالة الآن</p>
         <h3>${text(view.label)}</h3>
@@ -274,7 +282,6 @@
     const trigger = event.target.closest('.smart-summary-btn');
     if (!trigger) return;
     event.preventDefault();
-    event.stopImmediatePropagation();
     openLens(trigger.dataset.symbol || trigger.getAttribute('data-symbol'));
   }, true);
 

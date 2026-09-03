@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { sanitizeDecisionSnapshot, computeDecisionOutcomes, buildDecisionIntelligenceSummary } from './decision-intelligence.js';
 
 execFileSync(process.execPath, ['check-smart-decision-summary-ui.mjs'], { stdio: 'pipe' }); // ASIRI_SMART_DECISION_SUMMARY_UI_V1
+execFileSync(process.execPath, ['check-batch1-stability.mjs'], { stdio: 'pipe' }); // ASIRI_BATCH1_PORTFOLIO_V1
 
 const legacyPath = 'check.js';
 const generatedPath = '.check-v720-base.mjs';
@@ -26,11 +27,12 @@ const required = [
   'patch-decision-intelligence-v720.js',
   'supabase_migration_decision_intelligence_v720.sql',
   'index.html',
-  'check-smart-decision-summary-ui.mjs'
+  'check-smart-decision-summary-ui.mjs',
+  'check-batch1-stability.mjs'
 ];
 for (const file of required) if (!fs.existsSync(file)) throw new Error(`Missing v7.2 file: ${file}`);
 
-for (const file of ['decision-intelligence.js', 'decision-intelligence-v720.js', 'patch-decision-intelligence-v720.js', 'check-v720.js', 'check-smart-decision-summary-ui.mjs']) {
+for (const file of ['decision-intelligence.js', 'decision-intelligence-v720.js', 'patch-decision-intelligence-v720.js', 'smart-decision-lens-static.js', 'check-v720.js', 'check-smart-decision-summary-ui.mjs', 'check-batch1-stability.mjs']) {
   execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' });
 }
 

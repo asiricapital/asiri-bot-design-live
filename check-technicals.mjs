@@ -46,8 +46,8 @@ ensure(technicalsSection.includes('مراجعة نية الأمر التجريب
 ensure(technicalsSection.includes('لا يوجد أمر جاهز للمراجعة') && technicalsSection.includes('مقفل عمداً'), 'يجب أن تعرض بطاقة مراجعة Testnet حالة القفل الصريحة');
 ensure(!/\/api\/testnet-lab|fetch\s*\(|XMLHttpRequest|\.post\s*\(/.test(technicalsSection), 'لا ينبغي أن تنشئ واجهة Live Terminal نية أو طلباً للمختبر من دون جلسة مصادقة محكومة');
 ensure(html.includes("const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';"), 'يجب أن تستخدم الواجهة خدمة Asiri Bot الخادمية للتحليل الفني');
-ensure(/if \(tab === 'technicals'\).*document\.getElementById\('sec-technicals'\)\.classList\.add\('active'\)/.test(html), 'التبويب الداخلي للتحليل الفني غير مربوط');
-ensure(html.includes("if (type === 'technicals') switchMainTab('technicals'"), 'التنقل السفلي للتحليل الفني غير مربوط');
+ensure(html.includes('document.getElementById(`sec-${tab}`)') && html.includes("if (tab === 'technicals') refreshTechnicalAnalysis();"), 'التبويب الداخلي الموحد للتحليل الفني غير مربوط');
+ensure(html.includes("technicals: 'technicals'") && html.includes('data-tab="technicals"'), 'التنقل السفلي للتحليل الفني غير مربوط');
 ensure(html.includes('function renderTechnicalInterpretation('), 'عرض التفسير الفني غير مربوط بالواجهة');
 ensure(html.includes('renderTechnicalInterpretation(payload.interpretation);'), 'يجب أن يستهلك العرض عقد التفسير الخادمي');
 ensure(!/placeOrder|brokerSubmission|\/api\/order|submitOrder/.test(technicalsSection), 'لا ينبغي أن تضيف لوحة التحليل أي مسار أو دالة تنفيذ');

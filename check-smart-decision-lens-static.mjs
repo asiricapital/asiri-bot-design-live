@@ -5,16 +5,17 @@ const script = readFileSync(new URL('./smart-decision-lens-static.js', import.me
 const css = readFileSync(new URL('./smart-decision-lens-static.css', import.meta.url), 'utf8');
 
 for (const marker of [
-  'smart-decision-lens-static.css?v=1',
-  'smart-decision-lens-static.js?v=1',
+  'smart-decision-lens-static.css?v=2',
+  'smart-decision-lens-static.js?v=2',
   'class="smart-summary-btn"'
 ]) {
   if (!index.includes(marker)) throw new Error(`Static lens index marker missing: ${marker}`);
 }
 for (const marker of [
   'smart-summary-btn',
-  'event.stopImmediatePropagation()',
   'عدسة القرار الذكية',
+  'قراءة تفسيرية محلية من البيانات الظاهرة',
+  'لا تستخدم نموذج ذكاء اصطناعي',
   'رحلة السهم',
   'لا تنفيذ آلي',
   'المراجعة البشرية إلزامية',
@@ -54,6 +55,7 @@ for (const marker of [
   if (!css.includes(marker)) throw new Error(`Static lens CSS marker missing: ${marker}`);
 }
 if (/\b(fetch|XMLHttpRequest)\s*\(/.test(script)) throw new Error('Static lens must not make network calls.');
+if (script.includes('event.stopImmediatePropagation()')) throw new Error('Static lens must not suppress unrelated click handlers.');
 if (/\b(order|trade|broker|execute|submit)\b/i.test(script)) throw new Error('Static lens must not expose trading or broker actions.');
 if (/\b(fetch|XMLHttpRequest|localStorage|sessionStorage)\s*\(/.test(script)) throw new Error('Static lens simulation must remain local and network-free.');
 console.log('Static smart decision lens checks passed: v27 binding, evidence-confidence simulator, review gates, mobile safety and read-only boundaries verified.');

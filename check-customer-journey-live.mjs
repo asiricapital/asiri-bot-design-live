@@ -18,8 +18,8 @@ ensure(journeySectionStart >= 0 && journeySectionEnd > journeySectionStart, 'ق�
 ensure(journeySection.includes('ابدأ بالخدمة الأقرب لخطوتك التالية'), 'عنوان مسار العميل غير موجود');
 ensure(journeySection.includes('openJourneyDestination'), 'بطاقات المسار يجب أن تربط بوجهة داخلية');
 ensure(!journeySection.includes('fetch(') && !journeySection.includes('VERIFIED_QUOTES_API'), 'مسار العميل يجب ألا يستدعي بيانات سوق أو وسيط');
-ensure(html.includes("if (tab === 'journey') document.getElementById('sec-journey').classList.add('active');"), 'التبويب الداخلي لمسار العميل غير مربوط');
-ensure(html.includes("if (type === 'journey') switchMainTab('journey'"), 'التنقل السفلي لمسار العميل غير مربوط');
+ensure(html.includes('document.getElementById(`sec-${tab}`)') && html.includes('pill.dataset.tab === tab'), 'التبويب الداخلي الموحد لمسار العميل غير مربوط');
+ensure(html.includes("journey: 'journey'") && html.includes('data-tab="journey"'), 'التنقل السفلي لمسار العميل غير مربوط');
 ensure(html.includes("const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';"), 'مصدر الأسعار الموثقة يجب أن يبقى دون تغيير');
 
 console.log('Customer journey live-terminal checks passed.');

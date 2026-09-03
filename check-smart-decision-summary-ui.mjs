@@ -1,33 +1,30 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const html = fs.readFileSync('index.html', 'utf8');
-const required = [
+const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+const lens = fs.readFileSync(new URL('./smart-decision-lens-static.js', import.meta.url), 'utf8');
+
+for (const marker of [
   'ASIRI_SMART_DECISION_SUMMARY_UI_V1',
-  'id="smartDecisionSummaryModal"',
-  'SMART_SUMMARY_API',
-  '/api/live-terminal/smart-summary',
-  'openSmartDecisionSummary',
-  'closeSmartDecisionSummary',
-  'renderSmartDecisionSummaryUnavailable',
-  'QUOTE_UNAVAILABLE_OR_STALE',
-  'TECHNICAL_CONTEXT_UNAVAILABLE_OR_STALE',
-  'AI_NOT_CONFIGURED',
-  'executionAllowed=false',
-  'automaticTrading=false',
-  'ملخص ذكي',
-  'لا ينشئ توصية شراء أو بيع'
-];
-for (const marker of required) assert.ok(html.includes(marker), `Smart summary UI marker missing: ${marker}`);
+  'class="smart-summary-btn"',
+  'عدسة القرار'
+]) assert.ok(html.includes(marker), `Decision lens UI marker missing: ${marker}`);
 
-const summaryBlock = html.slice(html.indexOf('function openSmartDecisionSummary'), html.indexOf('function removeStock'));
-const renderingBlock = html.slice(html.indexOf('function renderSmartDecisionSummary('), html.indexOf('async function openSmartDecisionSummary'));
-assert.ok(summaryBlock.includes('item.isFresh !== true'), 'Smart summary must reject a non-fresh quote before requesting analysis');
-assert.ok(summaryBlock.includes('item.error === true'), 'Smart summary must reject a failed quote before requesting analysis');
-assert.ok(renderingBlock.includes('availability !== \'available\''), 'Smart summary must require an available API payload');
-assert.ok(renderingBlock.includes('renderSmartDecisionSummaryUnavailable(payload);'), 'Unavailable API payloads must preserve their explicit reason for the user');
-assert.ok(renderingBlock.includes('brokerSubmission !== false'), 'Smart summary must reject a payload without an explicit broker lock');
-assert.ok(!/fetch\([^\n]*(?:order|trade|broker|testnet)/i.test(summaryBlock), 'Smart summary UI must not call an execution path');
-assert.ok(!/automaticTrading\s*=\s*true|executionAllowed\s*=\s*true|brokerSubmission\s*=\s*true/i.test(summaryBlock), 'Smart summary UI must remain read-only');
+assert.ok(!html.includes('onclick="openSmartDecisionSummary'), 'Only the external decision-lens handler may own the stock action');
+assert.ok(!html.includes('/api/live-terminal/smart-summary'), 'The unavailable smart-summary route must not be called or advertised');
+assert.ok(!html.includes('smartDecisionSummaryModal'), 'The inactive legacy AI summary modal must not remain in the page');
+assert.ok(!html.includes('AI-ASSISTED RESEARCH'), 'The page must not imply a model generated the local lens');
 
-console.log('Smart decision summary UI checks passed: on-demand UI, explicit unavailable states, and no execution route.');
+for (const marker of [
+  "event.target.closest('.smart-summary-btn')",
+  'قراءة تفسيرية محلية من البيانات الظاهرة',
+  'لا تستخدم نموذج ذكاء اصطناعي',
+  'لا تنفيذ آلي',
+  'المراجعة البشرية إلزامية'
+]) assert.ok(lens.includes(marker), `Local decision lens marker missing: ${marker}`);
+
+assert.ok(!lens.includes('event.stopImmediatePropagation()'), 'The local lens must not suppress unrelated click handlers');
+assert.ok(!/\b(fetch|XMLHttpRequest)\s*\(/.test(lens), 'The local lens must not make network calls');
+assert.ok(!/\b(order|trade|broker|execute|submit)\b/i.test(lens), 'The local lens must not expose trading or broker actions');
+
+console.log('Decision lens UI checks passed: one local handler, explicit non-AI disclosure, no unavailable endpoint, and no execution route.');

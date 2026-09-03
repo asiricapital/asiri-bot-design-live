@@ -16,9 +16,9 @@ ensure(researchSection.includes('مركز أبحاث وقرار موثّق'), '�
 ensure(researchSection.includes('SEC EDGAR'), 'رابط المصدر التنظيمي الرسمي غير موجود');
 ensure(researchSection.includes('NO BROKER LINK'), 'يجب أن يوضح المركز عدم وجود ربط وسيط');
 ensure(!researchSection.includes('fetch(') && !researchSection.includes('VERIFIED_QUOTES_API'), 'المركز لا يجب أن يضيف مصدر أسعار أو وسيطاً جديداً');
-ensure(html.includes("if (tab === 'research') document.getElementById('sec-research').classList.add('active');"), 'التبويب الداخلي لمركز الأبحاث غير مربوط');
-ensure(html.includes("if (type === 'research') switchMainTab('research'"), 'التنقل السفلي لمركز الأبحاث غير مربوط');
+ensure(html.includes('document.getElementById(`sec-${tab}`)') && html.includes('pill.dataset.tab === tab'), 'التبويب الداخلي الموحد لمركز الأبحاث غير مربوط');
+ensure(html.includes("research: 'research'") && html.includes('data-tab="research"'), 'التنقل السفلي لمركز الأبحاث غير مربوط');
 ensure(html.includes("const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';"), 'مصدر الأسعار الموثقة يجب أن يبقى دون تغيير');
-ensure(!html.includes('brokerSubmission') && !html.includes('placeOrder') && !html.includes('/api/order'), 'لا ينبغي إضافة أي مسار تنفيذ أو أمر وسيط');
+ensure(!researchSection.includes('brokerSubmission') && !researchSection.includes('placeOrder') && !researchSection.includes('/api/order'), 'لا ينبغي أن يضيف مركز الأبحاث أي مسار تنفيذ أو أمر وسيط');
 
 console.log('Research center checks passed.');

@@ -6,10 +6,11 @@
 .smart-lens-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 14px; border-bottom: 1px solid rgba(30, 51, 86, .94); }
 .smart-lens-kicker, .smart-lens-eyebrow { margin: 0; color: #62e8f9; font-size: .64rem; font-weight: 900; letter-spacing: .11em; }
 .smart-lens-head h2 { margin: 5px 0 0; color: #fff; font-size: 1.15rem; }
-.smart-lens-close { min-height: 34px; border: 1px solid rgba(148, 163, 184, .35); border-radius: 9px; padding: 0 11px; background: rgba(6, 14, 24, .85); color: #cbd5e1; font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+.smart-lens-close { min-height: 44px; border: 1px solid rgba(148, 163, 184, .35); border-radius: 9px; padding: 0 11px; background: rgba(6, 14, 24, .85); color: #cbd5e1; font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
 .smart-lens-close:focus-visible, .smart-lens-close:hover { outline: none; border-color: #00e5ff; color: #fff; }
 .smart-lens-content { padding: 15px 18px 6px; }
 .smart-lens-symbol-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.smart-lens-local-note { margin: -2px 0 12px; border-right: 2px solid #00e5ff; padding: 4px 9px 4px 0; color: #9fb1c5; font-size: .67rem; line-height: 1.7; }
 .smart-lens-symbol { color: #67e8f9; font-size: 1.15rem; font-weight: 900; letter-spacing: .03em; }
 .smart-lens-price { display: inline-block; margin-inline-start: 9px; color: #f8fafc; font-size: .85rem; font-weight: 800; direction: ltr; }
 .smart-lens-state { flex: none; border: 1px solid rgba(247, 201, 72, .38); border-radius: 999px; padding: 5px 9px; background: rgba(247, 201, 72, .1); color: #ffe29a; font-size: .67rem; font-weight: 900; }
