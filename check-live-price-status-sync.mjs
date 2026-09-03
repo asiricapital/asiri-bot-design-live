@@ -4,8 +4,10 @@ const source = await readFile(new URL('./index.html', import.meta.url), 'utf8');
 const required = [
   "const states = symbols.map((symbol) => quoteDataState(stockMarketData[symbol]))",
   "const freshCount = states.filter((state) => state === 'FRESH').length",
-  "const cachedCount = states.filter((state) => state === 'CACHED').length",
-  "تم الفحص: ${completeCount}/${symbols.length} مكتملة • حديثة ${freshCount} • محفوظة ${cachedCount}",
+  "const delayedCount = states.filter((state) => state === 'DELAYED').length",
+  "const staleCount = states.filter((state) => state === 'STALE').length",
+  "const unavailableCount = states.filter((state) => state === 'UNAVAILABLE').length",
+  "تم الفحص: ${completeCount}/${symbols.length} قابلة للعرض • حديثة ${freshCount} • متأخرة ${delayedCount} • قديمة ${staleCount} • ناقصة ${unavailableCount}",
   "آخر فحص لمحرك السوق • ${checkedAt} • استلم ${receivedComplete} قراءة مكتملة",
   "const retryText = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً'",
   "document.getElementById('last-sync-label').textContent = retryText",

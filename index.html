@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Asiri Capital | Live Terminal v27</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link href="./smart-decision-lens-static.css?v=4" rel="stylesheet">
+    <link href="./smart-decision-lens-static.css?v=5" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -109,7 +109,7 @@
         .section-title-main { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
         .section-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4; }
 
-        .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+        .filter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
         .filter-btn {
             background: var(--bg-base); border: 1px solid var(--border-color);
             color: var(--text-main); padding: 0.6rem 0.2rem; border-radius: 10px;
@@ -144,11 +144,12 @@
         .val-neutral { color: var(--text-muted); }
         .val-price { color: var(--text-main); }
 
-        /* ASIRI_BATCH2_DATA_TRUTH_V1 · states describe quote quality, never trading actions. */
+        /* ASIRI_BATCH4_DATA_HEALTH_V1 · source health and age, never trading actions. */
         .badge-data-state { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 92px; text-align: center; }
         .badge-fresh { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge-cached { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
-        .badge-unavailable { background: rgba(239, 68, 68, 0.12); color: #fecaca; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-delayed { background: rgba(226, 188, 83, 0.15); color: #ffe4a3; border: 1px solid rgba(226, 188, 83, 0.34); }
+        .badge-stale { background: rgba(251, 113, 133, 0.13); color: #fecdd3; border: 1px solid rgba(251, 113, 133, 0.34); }
+        .badge-unavailable { background: rgba(148, 163, 184, 0.12); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
         .remove-symbol-btn { margin-top: 0.35rem; min-height: 28px; padding: 0.2rem 0.5rem; border: 1px solid rgba(239, 68, 68, 0.42); border-radius: 6px; background: rgba(239, 68, 68, 0.08); color: #fca5a5; font: inherit; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
         .remove-symbol-btn:active { transform: scale(0.97); background: rgba(239, 68, 68, 0.18); }
 
@@ -162,11 +163,11 @@
         .portfolio-head h2 { margin:6px 0 5px; font-size:1.35rem; }
         .portfolio-head p { max-width:680px; margin:0; color:var(--text-muted); font-size:.78rem; line-height:1.75; }
         .portfolio-seal { flex:none; padding:9px 11px; border:1px solid rgba(37,214,149,.34); border-radius:12px; color:var(--green); background:rgba(37,214,149,.07); font-size:.67rem; font-weight:900; line-height:1.55; text-align:center; }
-        .portfolio-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; margin:15px 0; }
+        .portfolio-kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:9px; margin:15px 0; }
         .portfolio-kpi { border:1px solid var(--border-color); border-radius:12px; padding:11px; background:rgba(6,14,24,.5); }
         .portfolio-kpi span { display:block; color:var(--text-muted); font-size:.66rem; }
         .portfolio-kpi strong { display:block; margin-top:5px; color:#fff; font-size:1rem; overflow-wrap:anywhere; }
-        .portfolio-kpi.fresh strong { color:var(--green); }.portfolio-kpi.stale strong { color:var(--accent-gold); }.portfolio-kpi.unavailable strong { color:#fca5a5; }
+        .portfolio-kpi.fresh strong { color:var(--green); }.portfolio-kpi.delayed strong { color:#ffe4a3; }.portfolio-kpi.stale strong { color:#fecdd3; }.portfolio-kpi.unavailable strong { color:#cbd5e1; }
         .portfolio-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:11px; }
         .portfolio-toolbar p { margin:0; color:var(--text-muted); font-size:.7rem; line-height:1.6; }
         .portfolio-refresh { min-height:44px; flex:none; border:1px solid rgba(0,229,255,.4); border-radius:11px; padding:0 13px; background:rgba(0,229,255,.09); color:#a5f3fc; font:inherit; font-size:.72rem; font-weight:900; cursor:pointer; }
@@ -175,7 +176,7 @@
         .portfolio-row { display:grid; grid-template-columns:minmax(72px,.65fr) minmax(110px,.9fr) minmax(125px,1.25fr) auto; gap:10px; align-items:center; border:1px solid var(--border-color); border-radius:12px; padding:11px; background:rgba(6,14,24,.5); }
         .portfolio-symbol strong,.portfolio-price strong { display:block; color:#fff; font-size:.9rem; }.portfolio-symbol small,.portfolio-price small,.portfolio-source small { display:block; margin-top:3px; color:var(--text-muted); font-size:.62rem; line-height:1.5; }
         .portfolio-price strong { direction:ltr; text-align:right; color:var(--green); }.portfolio-price.unavailable strong { color:var(--text-muted); }
-        .portfolio-source b { display:block; color:#dce7f4; font-size:.7rem; overflow-wrap:anywhere; }.portfolio-status { display:inline-flex; align-items:center; width:max-content; margin-top:4px; border:1px solid rgba(247,201,72,.3); border-radius:999px; padding:3px 7px; color:#ffe4a3; background:rgba(247,201,72,.08); font-size:.61rem; font-weight:900; }.portfolio-status.fresh { border-color:rgba(37,214,149,.32); color:#b9f7df; background:rgba(37,214,149,.08); }.portfolio-status.unavailable { border-color:rgba(239,68,68,.32); color:#fecaca; background:rgba(239,68,68,.08); }
+        .portfolio-source b { display:block; color:#dce7f4; font-size:.7rem; overflow-wrap:anywhere; }.portfolio-status { display:inline-flex; align-items:center; width:max-content; margin-top:4px; border:1px solid rgba(247,201,72,.3); border-radius:999px; padding:3px 7px; color:#ffe4a3; background:rgba(247,201,72,.08); font-size:.61rem; font-weight:900; }.portfolio-status.fresh { border-color:rgba(37,214,149,.32); color:#b9f7df; background:rgba(37,214,149,.08); }.portfolio-status.delayed { border-color:rgba(226,188,83,.38); color:#ffe4a3; background:rgba(226,188,83,.08); }.portfolio-status.stale { border-color:rgba(251,113,133,.36); color:#fecdd3; background:rgba(251,113,133,.08); }.portfolio-status.unavailable { border-color:rgba(148,163,184,.34); color:#cbd5e1; background:rgba(148,163,184,.08); }
         .portfolio-open { min-height:44px; border:1px solid rgba(226,188,83,.4); border-radius:10px; padding:0 11px; background:rgba(226,188,83,.08); color:#ffe4a3; font:inherit; font-size:.67rem; font-weight:900; cursor:pointer; }
         .portfolio-open:focus-visible,.portfolio-open:hover { outline:none; border-color:var(--accent-gold); background:rgba(226,188,83,.14); }
         .portfolio-empty { border:1px dashed rgba(148,163,184,.35); border-radius:13px; padding:25px 14px; color:var(--text-muted); text-align:center; font-size:.76rem; line-height:1.75; }
@@ -187,11 +188,11 @@
         .readiness-head h2,.feature-status-head h2 { margin:6px 0 5px; font-size:1.25rem; }
         .readiness-head p,.feature-status-head p { max-width:720px; color:var(--text-muted); font-size:.77rem; line-height:1.75; }
         .feature-status-badge { flex:none; border:1px solid rgba(247,201,72,.38); border-radius:999px; padding:6px 10px; color:#ffe4a3; background:rgba(247,201,72,.08); font-size:.67rem; font-weight:900; white-space:nowrap; }
-        .readiness-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; margin:15px 0; }
+        .readiness-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:9px; margin:15px 0; }
         .readiness-metric { border:1px solid var(--border-color); border-radius:12px; padding:11px; background:rgba(6,14,24,.5); }
         .readiness-metric span { display:block; color:var(--text-muted); font-size:.65rem; }
         .readiness-metric strong { display:block; margin-top:5px; color:#fff; font-size:1.05rem; }
-        .readiness-metric.fresh strong { color:var(--green); }.readiness-metric.cached strong { color:var(--accent-gold); }.readiness-metric.unavailable strong { color:#fca5a5; }
+        .readiness-metric.fresh strong { color:var(--green); }.readiness-metric.delayed strong { color:#ffe4a3; }.readiness-metric.stale strong { color:#fecdd3; }.readiness-metric.unavailable strong { color:#cbd5e1; }
         .readiness-details { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
         .readiness-detail { border:1px solid var(--border-color); border-radius:11px; padding:11px; background:rgba(6,14,24,.45); }
         .readiness-detail span { display:block; color:var(--text-muted); font-size:.65rem; }.readiness-detail b { display:block; margin-top:4px; color:#dce7f4; font-size:.73rem; line-height:1.65; overflow-wrap:anywhere; }
@@ -253,7 +254,7 @@
         .research-card { min-height: 0; overflow: hidden; background: radial-gradient(circle at 10% 3%, rgba(247,201,72,.14), transparent 28%),radial-gradient(circle at 95% 0%, rgba(0,229,255,.12), transparent 35%),linear-gradient(145deg,#0d1d32,#091522 70%); }
         .research-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }.research-kicker { color:var(--accent-cyan); font-size:.7rem; font-weight:800; letter-spacing:.1em; }.research-topline h2 { margin:6px 0 5px; font-size:1.42rem; }.research-topline p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.8; max-width:650px; }.research-seal { flex:none; padding:9px 11px; border:1px solid rgba(247,201,72,.4); border-radius:12px; color:#ffe7a1; background:rgba(247,201,72,.08); font-size:.67rem; font-weight:800; line-height:1.6; text-align:center; }
         .research-controls { display:grid; grid-template-columns:minmax(160px,1fr) auto auto; gap:9px; margin:16px 0; }.research-select,.research-btn { min-height:42px; border-radius:11px; font:inherit; font-size:.78rem; }.research-select { background:#081321; border:1px solid var(--border-color); color:var(--text-main); padding:0 11px; }.research-btn { border:1px solid var(--border-color); padding:0 13px; color:var(--text-main); background:#10213a; font-weight:800; cursor:pointer; transition:.18s ease; }.research-btn:hover { border-color:var(--accent-cyan); transform:translateY(-1px); }.research-btn.sec { background:rgba(247,201,72,.1); color:#ffe8a3; border-color:rgba(247,201,72,.38); }
-        .research-grid { display:grid; grid-template-columns:1.15fr .85fr .85fr; gap:10px; }.research-tile { min-height:175px; position:relative; overflow:hidden; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.48); }.research-tile::before { position:absolute; top:0; right:0; content:''; width:3px; height:100%; background:var(--accent-cyan); }.research-tile.filing::before { background:var(--accent-gold); }.research-tile.event::before { background:var(--green); }.research-tile h3 { margin:0 0 8px; font-size:.88rem; }.research-tile p { margin:0; color:var(--text-muted); font-size:.74rem; line-height:1.75; }.quality-line { display:flex; justify-content:space-between; gap:8px; margin:11px 0 6px; color:var(--text-muted); font-size:.7rem; }.quality-value { color:var(--text-main); font-weight:800; }.quality-status { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:999px; font-size:.66rem; font-weight:800; background:rgba(247,201,72,.1); color:#ffe7a1; border:1px solid rgba(247,201,72,.26); }.quality-status.fresh { color:var(--green); background:rgba(37,214,149,.08); border-color:rgba(37,214,149,.26); }.quality-status.stale { color:#ffcf7a; }.quality-status.unavailable { color:#fecaca; background:rgba(239,68,68,.09); border-color:rgba(239,68,68,.28); }.quality-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }.research-link { display:inline-block; margin-top:14px; color:var(--accent-gold); font-size:.72rem; font-weight:800; text-decoration:none; }.research-link:hover { text-decoration:underline; }.research-note-box { grid-column:1 / -1; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.44); }.research-note-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }.research-note-head h3 { margin:0; font-size:.88rem; }.research-note-status { color:var(--text-muted); font-size:.68rem; }.research-textarea { width:100%; min-height:96px; resize:vertical; background:#081321; border:1px solid var(--border-color); border-radius:10px; color:var(--text-main); padding:11px; font:inherit; font-size:.76rem; line-height:1.7; }.research-note-actions { display:flex; gap:8px; margin-top:9px; }.research-note-actions .research-btn { min-height:35px; font-size:.7rem; }.research-safety { grid-column:1 / -1; border-right:2px solid var(--accent-gold); padding:4px 10px 4px 0; color:#e7d7ae; font-size:.73rem; line-height:1.75; }.research-safety b { color:var(--accent-gold); }
+        .research-grid { display:grid; grid-template-columns:1.15fr .85fr .85fr; gap:10px; }.research-tile { min-height:175px; position:relative; overflow:hidden; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.48); }.research-tile::before { position:absolute; top:0; right:0; content:''; width:3px; height:100%; background:var(--accent-cyan); }.research-tile.filing::before { background:var(--accent-gold); }.research-tile.event::before { background:var(--green); }.research-tile h3 { margin:0 0 8px; font-size:.88rem; }.research-tile p { margin:0; color:var(--text-muted); font-size:.74rem; line-height:1.75; }.quality-line { display:flex; justify-content:space-between; gap:8px; margin:11px 0 6px; color:var(--text-muted); font-size:.7rem; }.quality-value { color:var(--text-main); font-weight:800; }.quality-status { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:999px; font-size:.66rem; font-weight:800; background:rgba(247,201,72,.1); color:#ffe7a1; border:1px solid rgba(247,201,72,.26); }.quality-status.fresh { color:var(--green); background:rgba(37,214,149,.08); border-color:rgba(37,214,149,.26); }.quality-status.delayed { color:#ffe4a3; background:rgba(226,188,83,.09); border-color:rgba(226,188,83,.3); }.quality-status.stale { color:#fecdd3; background:rgba(251,113,133,.08); border-color:rgba(251,113,133,.3); }.quality-status.unavailable { color:#cbd5e1; background:rgba(148,163,184,.08); border-color:rgba(148,163,184,.28); }.quality-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }.research-link { display:inline-block; margin-top:14px; color:var(--accent-gold); font-size:.72rem; font-weight:800; text-decoration:none; }.research-link:hover { text-decoration:underline; }.research-note-box { grid-column:1 / -1; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.44); }.research-note-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }.research-note-head h3 { margin:0; font-size:.88rem; }.research-note-status { color:var(--text-muted); font-size:.68rem; }.research-textarea { width:100%; min-height:96px; resize:vertical; background:#081321; border:1px solid var(--border-color); border-radius:10px; color:var(--text-main); padding:11px; font:inherit; font-size:.76rem; line-height:1.7; }.research-note-actions { display:flex; gap:8px; margin-top:9px; }.research-note-actions .research-btn { min-height:35px; font-size:.7rem; }.research-safety { grid-column:1 / -1; border-right:2px solid var(--accent-gold); padding:4px 10px 4px 0; color:#e7d7ae; font-size:.73rem; line-height:1.75; }.research-safety b { color:var(--accent-gold); }
         .nav-pill.technicals-pill { border-color:rgba(37,214,149,.42); color:#b9f7df; }.nav-pill.technicals-pill:hover { background:rgba(37,214,149,.08); border-color:var(--green); }
         .technicals-card { min-height:0; overflow:hidden; background:radial-gradient(circle at 92% 5%,rgba(37,214,149,.12),transparent 30%),radial-gradient(circle at 8% 0%,rgba(0,229,255,.11),transparent 32%),linear-gradient(145deg,#0d1d32,#091522 70%); }.technicals-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }.technicals-kicker { color:var(--green); font-size:.7rem; font-weight:800; letter-spacing:.1em; }.technicals-topline h2 { margin:6px 0 5px; font-size:1.42rem; }.technicals-topline p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.8; max-width:650px; }.technicals-seal { flex:none; padding:9px 11px; border:1px solid rgba(37,214,149,.4); border-radius:12px; color:#b9f7df; background:rgba(37,214,149,.08); font-size:.67rem; font-weight:800; line-height:1.6; text-align:center; }
         .technicals-controls { display:grid; grid-template-columns:minmax(160px,1fr) auto; gap:9px; margin:16px 0; }.technicals-select,.technicals-btn { min-height:42px; border-radius:11px; font:inherit; font-size:.78rem; }.technicals-select { background:#081321; border:1px solid var(--border-color); color:var(--text-main); padding:0 11px; }.technicals-btn { border:1px solid rgba(37,214,149,.42); padding:0 14px; color:#c5f9e4; background:rgba(37,214,149,.1); font-weight:800; cursor:pointer; transition:.18s ease; }.technicals-btn:hover { border-color:var(--green); transform:translateY(-1px); }.technicals-btn:active { transform:scale(.97); }
@@ -267,7 +268,7 @@
         @media(max-width:780px){ .technicals-topline{flex-direction:column}.technicals-grid{grid-template-columns:1fr 1fr}.tech-context,.tech-safety{grid-column:1/-1}.testnet-review-grid{grid-template-columns:1fr 1fr}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.55rem} }
         @media(max-width:520px){ .technicals-controls,.technicals-grid{grid-template-columns:1fr}.technicals-btn{width:100%}.tech-tile{min-height:148px}.tech-context,.tech-safety{grid-column:auto}.tech-context{flex-direction:column}.testnet-review-grid{grid-template-columns:1fr}.testnet-review-guard{grid-template-columns:1fr;align-items:start}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.5rem} }
         @media(max-width:780px){ .portfolio-head{flex-direction:column}.portfolio-kpis{grid-template-columns:1fr 1fr}.portfolio-row{grid-template-columns:minmax(70px,.7fr) 1fr minmax(120px,1.2fr) auto} }
-        @media(max-width:520px){ .portfolio-toolbar{align-items:stretch;flex-direction:column}.portfolio-refresh{width:100%}.portfolio-row{grid-template-columns:1fr 1fr}.portfolio-source{grid-column:1/-1}.portfolio-open{grid-column:1/-1;width:100%}.readiness-grid,.filter-grid{grid-template-columns:1fr 1fr}.readiness-details{grid-template-columns:1fr}.readiness-head,.feature-status-head{flex-direction:column}.table-headers{display:none}.stock-row{grid-template-columns:1fr auto;gap:.7rem}.stock-col-price{text-align:left;font-size:1rem}.stock-col-change{grid-column:1/-1;text-align:right;border-top:1px solid rgba(30,51,86,.7);padding-top:.6rem}.stock-col-action{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:.4rem}.badge-data-state{grid-column:1/-1;width:100%;min-height:44px;display:flex;align-items:center;justify-content:center}.smart-summary-btn,.remove-symbol-btn{width:100%;margin-top:0}.nav-pill,.filter-btn,.smart-summary-btn,.remove-symbol-btn,.modal-btn{min-height:44px}.filter-btn{font-size:.72rem;line-height:1.45}.modal-card{max-height:calc(100dvh - 2rem);overflow:auto}.bottom-nav{grid-template-columns:repeat(8,minmax(44px,1fr));overflow-x:auto;scrollbar-width:none}.bottom-nav::-webkit-scrollbar{display:none} }
+        @media(max-width:520px){ .portfolio-toolbar{align-items:stretch;flex-direction:column}.portfolio-refresh{width:100%}.portfolio-row{grid-template-columns:1fr 1fr}.portfolio-source{grid-column:1/-1}.portfolio-open{grid-column:1/-1;width:100%}.readiness-grid,.filter-grid{grid-template-columns:1fr 1fr}.portfolio-kpis>:last-child,.readiness-grid>:last-child,.filter-grid>:last-child{grid-column:1/-1}.readiness-details{grid-template-columns:1fr}.readiness-head,.feature-status-head{flex-direction:column}.table-headers{display:none}.stock-row{grid-template-columns:1fr auto;gap:.7rem}.stock-col-price{text-align:left;font-size:1rem}.stock-col-change{grid-column:1/-1;text-align:right;border-top:1px solid rgba(30,51,86,.7);padding-top:.6rem}.stock-col-action{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:.4rem}.badge-data-state{grid-column:1/-1;width:100%;min-height:44px;display:flex;align-items:center;justify-content:center}.smart-summary-btn,.remove-symbol-btn{width:100%;margin-top:0}.nav-pill,.filter-btn,.smart-summary-btn,.remove-symbol-btn,.modal-btn{min-height:44px}.filter-btn{font-size:.72rem;line-height:1.45}.modal-card{max-height:calc(100dvh - 2rem);overflow:auto}.bottom-nav{grid-template-columns:repeat(8,minmax(44px,1fr));overflow-x:auto;scrollbar-width:none}.bottom-nav::-webkit-scrollbar{display:none} }
     </style>
 </head>
 <body>
@@ -304,9 +305,10 @@
 
                 <div class="filter-grid" role="group" aria-label="تصفية حالة بيانات الأسعار">
                     <button class="filter-btn active" type="button" data-filter="ALL" aria-pressed="true" onclick="filterAction('ALL', this)">الكل</button>
-                    <button class="filter-btn" type="button" data-filter="FRESH" aria-pressed="false" onclick="filterAction('FRESH', this)">موثقة الآن</button>
-                    <button class="filter-btn" type="button" data-filter="CACHED" aria-pressed="false" onclick="filterAction('CACHED', this)">آخر قراءة</button>
-                    <button class="filter-btn" type="button" data-filter="UNAVAILABLE" aria-pressed="false" onclick="filterAction('UNAVAILABLE', this)">غير متاحة</button>
+                    <button class="filter-btn" type="button" data-filter="FRESH" aria-pressed="false" onclick="filterAction('FRESH', this)">حديثة</button>
+                    <button class="filter-btn" type="button" data-filter="DELAYED" aria-pressed="false" onclick="filterAction('DELAYED', this)">متأخرة</button>
+                    <button class="filter-btn" type="button" data-filter="STALE" aria-pressed="false" onclick="filterAction('STALE', this)">قديمة</button>
+                    <button class="filter-btn" type="button" data-filter="UNAVAILABLE" aria-pressed="false" onclick="filterAction('UNAVAILABLE', this)">ناقصة</button>
                 </div>
 
                 <div class="table-headers">
@@ -380,9 +382,10 @@
                 <header class="readiness-head"><div><div class="readiness-kicker">DATA READINESS · VERIFIED ONLY</div><h2 id="readiness-title">ملخص جاهزية البيانات</h2><p>ملخص موحّد لحالة القراءات الظاهرة في قائمة المتابعة. لا يستنتج فرصًا أو توصيات من السعر وحده، ولا يدّعي توفر سيولة أو أحجام لحظية غير موجودة في عقد الواجهة الحالي.</p></div><span class="feature-status-badge">قراءة فقط</span></header>
                 <div class="readiness-grid" aria-label="ملخص جاهزية قراءات الأسعار">
                     <article class="readiness-metric"><span>إجمالي الرموز</span><strong id="readiness-total">0</strong></article>
-                    <article class="readiness-metric fresh"><span>موثقة الآن</span><strong id="readiness-fresh">0</strong></article>
-                    <article class="readiness-metric cached"><span>آخر قراءة</span><strong id="readiness-cached">0</strong></article>
-                    <article class="readiness-metric unavailable"><span>غير متاحة</span><strong id="readiness-unavailable">0</strong></article>
+                    <article class="readiness-metric fresh"><span>حديثة الآن</span><strong id="readiness-fresh">0</strong></article>
+                    <article class="readiness-metric delayed"><span>متأخرة / إغلاق</span><strong id="readiness-delayed">0</strong></article>
+                    <article class="readiness-metric stale"><span>قديمة</span><strong id="readiness-stale">0</strong></article>
+                    <article class="readiness-metric unavailable"><span>ناقصة</span><strong id="readiness-unavailable">0</strong></article>
                 </div>
                 <div class="readiness-details"><article class="readiness-detail"><span>أحدث وقت موثق</span><b id="readiness-latest">غير متاح</b></article><article class="readiness-detail"><span>المصادر الظاهرة</span><b id="readiness-sources">غير متاح</b></article></div>
                 <p class="portfolio-safety"><b>حدود الملخص:</b> يعكس اكتمال البيانات وحداثتها فقط؛ لا يمثل تصنيف شراء أو بيع ولا يقيس احتمال الربح.</p>
@@ -404,9 +407,10 @@
                 </header>
                 <div class="portfolio-kpis" aria-label="ملخص حالة قائمة المتابعة">
                     <article class="portfolio-kpi"><span>إجمالي الرموز</span><strong id="portfolio-count">0</strong></article>
-                    <article class="portfolio-kpi fresh"><span>موثقة الآن</span><strong id="portfolio-fresh-count">0</strong></article>
-                    <article class="portfolio-kpi stale"><span>آخر قراءة محفوظة</span><strong id="portfolio-cached-count">0</strong></article>
-                    <article class="portfolio-kpi unavailable"><span>بانتظار قراءة</span><strong id="portfolio-unavailable-count">0</strong></article>
+                    <article class="portfolio-kpi fresh"><span>حديثة الآن</span><strong id="portfolio-fresh-count">0</strong></article>
+                    <article class="portfolio-kpi delayed"><span>متأخرة / إغلاق</span><strong id="portfolio-delayed-count">0</strong></article>
+                    <article class="portfolio-kpi stale"><span>قديمة للمرجع</span><strong id="portfolio-stale-count">0</strong></article>
+                    <article class="portfolio-kpi unavailable"><span>ناقصة</span><strong id="portfolio-unavailable-count">0</strong></article>
                 </div>
                 <div class="portfolio-toolbar"><p id="portfolio-updated-at">سيظهر وقت أحدث قراءة موثقة عند وصول البيانات.</p><button class="portfolio-refresh" type="button" onclick="refreshVerifiedQuotes()">تحديث القراءات</button></div>
                 <div id="portfolio-list" class="portfolio-list" aria-live="polite"><div class="portfolio-empty">جارٍ تجهيز قائمة المتابعة…</div></div>
@@ -461,6 +465,7 @@
         </div>
     </div>
 
+    <script src="./quote-data-health.js?v=1"></script>
     <script>
         const INITIAL_STOCKS = [
             'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
@@ -472,7 +477,7 @@
         let watchlist = [];
         let stockMarketData = {};
         let currentFilter = 'ALL';
-        const DATA_FILTERS = new Set(['ALL', 'FRESH', 'CACHED', 'UNAVAILABLE']);
+        const DATA_FILTERS = new Set(['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE']);
         let quoteRefreshInFlight = false;
         const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';
         const QUOTE_REFRESH_MS = 10000; // 10 seconds; quoteRefreshInFlight prevents overlapping requests.
@@ -506,22 +511,16 @@
             return Number.isFinite(number) ? number : null;
         }
 
-        function quoteDataState(item) {
-            const price = finiteNumber(item?.price);
-            const priceAvailable = price !== null && price > 0;
-            const sourceKnown = Boolean(String(item?.source || '').trim());
-            const timeValue = new Date(item?.time || item?.updatedAt || item?.observedAt || '').getTime();
-            const timeKnown = Number.isFinite(timeValue);
-            if (!priceAvailable || !sourceKnown || !timeKnown) return 'UNAVAILABLE';
-            if (item?.isFresh === true && item?.error !== true) return 'FRESH';
-            return 'CACHED';
+        function quoteHealth(item, nowMs = Date.now()) {
+            return window.asiriQuoteDataHealth.classifyQuote(item, nowMs);
         }
 
-        function quoteDataView(item) {
-            const state = quoteDataState(item);
-            if (state === 'FRESH') return { state, label: 'موثقة الآن', detail: 'قراءة مكتملة وحديثة', cls: 'badge-fresh' };
-            if (state === 'CACHED') return { state, label: 'آخر قراءة', detail: 'قراءة محفوظة تحتاج تحديثًا', cls: 'badge-cached' };
-            return { state, label: item?.error ? 'تعذر التحديث' : 'بانتظار قراءة', detail: 'لا توجد قراءة مكتملة قابلة للتحقق', cls: 'badge-unavailable' };
+        function quoteDataState(item, nowMs = Date.now()) {
+            return quoteHealth(item, nowMs).state;
+        }
+
+        function quoteDataView(item, nowMs = Date.now()) {
+            return window.asiriQuoteDataHealth.describeQuote(quoteHealth(item, nowMs));
         }
 
         function normalizeDataFilter(value) {
@@ -589,12 +588,19 @@
                     stockMarketData[symbol] = {
                         ...stockMarketData[symbol], symbol,
                         price: finiteNumber(saved.price),
-                        time: saved.time || null,
+                        time: saved.updatedAt || saved.time || null,
+                        updatedAt: saved.updatedAt || saved.time || null,
+                        observedAt: saved.observedAt || null,
                         source: saved.source || null,
+                        provider: saved.provider || null,
+                        session: saved.session || null,
+                        sessionLabel: saved.sessionLabel || null,
+                        isLiveSession: typeof saved.isLiveSession === 'boolean' ? saved.isLiveSession : null,
                         snapshotStoredAt: new Date(storedAtMs).toISOString(),
                         isFresh: false,
                         updated: false,
-                        error: false
+                        error: false,
+                        fromSnapshot: true
                     };
                 });
             } catch (_) { /* The live refresh remains the source of truth. */ }
@@ -609,7 +615,13 @@
                 if (item && portfolioHasPrice(item) && Number.isFinite(storedAtMs) && ageMs >= 0 && ageMs <= QUOTE_SNAPSHOT_MAX_AGE_MS) rows[symbol] = {
                     price: finiteNumber(item.price),
                     time: item.time || null,
+                    updatedAt: item.updatedAt || item.time || null,
+                    observedAt: item.observedAt || null,
                     source: item.source || null,
+                    provider: item.provider || null,
+                    session: item.session || null,
+                    sessionLabel: item.sessionLabel || null,
+                    isLiveSession: typeof item.isLiveSession === 'boolean' ? item.isLiveSession : null,
                     storedAt: new Date(storedAtMs).toISOString()
                 };
             });
@@ -627,10 +639,12 @@
             quoteRefreshInFlight = true;
             document.getElementById('sync-status-text').textContent = 'جاري جلب أسعار موثقة…';
             setSyncIndicator('var(--warning)');
+            const controller = new AbortController();
+            const timeoutId = window.setTimeout(() => controller.abort(), 20000);
 
             try {
                 const symbols = [...new Set(watchlist.map(sym => String(sym).trim().toUpperCase()).filter(Boolean))];
-                const response = await fetch(`${VERIFIED_QUOTES_API}?stocks=${encodeURIComponent(symbols.join(','))}`, { cache: 'no-store' });
+                const response = await fetch(`${VERIFIED_QUOTES_API}?stocks=${encodeURIComponent(symbols.join(','))}`, { cache: 'no-store', signal: controller.signal });
                 if (!response.ok) throw new Error(`QUOTE_API_${response.status}`);
                 const payload = await response.json();
                 const rows = Array.isArray(payload.stocks) ? payload.stocks : [];
@@ -644,12 +658,17 @@
                     const incoming = {
                         price: finiteNumber(row?.price),
                         source: row?.source || null,
-                        time: row?.updatedAt || row?.observedAt || null,
+                        updatedAt: row?.updatedAt || row?.time || null,
+                        observedAt: row?.observedAt || payload?.observedAt || null,
+                        time: row?.updatedAt || row?.time || null,
+                        session: row?.session || null,
+                        sessionLabel: row?.sessionLabel || null,
+                        isLiveSession: typeof row?.isLiveSession === 'boolean' ? row.isLiveSession : null,
                         isFresh: row?.isFresh === true,
                         error: false
                     };
                     if (row?.ok && quoteDataState(incoming) !== 'UNAVAILABLE') {
-                        updateVerifiedStockPrice(row);
+                        updateVerifiedStockPrice(row, payload?.observedAt);
                         receivedComplete += 1;
                     } else {
                         markQuoteUnavailable(symbol);
@@ -662,17 +681,19 @@
                 renderResearchHub();
                 const states = symbols.map((symbol) => quoteDataState(stockMarketData[symbol]));
                 const freshCount = states.filter((state) => state === 'FRESH').length;
-                const cachedCount = states.filter((state) => state === 'CACHED').length;
-                const completeCount = freshCount + cachedCount;
+                const delayedCount = states.filter((state) => state === 'DELAYED').length;
+                const staleCount = states.filter((state) => state === 'STALE').length;
+                const unavailableCount = states.filter((state) => state === 'UNAVAILABLE').length;
+                const completeCount = freshCount + delayedCount + staleCount;
                 const checkedAt = new Date().toLocaleTimeString('ar-SA');
                 const statusText = completeCount
-                    ? `تم الفحص: ${completeCount}/${symbols.length} مكتملة • حديثة ${freshCount} • محفوظة ${cachedCount}`
+                    ? `تم الفحص: ${completeCount}/${symbols.length} قابلة للعرض • حديثة ${freshCount} • متأخرة ${delayedCount} • قديمة ${staleCount} • ناقصة ${unavailableCount}`
                     : 'لم تتوفر قراءة مكتملة بعد — ستتم المحاولة تلقائياً';
                 document.getElementById('sync-status-text').textContent = statusText;
                 document.getElementById('last-sync-label').textContent = completeCount
                     ? `آخر فحص لمحرك السوق • ${checkedAt} • استلم ${receivedComplete} قراءة مكتملة`
                     : 'لم تتوفر قراءة مكتملة بعد — ستتم المحاولة تلقائياً';
-                setSyncIndicator(freshCount ? 'var(--success)' : 'var(--warning)');
+                setSyncIndicator(unavailableCount || staleCount ? 'var(--danger)' : delayedCount ? 'var(--warning)' : 'var(--success)');
             } catch (error) {
                 console.error('Verified quote refresh failed:', error);
                 watchlist.forEach(markQuoteUnavailable);
@@ -683,24 +704,37 @@
                 document.getElementById('last-sync-label').textContent = retryText;
                 setSyncIndicator('var(--danger)');
             } finally {
+                window.clearTimeout(timeoutId);
                 quoteRefreshInFlight = false;
             }
         }
 
-        function updateVerifiedStockPrice(row) {
+        function updateVerifiedStockPrice(row, payloadObservedAt = null) {
             const sym = String(row.symbol || '').trim().toUpperCase();
             // A response that began before a local deletion must never re-add the removed symbol.
             if (!sym || !watchlist.includes(sym)) return;
 
             const item = stockMarketData[sym] || (stockMarketData[sym] = { symbol: sym });
             item.price = finiteNumber(row.price);
-            item.time = row.updatedAt || row.observedAt || null;
+            item.time = row.updatedAt || row.time || null;
+            item.updatedAt = row.updatedAt || row.time || null;
+            item.observedAt = row.observedAt || payloadObservedAt || null;
+            item.receivedAt = new Date().toISOString();
             item.source = row.source || null;
-            const observedAtMs = new Date(item.time).getTime();
-            item.snapshotStoredAt = new Date(Math.min(Date.now(), observedAtMs)).toISOString();
+            item.provider = row.provider || null;
+            item.session = row.session || null;
+            item.sessionLabel = row.sessionLabel || null;
+            item.marketState = row.marketState || null;
+            item.isLiveSession = typeof row.isLiveSession === 'boolean' ? row.isLiveSession : null;
+            item.volume = finiteNumber(row.volume);
+            item.averageVolume = finiteNumber(row.averageVolume);
+            item.bidPrice = finiteNumber(row.bidPrice);
+            item.askPrice = finiteNumber(row.askPrice);
+            item.snapshotStoredAt = item.receivedAt;
             item.isFresh = row.isFresh === true;
             item.updated = true;
             item.error = false;
+            item.fromSnapshot = false;
         }
 
         function markQuoteUnavailable(symbol) {
@@ -733,17 +767,19 @@
                 return { symbol, item, view, hasPrice: view.state !== 'UNAVAILABLE' };
             });
             const freshCount = rows.filter(({ view }) => view.state === 'FRESH').length;
-            const cachedCount = rows.filter(({ view }) => view.state === 'CACHED').length;
+            const delayedCount = rows.filter(({ view }) => view.state === 'DELAYED').length;
+            const staleCount = rows.filter(({ view }) => view.state === 'STALE').length;
             const unavailableCount = rows.filter(({ view }) => view.state === 'UNAVAILABLE').length;
             const observedTimes = rows
                 .filter(({ view }) => view.state !== 'UNAVAILABLE')
-                .map(({ item }) => new Date(item.time || item.updatedAt || item.observedAt || '').getTime())
+                .map(({ item }) => new Date(item.updatedAt || item.time || '').getTime())
                 .filter(Number.isFinite);
             const latestTime = observedTimes.length ? new Date(Math.max(...observedTimes)).toLocaleString('ar-SA') : null;
 
             document.getElementById('portfolio-count').textContent = rows.length;
             document.getElementById('portfolio-fresh-count').textContent = freshCount;
-            document.getElementById('portfolio-cached-count').textContent = cachedCount;
+            document.getElementById('portfolio-delayed-count').textContent = delayedCount;
+            document.getElementById('portfolio-stale-count').textContent = staleCount;
             document.getElementById('portfolio-unavailable-count').textContent = unavailableCount;
             document.getElementById('portfolio-updated-at').textContent = latestTime ? `أحدث قراءة ظاهرة: ${latestTime}` : 'سيظهر وقت أحدث قراءة موثقة عند وصول البيانات.';
 
@@ -756,7 +792,7 @@
                 const state = view.state.toLowerCase();
                 const price = hasPrice ? `$${finiteNumber(item.price).toFixed(2)}` : 'غير متاح';
                 const source = hasPrice ? item.source : 'غير متاح';
-                const readingTime = hasPrice ? portfolioTime(item.time || item.updatedAt || item.observedAt) : 'غير متاح';
+                const readingTime = hasPrice ? portfolioTime(item.updatedAt || item.time) : 'غير متاح';
                 return `<article class="portfolio-row" data-portfolio-symbol="${escapeMarkup(symbol)}">
                     <div class="portfolio-symbol"><strong>${escapeMarkup(symbol)}</strong><small>رمز محفوظ محليًا</small></div>
                     <div class="portfolio-price ${hasPrice ? '' : 'unavailable'}"><strong>${escapeMarkup(price)}</strong><span class="portfolio-status ${state}">${escapeMarkup(view.label)}</span></div>
@@ -770,16 +806,17 @@
             const total = document.getElementById('readiness-total');
             if (!total) return;
             const rows = watchlist.map((symbol) => stockMarketData[symbol] || { symbol });
-            const states = rows.map(quoteDataState);
+            const states = rows.map((item) => quoteDataState(item));
             const completeRows = rows.filter((item) => quoteDataState(item) !== 'UNAVAILABLE');
             const times = completeRows
-                .map((item) => new Date(item.time || item.updatedAt || item.observedAt || '').getTime())
+                .map((item) => new Date(item.updatedAt || item.time || '').getTime())
                 .filter(Number.isFinite);
             const sources = [...new Set(completeRows.map((item) => String(item.source || '').trim()).filter(Boolean))];
 
             total.textContent = rows.length;
             document.getElementById('readiness-fresh').textContent = states.filter((state) => state === 'FRESH').length;
-            document.getElementById('readiness-cached').textContent = states.filter((state) => state === 'CACHED').length;
+            document.getElementById('readiness-delayed').textContent = states.filter((state) => state === 'DELAYED').length;
+            document.getElementById('readiness-stale').textContent = states.filter((state) => state === 'STALE').length;
             document.getElementById('readiness-unavailable').textContent = states.filter((state) => state === 'UNAVAILABLE').length;
             document.getElementById('readiness-latest').textContent = times.length ? new Date(Math.max(...times)).toLocaleString('ar-SA') : 'غير متاح';
             document.getElementById('readiness-sources').textContent = sources.length ? sources.join('، ') : 'غير متاح';
@@ -932,9 +969,9 @@
             const hasCompleteReading = view.state !== 'UNAVAILABLE';
             const status = document.getElementById('research-quality-status');
             status.textContent = view.label;
-            status.className = `quality-status ${view.state === 'FRESH' ? 'fresh' : view.state === 'CACHED' ? 'stale' : 'unavailable'}`;
+            status.className = `quality-status ${view.state === 'FRESH' ? 'fresh' : view.state === 'DELAYED' ? 'delayed' : view.state === 'STALE' ? 'stale' : 'unavailable'}`;
             document.getElementById('research-source').textContent = hasCompleteReading ? item.source : 'غير متاح';
-            document.getElementById('research-time').textContent = hasCompleteReading ? portfolioTime(item.time || item.updatedAt || item.observedAt) : 'غير متاح';
+            document.getElementById('research-time').textContent = hasCompleteReading ? portfolioTime(item.updatedAt || item.time) : 'غير متاح';
             document.getElementById('research-session').textContent = view.detail;
             document.getElementById('research-price-note').textContent = hasCompleteReading ? `آخر سعر ظاهر: $${finiteNumber(item.price).toFixed(2)} • يعتمد العرض على المصدر والوقت أعلاه.` : 'لا تعرض المنصة سعراً حتى تكتمل القراءة مع المصدر والوقت.';
             const secUrl = `https://www.sec.gov/edgar/search/#/q=${encodeURIComponent(symbol)}`;
@@ -1074,6 +1111,6 @@
 
         init();
     </script>
-    <script src="./smart-decision-lens-static.js?v=4"></script>
+    <script src="./smart-decision-lens-static.js?v=5"></script>
 </body>
 </html>

@@ -5,8 +5,9 @@ const script = readFileSync(new URL('./smart-decision-lens-static.js', import.me
 const css = readFileSync(new URL('./smart-decision-lens-static.css', import.meta.url), 'utf8');
 
 for (const marker of [
-  'smart-decision-lens-static.css?v=4',
-  'smart-decision-lens-static.js?v=4',
+  'quote-data-health.js?v=1',
+  'smart-decision-lens-static.css?v=5',
+  'smart-decision-lens-static.js?v=5',
   'class="smart-summary-btn"'
 ]) {
   if (!index.includes(marker)) throw new Error(`Static lens index marker missing: ${marker}`);
@@ -27,9 +28,10 @@ for (const marker of [
   'DATA QUALITY SCENARIOS · LOCAL ONLY',
   'مختبر حالات جودة القراءة',
   "stale: Object.freeze",
-  "failedSource: Object.freeze",
-  "incompleteEvidence: Object.freeze",
-  "completeEvidence: Object.freeze",
+  "delayed: Object.freeze",
+  "stale: Object.freeze",
+  "unavailable: Object.freeze",
+  "fresh: Object.freeze",
   'محاكاة محلية',
   'لا تُعدّل بيانات السوق أو حالة السهم أو التنبيهات',
   'qualityChecks(item)',
@@ -41,8 +43,9 @@ for (const marker of [
   '.smart-decision-lens-static',
   'env(safe-area-inset-bottom)',
   '@media (max-width: 520px)',
-  '.smart-lens-state.ready',
-  '.smart-lens-state.cached',
+  '.smart-lens-state.fresh',
+  '.smart-lens-state.delayed',
+  '.smart-lens-state.stale',
   '.smart-lens-state.unavailable',
   '.smart-lens-completeness',
   '.smart-lens-field-grid',
