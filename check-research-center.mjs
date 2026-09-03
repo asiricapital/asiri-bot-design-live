@@ -12,7 +12,7 @@ const researchSection = html.slice(researchStart, researchEnd);
 
 ensure(toolsIndex >= 0 && journeyIndex > toolsIndex && researchIndex > journeyIndex && commandIndex > researchIndex, 'مركز الأبحاث يجب أن يأتي بعد مسار العميل وقبل قمة القرار');
 ensure(researchStart >= 0 && researchEnd > researchStart, 'قسم مركز الأبحاث غير موجود في الصفحة الحالية');
-ensure(researchSection.includes('مركز أبحاث وقرار موثّق'), 'عنوان مركز الأبحاث غير موجود');
+ensure(researchSection.includes('مركز أبحاث ومراجعة موثّقة'), 'عنوان مركز الأبحاث غير موجود');
 ensure(researchSection.includes('SEC EDGAR'), 'رابط المصدر التنظيمي الرسمي غير موجود');
 ensure(researchSection.includes('NO BROKER LINK'), 'يجب أن يوضح المركز عدم وجود ربط وسيط');
 ensure(!researchSection.includes('fetch(') && !researchSection.includes('VERIFIED_QUOTES_API'), 'المركز لا يجب أن يضيف مصدر أسعار أو وسيطاً جديداً');

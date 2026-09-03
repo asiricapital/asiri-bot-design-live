@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Asiri Capital | Live Terminal v27</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link href="./smart-decision-lens-static.css?v=2" rel="stylesheet">
+    <link href="./smart-decision-lens-static.css?v=3" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -46,11 +46,13 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        .account-status { font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.4rem; }
+        .account-status { min-width: 0; font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.4rem; }
+        #sync-status-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .live-dot { width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 8px var(--accent-cyan); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         .btn-account {
+            flex: none;
             background: rgba(0, 229, 255, 0.1);
             border: 1px solid rgba(0, 229, 255, 0.3);
             color: var(--accent-cyan);
@@ -140,11 +142,13 @@
         .val-pos { color: var(--success); }
         .val-neg { color: var(--danger); }
         .val-neutral { color: var(--text-muted); }
+        .val-price { color: var(--text-main); }
 
-        .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 85px; text-align: center; }
-        .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge-wait { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
-        .badge-avoid { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+        /* ASIRI_BATCH2_DATA_TRUTH_V1 · states describe quote quality, never trading actions. */
+        .badge-data-state { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 92px; text-align: center; }
+        .badge-fresh { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-cached { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
+        .badge-unavailable { background: rgba(239, 68, 68, 0.12); color: #fecaca; border: 1px solid rgba(239, 68, 68, 0.3); }
         .remove-symbol-btn { margin-top: 0.35rem; min-height: 28px; padding: 0.2rem 0.5rem; border: 1px solid rgba(239, 68, 68, 0.42); border-radius: 6px; background: rgba(239, 68, 68, 0.08); color: #fca5a5; font: inherit; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
         .remove-symbol-btn:active { transform: scale(0.97); background: rgba(239, 68, 68, 0.18); }
 
@@ -176,6 +180,23 @@
         .portfolio-open:focus-visible,.portfolio-open:hover { outline:none; border-color:var(--accent-gold); background:rgba(226,188,83,.14); }
         .portfolio-empty { border:1px dashed rgba(148,163,184,.35); border-radius:13px; padding:25px 14px; color:var(--text-muted); text-align:center; font-size:.76rem; line-height:1.75; }
         .portfolio-safety { margin-top:13px; border-right:2px solid var(--green); padding:5px 10px 5px 0; color:#b9f7df; font-size:.7rem; line-height:1.75; }.portfolio-safety b { color:var(--green); }
+
+        .readiness-card,.feature-status-card { min-height:0; overflow:hidden; background:radial-gradient(circle at 92% 0%,rgba(0,229,255,.11),transparent 35%),linear-gradient(145deg,#0d1d32,#091522 72%); }
+        .readiness-head,.feature-status-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding-bottom:14px; border-bottom:1px solid var(--border-color); }
+        .readiness-kicker,.feature-status-kicker { color:var(--accent-cyan); font-size:.69rem; font-weight:900; letter-spacing:.1em; }
+        .readiness-head h2,.feature-status-head h2 { margin:6px 0 5px; font-size:1.25rem; }
+        .readiness-head p,.feature-status-head p { max-width:720px; color:var(--text-muted); font-size:.77rem; line-height:1.75; }
+        .feature-status-badge { flex:none; border:1px solid rgba(247,201,72,.38); border-radius:999px; padding:6px 10px; color:#ffe4a3; background:rgba(247,201,72,.08); font-size:.67rem; font-weight:900; white-space:nowrap; }
+        .readiness-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; margin:15px 0; }
+        .readiness-metric { border:1px solid var(--border-color); border-radius:12px; padding:11px; background:rgba(6,14,24,.5); }
+        .readiness-metric span { display:block; color:var(--text-muted); font-size:.65rem; }
+        .readiness-metric strong { display:block; margin-top:5px; color:#fff; font-size:1.05rem; }
+        .readiness-metric.fresh strong { color:var(--green); }.readiness-metric.cached strong { color:var(--accent-gold); }.readiness-metric.unavailable strong { color:#fca5a5; }
+        .readiness-details { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+        .readiness-detail { border:1px solid var(--border-color); border-radius:11px; padding:11px; background:rgba(6,14,24,.45); }
+        .readiness-detail span { display:block; color:var(--text-muted); font-size:.65rem; }.readiness-detail b { display:block; margin-top:4px; color:#dce7f4; font-size:.73rem; line-height:1.65; overflow-wrap:anywhere; }
+        .feature-status-body { margin-top:15px; border:1px dashed rgba(148,163,184,.32); border-radius:13px; padding:18px 14px; color:var(--text-muted); font-size:.77rem; line-height:1.85; }
+        .feature-status-body b { color:#ffe4a3; }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
@@ -232,7 +253,7 @@
         .research-card { min-height: 0; overflow: hidden; background: radial-gradient(circle at 10% 3%, rgba(247,201,72,.14), transparent 28%),radial-gradient(circle at 95% 0%, rgba(0,229,255,.12), transparent 35%),linear-gradient(145deg,#0d1d32,#091522 70%); }
         .research-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }.research-kicker { color:var(--accent-cyan); font-size:.7rem; font-weight:800; letter-spacing:.1em; }.research-topline h2 { margin:6px 0 5px; font-size:1.42rem; }.research-topline p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.8; max-width:650px; }.research-seal { flex:none; padding:9px 11px; border:1px solid rgba(247,201,72,.4); border-radius:12px; color:#ffe7a1; background:rgba(247,201,72,.08); font-size:.67rem; font-weight:800; line-height:1.6; text-align:center; }
         .research-controls { display:grid; grid-template-columns:minmax(160px,1fr) auto auto; gap:9px; margin:16px 0; }.research-select,.research-btn { min-height:42px; border-radius:11px; font:inherit; font-size:.78rem; }.research-select { background:#081321; border:1px solid var(--border-color); color:var(--text-main); padding:0 11px; }.research-btn { border:1px solid var(--border-color); padding:0 13px; color:var(--text-main); background:#10213a; font-weight:800; cursor:pointer; transition:.18s ease; }.research-btn:hover { border-color:var(--accent-cyan); transform:translateY(-1px); }.research-btn.sec { background:rgba(247,201,72,.1); color:#ffe8a3; border-color:rgba(247,201,72,.38); }
-        .research-grid { display:grid; grid-template-columns:1.15fr .85fr .85fr; gap:10px; }.research-tile { min-height:175px; position:relative; overflow:hidden; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.48); }.research-tile::before { position:absolute; top:0; right:0; content:''; width:3px; height:100%; background:var(--accent-cyan); }.research-tile.filing::before { background:var(--accent-gold); }.research-tile.event::before { background:var(--green); }.research-tile h3 { margin:0 0 8px; font-size:.88rem; }.research-tile p { margin:0; color:var(--text-muted); font-size:.74rem; line-height:1.75; }.quality-line { display:flex; justify-content:space-between; gap:8px; margin:11px 0 6px; color:var(--text-muted); font-size:.7rem; }.quality-value { color:var(--text-main); font-weight:800; }.quality-status { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:999px; font-size:.66rem; font-weight:800; background:rgba(247,201,72,.1); color:#ffe7a1; border:1px solid rgba(247,201,72,.26); }.quality-status.fresh { color:var(--green); background:rgba(37,214,149,.08); border-color:rgba(37,214,149,.26); }.quality-status.stale { color:#ffcf7a; }.quality-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }.research-link { display:inline-block; margin-top:14px; color:var(--accent-gold); font-size:.72rem; font-weight:800; text-decoration:none; }.research-link:hover { text-decoration:underline; }.research-note-box { grid-column:1 / -1; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.44); }.research-note-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }.research-note-head h3 { margin:0; font-size:.88rem; }.research-note-status { color:var(--text-muted); font-size:.68rem; }.research-textarea { width:100%; min-height:96px; resize:vertical; background:#081321; border:1px solid var(--border-color); border-radius:10px; color:var(--text-main); padding:11px; font:inherit; font-size:.76rem; line-height:1.7; }.research-note-actions { display:flex; gap:8px; margin-top:9px; }.research-note-actions .research-btn { min-height:35px; font-size:.7rem; }.research-safety { grid-column:1 / -1; border-right:2px solid var(--accent-gold); padding:4px 10px 4px 0; color:#e7d7ae; font-size:.73rem; line-height:1.75; }.research-safety b { color:var(--accent-gold); }
+        .research-grid { display:grid; grid-template-columns:1.15fr .85fr .85fr; gap:10px; }.research-tile { min-height:175px; position:relative; overflow:hidden; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.48); }.research-tile::before { position:absolute; top:0; right:0; content:''; width:3px; height:100%; background:var(--accent-cyan); }.research-tile.filing::before { background:var(--accent-gold); }.research-tile.event::before { background:var(--green); }.research-tile h3 { margin:0 0 8px; font-size:.88rem; }.research-tile p { margin:0; color:var(--text-muted); font-size:.74rem; line-height:1.75; }.quality-line { display:flex; justify-content:space-between; gap:8px; margin:11px 0 6px; color:var(--text-muted); font-size:.7rem; }.quality-value { color:var(--text-main); font-weight:800; }.quality-status { display:inline-flex; align-items:center; gap:5px; padding:4px 7px; border-radius:999px; font-size:.66rem; font-weight:800; background:rgba(247,201,72,.1); color:#ffe7a1; border:1px solid rgba(247,201,72,.26); }.quality-status.fresh { color:var(--green); background:rgba(37,214,149,.08); border-color:rgba(37,214,149,.26); }.quality-status.stale { color:#ffcf7a; }.quality-status.unavailable { color:#fecaca; background:rgba(239,68,68,.09); border-color:rgba(239,68,68,.28); }.quality-status::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }.research-link { display:inline-block; margin-top:14px; color:var(--accent-gold); font-size:.72rem; font-weight:800; text-decoration:none; }.research-link:hover { text-decoration:underline; }.research-note-box { grid-column:1 / -1; border:1px solid var(--border-color); border-radius:14px; padding:14px; background:rgba(6,14,24,.44); }.research-note-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }.research-note-head h3 { margin:0; font-size:.88rem; }.research-note-status { color:var(--text-muted); font-size:.68rem; }.research-textarea { width:100%; min-height:96px; resize:vertical; background:#081321; border:1px solid var(--border-color); border-radius:10px; color:var(--text-main); padding:11px; font:inherit; font-size:.76rem; line-height:1.7; }.research-note-actions { display:flex; gap:8px; margin-top:9px; }.research-note-actions .research-btn { min-height:35px; font-size:.7rem; }.research-safety { grid-column:1 / -1; border-right:2px solid var(--accent-gold); padding:4px 10px 4px 0; color:#e7d7ae; font-size:.73rem; line-height:1.75; }.research-safety b { color:var(--accent-gold); }
         .nav-pill.technicals-pill { border-color:rgba(37,214,149,.42); color:#b9f7df; }.nav-pill.technicals-pill:hover { background:rgba(37,214,149,.08); border-color:var(--green); }
         .technicals-card { min-height:0; overflow:hidden; background:radial-gradient(circle at 92% 5%,rgba(37,214,149,.12),transparent 30%),radial-gradient(circle at 8% 0%,rgba(0,229,255,.11),transparent 32%),linear-gradient(145deg,#0d1d32,#091522 70%); }.technicals-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:15px; border-bottom:1px solid var(--border-color); }.technicals-kicker { color:var(--green); font-size:.7rem; font-weight:800; letter-spacing:.1em; }.technicals-topline h2 { margin:6px 0 5px; font-size:1.42rem; }.technicals-topline p { margin:0; color:var(--text-muted); font-size:.8rem; line-height:1.8; max-width:650px; }.technicals-seal { flex:none; padding:9px 11px; border:1px solid rgba(37,214,149,.4); border-radius:12px; color:#b9f7df; background:rgba(37,214,149,.08); font-size:.67rem; font-weight:800; line-height:1.6; text-align:center; }
         .technicals-controls { display:grid; grid-template-columns:minmax(160px,1fr) auto; gap:9px; margin:16px 0; }.technicals-select,.technicals-btn { min-height:42px; border-radius:11px; font:inherit; font-size:.78rem; }.technicals-select { background:#081321; border:1px solid var(--border-color); color:var(--text-main); padding:0 11px; }.technicals-btn { border:1px solid rgba(37,214,149,.42); padding:0 14px; color:#c5f9e4; background:rgba(37,214,149,.1); font-weight:800; cursor:pointer; transition:.18s ease; }.technicals-btn:hover { border-color:var(--green); transform:translateY(-1px); }.technicals-btn:active { transform:scale(.97); }
@@ -246,7 +267,7 @@
         @media(max-width:780px){ .technicals-topline{flex-direction:column}.technicals-grid{grid-template-columns:1fr 1fr}.tech-context,.tech-safety{grid-column:1/-1}.testnet-review-grid{grid-template-columns:1fr 1fr}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.55rem} }
         @media(max-width:520px){ .technicals-controls,.technicals-grid{grid-template-columns:1fr}.technicals-btn{width:100%}.tech-tile{min-height:148px}.tech-context,.tech-safety{grid-column:auto}.tech-context{flex-direction:column}.testnet-review-grid{grid-template-columns:1fr}.testnet-review-guard{grid-template-columns:1fr;align-items:start}.bottom-nav{grid-template-columns:repeat(8,minmax(0,1fr))}.nav-item{font-size:.5rem} }
         @media(max-width:780px){ .portfolio-head{flex-direction:column}.portfolio-kpis{grid-template-columns:1fr 1fr}.portfolio-row{grid-template-columns:minmax(70px,.7fr) 1fr minmax(120px,1.2fr) auto} }
-        @media(max-width:520px){ .portfolio-toolbar{align-items:stretch;flex-direction:column}.portfolio-refresh{width:100%}.portfolio-row{grid-template-columns:1fr 1fr}.portfolio-source{grid-column:1/-1}.portfolio-open{grid-column:1/-1;width:100%}.nav-pill,.filter-btn,.smart-summary-btn,.remove-symbol-btn,.modal-btn{min-height:44px}.modal-card{max-height:calc(100dvh - 2rem);overflow:auto}.bottom-nav{grid-template-columns:repeat(8,minmax(44px,1fr));overflow-x:auto;scrollbar-width:none}.bottom-nav::-webkit-scrollbar{display:none} }
+        @media(max-width:520px){ .portfolio-toolbar{align-items:stretch;flex-direction:column}.portfolio-refresh{width:100%}.portfolio-row{grid-template-columns:1fr 1fr}.portfolio-source{grid-column:1/-1}.portfolio-open{grid-column:1/-1;width:100%}.readiness-grid,.filter-grid{grid-template-columns:1fr 1fr}.readiness-details{grid-template-columns:1fr}.readiness-head,.feature-status-head{flex-direction:column}.table-headers{display:none}.stock-row{grid-template-columns:1fr auto;gap:.7rem}.stock-col-price{text-align:left;font-size:1rem}.stock-col-change{grid-column:1/-1;text-align:right;border-top:1px solid rgba(30,51,86,.7);padding-top:.6rem}.stock-col-action{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:.4rem}.badge-data-state{grid-column:1/-1;width:100%;min-height:44px;display:flex;align-items:center;justify-content:center}.smart-summary-btn,.remove-symbol-btn{width:100%;margin-top:0}.nav-pill,.filter-btn,.smart-summary-btn,.remove-symbol-btn,.modal-btn{min-height:44px}.filter-btn{font-size:.72rem;line-height:1.45}.modal-card{max-height:calc(100dvh - 2rem);overflow:auto}.bottom-nav{grid-template-columns:repeat(8,minmax(44px,1fr));overflow-x:auto;scrollbar-width:none}.bottom-nav::-webkit-scrollbar{display:none} }
     </style>
 </head>
 <body>
@@ -255,16 +276,16 @@
         <button class="btn-account" onclick="openAddStockModal()">+ إضافة أصل</button>
         <div class="account-status">
             <span class="live-dot" id="ws-dot"></span>
-            <span id="sync-status-text">جاري الاتصال بقناة السوق المباشرة...</span>
+            <span id="sync-status-text">جاري جلب أول قراءة موثقة...</span>
         </div>
     </div>
 
     <div class="nav-pills-container">
-        <button class="nav-pill active" data-tab="tools" onclick="switchMainTab('tools', this)">أدوات القرار</button>
+        <button class="nav-pill active" data-tab="tools" onclick="switchMainTab('tools', this)">حالة الأسعار</button>
         <button class="nav-pill journey-pill" data-tab="journey" onclick="switchMainTab('journey', this)">مسار العميل ✦</button>
         <button class="nav-pill research-pill" data-tab="research" onclick="switchMainTab('research', this)">مركز الأبحاث</button>
         <button class="nav-pill technicals-pill" data-tab="technicals" onclick="switchMainTab('technicals', this)">التحليل الفني</button>
-        <button class="nav-pill" data-tab="command" onclick="switchMainTab('command', this)">قمة القرار ⚡</button>
+        <button class="nav-pill" data-tab="command" onclick="switchMainTab('command', this)">ملخص البيانات ⚡</button>
         <button class="nav-pill" data-tab="alerts" onclick="switchMainTab('alerts', this)">التنبيهات</button>
         <button class="nav-pill" data-tab="portfolio" onclick="switchMainTab('portfolio', this)">محفظتي</button>
     </div>
@@ -277,22 +298,22 @@
 
         <div id="sec-tools" class="app-section active">
             <div class="card-section">
-                <div class="section-header-meta">VERIFIED QUOTES • بيانات موثقة</div>
-                <div class="section-title-main">القرار التنفيذي لكل سهم</div>
-                <div class="section-desc">تُعرض آخر قراءة موثقة مع المصدر ووقت التحديث؛ لا يتم إنشاء أسعار أو توصيات بديلة عند تعذر المصدر.</div>
+                <div class="section-header-meta">VERIFIED READINGS • حالة بيانات موثقة</div>
+                <div class="section-title-main">حالة بيانات كل سهم</div>
+                <div class="section-desc">تُعرض آخر قراءة مكتملة مع المصدر ووقت التحديث وحالتها الفعلية. هذه الشاشة لا تصدر قرار شراء أو بيع ولا تنشئ توصية عند نقص البيانات.</div>
 
-                <div class="filter-grid">
-                    <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
-                    <button class="filter-btn" onclick="filterAction('BUY', this)">شراء</button>
-                    <button class="filter-btn" onclick="filterAction('WAIT', this)">انتظار</button>
-                    <button class="filter-btn" onclick="filterAction('AVOID', this)">تجنب</button>
+                <div class="filter-grid" role="group" aria-label="تصفية حالة بيانات الأسعار">
+                    <button class="filter-btn active" type="button" data-filter="ALL" aria-pressed="true" onclick="filterAction('ALL', this)">الكل</button>
+                    <button class="filter-btn" type="button" data-filter="FRESH" aria-pressed="false" onclick="filterAction('FRESH', this)">موثقة الآن</button>
+                    <button class="filter-btn" type="button" data-filter="CACHED" aria-pressed="false" onclick="filterAction('CACHED', this)">آخر قراءة</button>
+                    <button class="filter-btn" type="button" data-filter="UNAVAILABLE" aria-pressed="false" onclick="filterAction('UNAVAILABLE', this)">غير متاحة</button>
                 </div>
 
                 <div class="table-headers">
                     <div>السهم</div>
-                    <div>السعر الحي</div>
-                    <div>الحالة</div>
-                    <div>قرار التنفيذ</div>
+                    <div>آخر سعر موثّق</div>
+                    <div>حالة القراءة</div>
+                    <div>التفاصيل والمراجعة</div>
                 </div>
 
                 <div id="stocks-list-wrapper">
@@ -307,30 +328,30 @@
                     <div>
                         <div class="journey-kicker">CUSTOMER JOURNEY · STEP BY STEP</div>
                         <h2 id="journey-title">ابدأ بالخدمة الأقرب لخطوتك التالية</h2>
-                        <p>رتّب استخدامك للمنصة كمسار قرار: راقب أولاً، راجع الإشارة، اضبط التنبيه، ثم راجع المحفظة. هذه البطاقات لا تنشئ توصية أو أمراً ولا تغيّر أي بيانات سوق.</p>
+                        <p>رتّب استخدامك للمنصة كمسار مراجعة: تحقق من حالة البيانات، ثم راجع السياق الفني، وحالة التنبيهات، وقائمة المتابعة. هذه البطاقات لا تنشئ توصية أو أمراً ولا تغيّر أي بيانات سوق.</p>
                     </div>
-                    <div class="journey-seal">READ ONLY<br>DECISION PATH</div>
+                    <div class="journey-seal">READ ONLY<br>REVIEW PATH</div>
                 </div>
                 <div class="journey-grid">
-                    <button type="button" class="journey-step safe" onclick="openJourneyDestination('tools')"><span class="journey-number">01 / OBSERVE</span><b>راقب القرار</b><p>اطلع على آخر قراءة موثقة وحالة المتابعة لكل سهم في قائمتك.</p><small>أدوات القرار ←</small></button>
-                    <button type="button" class="journey-step" onclick="openJourneyDestination('command')"><span class="journey-number">02 / REVIEW</span><b>راجع قمة القرار</b><p>انتقل إلى ملخص السيولة وإشارات السوق قبل أي مراجعة تحليلية.</p><small>قمة القرار ←</small></button>
-                    <button type="button" class="journey-step review" onclick="openJourneyDestination('alerts')"><span class="journey-number">03 / GUARD</span><b>اضبط تنبيهك</b><p>اجعل التنبيه وسيلة مراجعة لا بديلاً عن حكمك أو تحققك من المصدر.</p><small>التنبيهات ←</small></button>
+                    <button type="button" class="journey-step safe" onclick="openJourneyDestination('tools')"><span class="journey-number">01 / OBSERVE</span><b>راجع حالة البيانات</b><p>اطلع على آخر قراءة موثقة وحالة المتابعة لكل سهم في قائمتك.</p><small>حالة الأسعار ←</small></button>
+                    <button type="button" class="journey-step" onclick="openJourneyDestination('technicals')"><span class="journey-number">02 / REVIEW</span><b>حلّل السياق الفني</b><p>راجع المؤشرات المحسوبة من السجل اليومي قبل أي حكم يدوي.</p><small>التحليل الفني ←</small></button>
+                    <button type="button" class="journey-step review" onclick="openJourneyDestination('alerts')"><span class="journey-number">03 / GUARD</span><b>اطلع على حالة التنبيهات</b><p>تحقق من حالة الربط الفعلية؛ لا تفترض وجود تنبيه ما لم يكن مفعّلًا بوضوح.</p><small>حالة التنبيهات ←</small></button>
                     <button type="button" class="journey-step" onclick="openJourneyDestination('portfolio')"><span class="journey-number">04 / RECONCILE</span><b>راجع المحفظة</b><p>تحقق من الأصول المتابعة وعددها قبل تحديث قائمة المراقبة أو حذف رمز.</p><small>المحفظة الذكية ←</small></button>
                 </div>
-                <div class="journey-note"><span>بوابة أمان:</span> القرار التنفيذي لا يبدأ من بطاقة المسار؛ راجع المصدر والوقت والحالة قبل اتخاذ أي إجراء خارج المنصة.</div>
+                <div class="journey-note"><span>بوابة أمان:</span> لا تنشئ بطاقات المسار قرارًا؛ راجع المصدر والوقت والحالة قبل اتخاذ أي إجراء خارج المنصة.</div>
             </section>
         </div>
 
         <div id="sec-research" class="app-section">
             <section class="card-section research-card" aria-labelledby="research-title">
-                <div class="research-topline"><div><div class="research-kicker">RESEARCH CENTER · EVIDENCE FIRST</div><h2 id="research-title">مركز أبحاث وقرار موثّق</h2><p>اجمع قراءة السعر ومصدرها ووقتها مع رابط الملف الرسمي ومذكرتك البحثية في نقطة مراجعة واحدة. لا تنشئ هذه اللوحة توصية أو أمراً أو بديلاً عن المصدر.</p></div><div class="research-seal">READ ONLY<br>NO BROKER LINK</div></div>
+                <div class="research-topline"><div><div class="research-kicker">RESEARCH CENTER · EVIDENCE FIRST</div><h2 id="research-title">مركز أبحاث ومراجعة موثّقة</h2><p>اجمع قراءة السعر ومصدرها ووقتها مع رابط الملف الرسمي ومذكرتك البحثية في نقطة مراجعة واحدة. لا تنشئ هذه اللوحة توصية أو أمراً أو بديلاً عن المصدر.</p></div><div class="research-seal">READ ONLY<br>NO BROKER LINK</div></div>
                 <div class="research-controls"><select id="research-symbol" class="research-select" onchange="renderResearchHub()" aria-label="اختيار رمز البحث"></select><button class="research-btn" type="button" onclick="renderResearchHub()">تحديث القراءة</button><button class="research-btn sec" type="button" onclick="openOfficialFiling()">فتح SEC EDGAR ↗</button></div>
                 <div class="research-grid">
                     <article class="research-tile"><h3>جودة قراءة السوق</h3><span id="research-quality-status" class="quality-status">بانتظار قراءة</span><div class="quality-line"><span>المصدر</span><strong id="research-source" class="quality-value">—</strong></div><div class="quality-line"><span>وقت القراءة</span><strong id="research-time" class="quality-value">—</strong></div><div class="quality-line"><span>حالة الجلسة</span><strong id="research-session" class="quality-value">—</strong></div><p id="research-price-note">تستخدم هذه اللوحة عقد الأسعار الموثقة نفسه؛ لا يوجد مصدر بديل صامت.</p></article>
                     <article class="research-tile filing"><h3>الملفات الرسمية</h3><p>يوجه الرابط إلى بحث EDGAR الرسمي بحسب الرمز المختار. لم تُحمّل ملفات أو ملخصات آلية بعد؛ تبقى الوثيقة الأصلية هي مرجع المراجعة.</p><a id="research-filing-link" class="research-link" target="_blank" rel="noopener noreferrer">بحث في ملفات SEC ↗</a></article>
-                    <article class="research-tile event"><h3>الأحداث والتنبيهات</h3><p>قناة الأحداث الآلية غير متصلة بعد. ستظهر هنا فقط أحداث مصدرها معروف ووقت استلامها واضح؛ لا تملأ المنصة هذه المساحة بتوقعات.</p><div class="quality-line"><span>الحالة</span><strong class="quality-value">جاهز للتكامل</strong></div><div class="quality-line"><span>تنفيذ وسيط</span><strong class="quality-value" style="color:var(--green)">مقفل</strong></div></article>
+                    <article class="research-tile event"><h3>الأحداث والتنبيهات</h3><p>قناة الأحداث الآلية غير متصلة بعد. ستظهر هنا فقط أحداث مصدرها معروف ووقت استلامها واضح؛ لا تملأ المنصة هذه المساحة بتوقعات.</p><div class="quality-line"><span>الحالة</span><strong class="quality-value">غير متصل</strong></div><div class="quality-line"><span>تنفيذ وسيط</span><strong class="quality-value" style="color:var(--green)">مقفل</strong></div></article>
                     <section class="research-note-box"><div class="research-note-head"><h3>مذكرة بحث للمراجعة اللاحقة</h3><span id="research-note-status" class="research-note-status">محفوظة على هذا الجهاز فقط</span></div><textarea id="research-note" class="research-textarea" placeholder="سجّل الفرضية، رابط المصدر، شرط الإبطال، وما الذي يحتاج تحققاً إضافياً…"></textarea><div class="research-note-actions"><button class="research-btn" type="button" onclick="saveResearchNote()">حفظ المذكرة محلياً</button><button class="research-btn" type="button" onclick="clearResearchNote()">مسح المذكرة</button></div></section>
-                    <div class="research-safety"><b>بوابة أمان:</b> لا يعني سعر موثق أو ملف رسمي أن القرار صالح تلقائياً. راجع المصدر والوقت والحالة، ثم دوّن شرط الإبطال قبل أي إجراء خارج المنصة.</div>
+                    <div class="research-safety"><b>بوابة أمان:</b> لا يعني سعر موثق أو ملف رسمي أن المراجعة مكتملة تلقائياً. راجع المصدر والوقت والحالة، ثم دوّن شرط الإبطال قبل أي إجراء خارج المنصة.</div>
                 </div>
             </section>
         </div>
@@ -355,17 +376,24 @@
         </div>
 
         <div id="sec-command" class="app-section">
-            <div class="card-section">
-                <div class="section-title-main">قمة القرار الذكي والسيولة</div>
-                <div style="padding: 1rem 0; color: var(--accent-cyan);">إحصائيات البث المباشر وأحجام التداول اللحظية.</div>
-            </div>
+            <section class="card-section readiness-card" aria-labelledby="readiness-title">
+                <header class="readiness-head"><div><div class="readiness-kicker">DATA READINESS · VERIFIED ONLY</div><h2 id="readiness-title">ملخص جاهزية البيانات</h2><p>ملخص موحّد لحالة القراءات الظاهرة في قائمة المتابعة. لا يستنتج فرصًا أو توصيات من السعر وحده، ولا يدّعي توفر سيولة أو أحجام لحظية غير موجودة في عقد الواجهة الحالي.</p></div><span class="feature-status-badge">قراءة فقط</span></header>
+                <div class="readiness-grid" aria-label="ملخص جاهزية قراءات الأسعار">
+                    <article class="readiness-metric"><span>إجمالي الرموز</span><strong id="readiness-total">0</strong></article>
+                    <article class="readiness-metric fresh"><span>موثقة الآن</span><strong id="readiness-fresh">0</strong></article>
+                    <article class="readiness-metric cached"><span>آخر قراءة</span><strong id="readiness-cached">0</strong></article>
+                    <article class="readiness-metric unavailable"><span>غير متاحة</span><strong id="readiness-unavailable">0</strong></article>
+                </div>
+                <div class="readiness-details"><article class="readiness-detail"><span>أحدث وقت موثق</span><b id="readiness-latest">غير متاح</b></article><article class="readiness-detail"><span>المصادر الظاهرة</span><b id="readiness-sources">غير متاح</b></article></div>
+                <p class="portfolio-safety"><b>حدود الملخص:</b> يعكس اكتمال البيانات وحداثتها فقط؛ لا يمثل تصنيف شراء أو بيع ولا يقيس احتمال الربح.</p>
+            </section>
         </div>
 
         <div id="sec-alerts" class="app-section">
-            <div class="card-section">
-                <div class="section-title-main">سجل التنبيهات الذكية</div>
-                <div style="padding: 1rem 0; color: var(--text-muted);">التنبيهات تفعل فور تجاوز السعر الحي للعتبات.</div>
-            </div>
+            <section class="card-section feature-status-card" aria-labelledby="alerts-title">
+                <header class="feature-status-head"><div><div class="feature-status-kicker">PRICE ALERTS · CONNECTION STATUS</div><h2 id="alerts-title">التنبيهات السعرية</h2><p>ستُبنى هذه القناة على عتبات موثقة وسجل أحداث واضح قبل تفعيلها.</p></div><span class="feature-status-badge">غير مفعّلة</span></header>
+                <div class="feature-status-body"><b>الحالة الحالية:</b> لا تُحفظ عتبات سعرية، ولا تُرسل إشعارات داخلية أو Push من هذه النسخة. لن تعرض المنصة تنبيهًا تجريبيًا على أنه حدث حقيقي.</div>
+            </section>
         </div>
 
         <div id="sec-portfolio" class="app-section">
@@ -390,7 +418,7 @@
     <nav class="bottom-nav">
         <button class="nav-item active" type="button" data-tab="tools" onclick="bottomNavClick('tools', this)">
             <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
-            <span>الأدوات</span>
+            <span>الأسعار</span>
         </button>
         <button class="nav-item" type="button" data-tab="journey" onclick="bottomNavClick('journey', this)">
             <svg viewBox="0 0 24 24"><path d="M5 3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM5 15a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2Z"/></svg>
@@ -410,7 +438,7 @@
         </button>
         <button class="nav-item" type="button" data-tab="command" onclick="bottomNavClick('opportunities', this)">
             <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-            <span>الفرص</span>
+            <span>الملخص</span>
         </button>
         <button class="nav-item" type="button" data-tab="portfolio" onclick="bottomNavClick('portfolio', this)">
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
@@ -444,6 +472,7 @@
         let watchlist = [];
         let stockMarketData = {};
         let currentFilter = 'ALL';
+        const DATA_FILTERS = new Set(['ALL', 'FRESH', 'CACHED', 'UNAVAILABLE']);
         let quoteRefreshInFlight = false;
         const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';
         const QUOTE_REFRESH_MS = 10000; // 10 seconds; quoteRefreshInFlight prevents overlapping requests.
@@ -477,6 +506,29 @@
             return Number.isFinite(number) ? number : null;
         }
 
+        function quoteDataState(item) {
+            const price = finiteNumber(item?.price);
+            const priceAvailable = price !== null && price > 0;
+            const sourceKnown = Boolean(String(item?.source || '').trim());
+            const timeValue = new Date(item?.time || item?.updatedAt || item?.observedAt || '').getTime();
+            const timeKnown = Number.isFinite(timeValue);
+            if (!priceAvailable || !sourceKnown || !timeKnown) return 'UNAVAILABLE';
+            if (item?.isFresh === true && item?.error !== true) return 'FRESH';
+            return 'CACHED';
+        }
+
+        function quoteDataView(item) {
+            const state = quoteDataState(item);
+            if (state === 'FRESH') return { state, label: 'موثقة الآن', detail: 'قراءة مكتملة وحديثة', cls: 'badge-fresh' };
+            if (state === 'CACHED') return { state, label: 'آخر قراءة', detail: 'قراءة محفوظة تحتاج تحديثًا', cls: 'badge-cached' };
+            return { state, label: item?.error ? 'تعذر التحديث' : 'بانتظار قراءة', detail: 'لا توجد قراءة مكتملة قابلة للتحقق', cls: 'badge-unavailable' };
+        }
+
+        function normalizeDataFilter(value) {
+            const normalized = String(value || '').trim().toUpperCase();
+            return DATA_FILTERS.has(normalized) ? normalized : 'ALL';
+        }
+
         function init() {
             const saved = localStorage.getItem(WATCHLIST_KEY);
             if (saved !== null) {
@@ -499,9 +551,8 @@
                     price: null,
                     time: null,
                     updated: false,
-                    decision: 'WAIT',
-                    text: 'بانتظار تحديث موثق',
-                    cls: 'badge-wait'
+                    isFresh: false,
+                    error: false
                 };
             });
 
@@ -519,23 +570,31 @@
             try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist)); } catch (_) {}
         }
 
+        function setSyncIndicator(color) {
+            const dot = document.getElementById('ws-dot');
+            if (!dot) return;
+            dot.style.background = color;
+            dot.style.boxShadow = `0 0 8px ${color}`;
+        }
+
         function restoreVerifiedQuoteSnapshot() {
             try {
                 const snapshot = JSON.parse(localStorage.getItem(QUOTE_SNAPSHOT_KEY) || 'null');
-                const storedAtMs = new Date(snapshot?.storedAt || 0).getTime();
-                if (!snapshot?.rows || !Number.isFinite(storedAtMs) || (Date.now() - storedAtMs) > QUOTE_SNAPSHOT_MAX_AGE_MS) return;
+                if (!snapshot?.rows || typeof snapshot.rows !== 'object') return;
                 watchlist.forEach((symbol) => {
                     const saved = snapshot.rows[symbol];
-                    if (!saved || !portfolioHasPrice(saved)) return;
+                    const storedAtMs = new Date(saved?.storedAt || snapshot.storedAt || 0).getTime();
+                    const ageMs = Date.now() - storedAtMs;
+                    if (!saved || !Number.isFinite(storedAtMs) || ageMs < 0 || ageMs > QUOTE_SNAPSHOT_MAX_AGE_MS || !portfolioHasPrice(saved)) return;
                     stockMarketData[symbol] = {
-                        ...stockMarketData[symbol], ...saved, symbol,
+                        ...stockMarketData[symbol], symbol,
                         price: finiteNumber(saved.price),
+                        time: saved.time || null,
+                        source: saved.source || null,
+                        snapshotStoredAt: new Date(storedAtMs).toISOString(),
                         isFresh: false,
                         updated: false,
-                        error: false,
-                        decision: 'WAIT',
-                        text: 'مراقبة • آخر قراءة موثقة',
-                        cls: 'badge-wait'
+                        error: false
                     };
                 });
             } catch (_) { /* The live refresh remains the source of truth. */ }
@@ -545,20 +604,29 @@
             const rows = {};
             watchlist.forEach((symbol) => {
                 const item = stockMarketData[symbol];
-                if (item && portfolioHasPrice(item)) rows[symbol] = {
+                const storedAtMs = new Date(item?.snapshotStoredAt || 0).getTime();
+                const ageMs = Date.now() - storedAtMs;
+                if (item && portfolioHasPrice(item) && Number.isFinite(storedAtMs) && ageMs >= 0 && ageMs <= QUOTE_SNAPSHOT_MAX_AGE_MS) rows[symbol] = {
                     price: finiteNumber(item.price),
                     time: item.time || null,
-                    source: item.source || null
+                    source: item.source || null,
+                    storedAt: new Date(storedAtMs).toISOString()
                 };
             });
-            try { localStorage.setItem(QUOTE_SNAPSHOT_KEY, JSON.stringify({ storedAt: new Date().toISOString(), rows })); } catch (_) {}
+            try { localStorage.setItem(QUOTE_SNAPSHOT_KEY, JSON.stringify({ schemaVersion: 2, rows })); } catch (_) {}
         }
 
         async function refreshVerifiedQuotes() {
-            if (quoteRefreshInFlight || !watchlist.length) return;
+            if (quoteRefreshInFlight) return;
+            if (!watchlist.length) {
+                document.getElementById('sync-status-text').textContent = 'لا توجد رموز في قائمة المتابعة';
+                document.getElementById('last-sync-label').textContent = 'أضف رمزًا لبدء جلب القراءات الموثقة.';
+                setSyncIndicator('var(--text-muted)');
+                return;
+            }
             quoteRefreshInFlight = true;
             document.getElementById('sync-status-text').textContent = 'جاري جلب أسعار موثقة…';
-            document.getElementById('ws-dot').style.background = 'var(--warning)';
+            setSyncIndicator('var(--warning)');
 
             try {
                 const symbols = [...new Set(watchlist.map(sym => String(sym).trim().toUpperCase()).filter(Boolean))];
@@ -567,15 +635,22 @@
                 const payload = await response.json();
                 const rows = Array.isArray(payload.stocks) ? payload.stocks : [];
                 const receivedSymbols = new Set();
-                let verified = 0;
+                let receivedComplete = 0;
 
                 rows.forEach((row) => {
                     const symbol = normalizeSymbol(row?.symbol);
                     if (!symbol || !watchlist.includes(symbol)) return;
                     receivedSymbols.add(symbol);
-                    if (row?.ok && finiteNumber(row.price) !== null) {
+                    const incoming = {
+                        price: finiteNumber(row?.price),
+                        source: row?.source || null,
+                        time: row?.updatedAt || row?.observedAt || null,
+                        isFresh: row?.isFresh === true,
+                        error: false
+                    };
+                    if (row?.ok && quoteDataState(incoming) !== 'UNAVAILABLE') {
                         updateVerifiedStockPrice(row);
-                        verified += 1;
+                        receivedComplete += 1;
                     } else {
                         markQuoteUnavailable(symbol);
                     }
@@ -585,15 +660,19 @@
                 saveVerifiedQuoteSnapshot();
                 renderTable();
                 renderResearchHub();
-                const observedAt = new Date(payload.observedAt || Date.now()).toLocaleTimeString('ar-SA');
-                const statusText = verified
-                    ? `أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}`
-                    : 'لم تصل قراءة موثقة بعد — ستتم المحاولة تلقائياً';
+                const states = symbols.map((symbol) => quoteDataState(stockMarketData[symbol]));
+                const freshCount = states.filter((state) => state === 'FRESH').length;
+                const cachedCount = states.filter((state) => state === 'CACHED').length;
+                const completeCount = freshCount + cachedCount;
+                const checkedAt = new Date().toLocaleTimeString('ar-SA');
+                const statusText = completeCount
+                    ? `تم الفحص: ${completeCount}/${symbols.length} مكتملة • حديثة ${freshCount} • محفوظة ${cachedCount}`
+                    : 'لم تتوفر قراءة مكتملة بعد — ستتم المحاولة تلقائياً';
                 document.getElementById('sync-status-text').textContent = statusText;
-                document.getElementById('last-sync-label').textContent = verified
-                    ? `آخر تحديث موثق من محرك السوق • ${verified} أصل • ${observedAt}`
-                    : 'لم تصل قراءة موثقة بعد — ستتم المحاولة تلقائياً';
-                document.getElementById('ws-dot').style.background = verified ? 'var(--success)' : 'var(--warning)';
+                document.getElementById('last-sync-label').textContent = completeCount
+                    ? `آخر فحص لمحرك السوق • ${checkedAt} • استلم ${receivedComplete} قراءة مكتملة`
+                    : 'لم تتوفر قراءة مكتملة بعد — ستتم المحاولة تلقائياً';
+                setSyncIndicator(freshCount ? 'var(--success)' : 'var(--warning)');
             } catch (error) {
                 console.error('Verified quote refresh failed:', error);
                 watchlist.forEach(markQuoteUnavailable);
@@ -602,7 +681,7 @@
                 const retryText = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً';
                 document.getElementById('sync-status-text').textContent = retryText;
                 document.getElementById('last-sync-label').textContent = retryText;
-                document.getElementById('ws-dot').style.background = 'var(--danger)';
+                setSyncIndicator('var(--danger)');
             } finally {
                 quoteRefreshInFlight = false;
             }
@@ -615,14 +694,13 @@
 
             const item = stockMarketData[sym] || (stockMarketData[sym] = { symbol: sym });
             item.price = finiteNumber(row.price);
-            item.time = row.updatedAt || row.observedAt || new Date().toISOString();
+            item.time = row.updatedAt || row.observedAt || null;
             item.source = row.source || null;
+            const observedAtMs = new Date(item.time).getTime();
+            item.snapshotStoredAt = new Date(Math.min(Date.now(), observedAtMs)).toISOString();
             item.isFresh = row.isFresh === true;
             item.updated = true;
             item.error = false;
-            item.decision = 'WAIT';
-            item.text = item.isFresh ? 'مراقبة • بيانات موثقة' : 'مراقبة • آخر قراءة موثقة';
-            item.cls = 'badge-wait';
         }
 
         function markQuoteUnavailable(symbol) {
@@ -633,13 +711,11 @@
             item.isFresh = false;
             item.updated = false;
             item.error = true;
-            item.decision = 'WAIT';
-            item.text = hasLastPrice ? 'مراقبة • آخر قراءة موثقة' : 'تعذر التحديث الموثق';
-            item.cls = 'badge-wait';
+            if (!hasLastPrice) item.price = null;
         }
 
         function portfolioHasPrice(item) {
-            return finiteNumber(item?.price) !== null;
+            return quoteDataState(item) !== 'UNAVAILABLE';
         }
 
         function portfolioTime(value) {
@@ -653,14 +729,16 @@
 
             const rows = watchlist.map((symbol) => {
                 const item = stockMarketData[symbol] || { symbol };
-                const hasPrice = portfolioHasPrice(item);
-                const fresh = hasPrice && item.isFresh === true && item.error !== true;
-                return { symbol, item, hasPrice, fresh, cached: hasPrice && !fresh };
+                const view = quoteDataView(item);
+                return { symbol, item, view, hasPrice: view.state !== 'UNAVAILABLE' };
             });
-            const freshCount = rows.filter((row) => row.fresh).length;
-            const cachedCount = rows.filter((row) => row.cached).length;
-            const unavailableCount = rows.length - freshCount - cachedCount;
-            const observedTimes = rows.map(({ item }) => new Date(item.time || '').getTime()).filter(Number.isFinite);
+            const freshCount = rows.filter(({ view }) => view.state === 'FRESH').length;
+            const cachedCount = rows.filter(({ view }) => view.state === 'CACHED').length;
+            const unavailableCount = rows.filter(({ view }) => view.state === 'UNAVAILABLE').length;
+            const observedTimes = rows
+                .filter(({ view }) => view.state !== 'UNAVAILABLE')
+                .map(({ item }) => new Date(item.time || item.updatedAt || item.observedAt || '').getTime())
+                .filter(Number.isFinite);
             const latestTime = observedTimes.length ? new Date(Math.max(...observedTimes)).toLocaleString('ar-SA') : null;
 
             document.getElementById('portfolio-count').textContent = rows.length;
@@ -674,51 +752,68 @@
                 return;
             }
 
-            list.innerHTML = rows.map(({ symbol, item, hasPrice, fresh }) => {
-                const state = fresh ? 'fresh' : (hasPrice ? 'cached' : 'unavailable');
-                const status = fresh ? 'موثق الآن' : (hasPrice ? 'آخر قراءة موثقة' : (item.error ? 'تعذر التحديث' : 'بانتظار قراءة'));
-                const price = hasPrice ? `$${Number(item.price).toFixed(2)}` : 'غير متاح';
-                const source = item.source || 'غير متاح';
+            list.innerHTML = rows.map(({ symbol, item, view, hasPrice }) => {
+                const state = view.state.toLowerCase();
+                const price = hasPrice ? `$${finiteNumber(item.price).toFixed(2)}` : 'غير متاح';
+                const source = hasPrice ? item.source : 'غير متاح';
+                const readingTime = hasPrice ? portfolioTime(item.time || item.updatedAt || item.observedAt) : 'غير متاح';
                 return `<article class="portfolio-row" data-portfolio-symbol="${escapeMarkup(symbol)}">
                     <div class="portfolio-symbol"><strong>${escapeMarkup(symbol)}</strong><small>رمز محفوظ محليًا</small></div>
-                    <div class="portfolio-price ${hasPrice ? '' : 'unavailable'}"><strong>${escapeMarkup(price)}</strong><span class="portfolio-status ${state}">${escapeMarkup(status)}</span></div>
-                    <div class="portfolio-source"><b>${escapeMarkup(source)}</b><small>${escapeMarkup(portfolioTime(item.time))}</small></div>
+                    <div class="portfolio-price ${hasPrice ? '' : 'unavailable'}"><strong>${escapeMarkup(price)}</strong><span class="portfolio-status ${state}">${escapeMarkup(view.label)}</span></div>
+                    <div class="portfolio-source"><b>${escapeMarkup(source)}</b><small>${escapeMarkup(readingTime)}</small></div>
                     <button class="portfolio-open" type="button" data-symbol="${escapeMarkup(symbol)}" onclick="openPortfolioSymbol(this.dataset.symbol)">عرض بطاقة السهم</button>
                 </article>`;
             }).join('');
         }
 
+        function renderDataReadinessSummary() {
+            const total = document.getElementById('readiness-total');
+            if (!total) return;
+            const rows = watchlist.map((symbol) => stockMarketData[symbol] || { symbol });
+            const states = rows.map(quoteDataState);
+            const completeRows = rows.filter((item) => quoteDataState(item) !== 'UNAVAILABLE');
+            const times = completeRows
+                .map((item) => new Date(item.time || item.updatedAt || item.observedAt || '').getTime())
+                .filter(Number.isFinite);
+            const sources = [...new Set(completeRows.map((item) => String(item.source || '').trim()).filter(Boolean))];
+
+            total.textContent = rows.length;
+            document.getElementById('readiness-fresh').textContent = states.filter((state) => state === 'FRESH').length;
+            document.getElementById('readiness-cached').textContent = states.filter((state) => state === 'CACHED').length;
+            document.getElementById('readiness-unavailable').textContent = states.filter((state) => state === 'UNAVAILABLE').length;
+            document.getElementById('readiness-latest').textContent = times.length ? new Date(Math.max(...times)).toLocaleString('ar-SA') : 'غير متاح';
+            document.getElementById('readiness-sources').textContent = sources.length ? sources.join('، ') : 'غير متاح';
+        }
+
         function openPortfolioSymbol(symbol) {
             const normalized = normalizeSymbol(symbol);
             if (!normalized || !watchlist.includes(normalized)) return;
-            currentFilter = 'ALL';
-            document.querySelectorAll('.filter-btn').forEach((button) => button.classList.remove('active'));
-            document.querySelector('.filter-btn')?.classList.add('active');
-            renderTable();
+            filterAction('ALL', document.querySelector('.filter-btn[data-filter="ALL"]'));
             switchMainTab('tools', document.querySelector('[data-tab="tools"].nav-pill'));
             window.requestAnimationFrame(() => document.getElementById(`row-${normalized}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
         }
 
         function renderTable() {
             renderPortfolioSummary();
+            renderDataReadinessSummary();
             const wrapper = document.getElementById('stocks-list-wrapper');
             const filtered = watchlist.filter(sym => {
                 if (currentFilter === 'ALL') return true;
-                return stockMarketData[sym] && stockMarketData[sym].decision === currentFilter;
+                return quoteDataState(stockMarketData[sym] || { symbol: sym }) === currentFilter;
             });
 
             if (filtered.length === 0) {
-                wrapper.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">لا توجد أصول مطابقة لهذا الفلتر أو بانتظار تدفق البث.</div>`;
+                wrapper.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">لا توجد أصول مطابقة لحالة البيانات المحددة.</div>`;
                 return;
             }
 
             wrapper.innerHTML = filtered.map(sym => {
                 const item = stockMarketData[sym] || { symbol: sym, price: null };
-                const hasPrice = portfolioHasPrice(item);
-                const priceStr = hasPrice ? `$${finiteNumber(item.price).toFixed(2)}` : 'بانتظار تحديث موثق…';
-                const colorCls = hasPrice ? 'val-pos' : 'val-neutral';
+                const view = quoteDataView(item);
+                const hasPrice = view.state !== 'UNAVAILABLE';
+                const priceStr = hasPrice ? `$${finiteNumber(item.price).toFixed(2)}` : 'غير متاح';
+                const colorCls = hasPrice ? 'val-price' : 'val-neutral';
                 const flashCls = item.updated ? 'tick-flash' : '';
-                const textStatus = hasPrice ? (item.isFresh ? 'موثق الآن' : 'آخر قراءة موثقة') : (item.error ? 'تعذر التحديث' : 'بانتظار تحديث موثق');
 
                 return `
                     <div class="stock-row ${flashCls}" id="row-${sym}">
@@ -727,10 +822,10 @@
                             <div class="name">بيانات أسعار موثقة</div>
                         </div>
                         <div class="stock-col-price ${colorCls}">${priceStr}</div>
-                        <div class="stock-col-change val-neutral">${textStatus}</div>
+                        <div class="stock-col-change val-neutral">${escapeMarkup(view.detail)}</div>
                         <div class="stock-col-action">
-                            <span class="badge-decision ${item.cls || 'badge-wait'}">${item.text || 'انتظار'}</span>
-                            <button class="smart-summary-btn" type="button" data-symbol="${sym}" aria-label="فتح عدسة القرار التفسيرية لـ ${sym}">عدسة القرار</button>
+                            <span class="badge-data-state ${view.cls}">${escapeMarkup(view.label)}</span>
+                            <button class="smart-summary-btn" type="button" data-symbol="${sym}" aria-label="فتح تفاصيل القراءة لـ ${sym}">تفاصيل القراءة</button>
                             <button class="remove-symbol-btn" type="button" data-symbol="${sym}" onclick="removeStock(this.dataset.symbol)" aria-label="حذف ${sym} من قائمة المراقبة">حذف</button>
                         </div>
                     </div>
@@ -749,7 +844,7 @@
             saveWatchlist();
             if (!watchlist.length) {
                 document.getElementById('sync-status-text').textContent = 'لا توجد رموز في قائمة المراقبة. أضف رمزاً يدوياً للمتابعة.';
-                document.getElementById('ws-dot').style.background = 'var(--text-muted)';
+                setSyncIndicator('var(--text-muted)');
             }
             renderTable();
             renderResearchHub();
@@ -758,9 +853,13 @@
         }
 
         function filterAction(type, btn) {
-            currentFilter = type;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
+            currentFilter = normalizeDataFilter(type);
+            document.querySelectorAll('.filter-btn').forEach((button) => {
+                const selected = button.dataset.filter === currentFilter;
+                button.classList.toggle('active', selected);
+                button.setAttribute('aria-pressed', String(selected));
+            });
+            if (btn && btn.dataset.filter === currentFilter) btn.classList.add('active');
             renderTable();
         }
 
@@ -789,6 +888,7 @@
 
             if (tab === 'technicals') refreshTechnicalAnalysis();
             if (tab === 'portfolio') renderPortfolioSummary();
+            if (tab === 'command') renderDataReadinessSummary();
             if (!options.preserveScroll) window.scrollTo({ top: 0, behavior: 'auto' });
             return true;
         }
@@ -828,15 +928,15 @@
             if (prior && watchlist.includes(prior)) select.value = prior;
             const symbol = selectedResearchSymbol();
             const item = stockMarketData[symbol] || { symbol };
-            const hasPrice = finiteNumber(item.price) !== null;
-            const fresh = item.isFresh === true && item.error !== true;
+            const view = quoteDataView(item);
+            const hasCompleteReading = view.state !== 'UNAVAILABLE';
             const status = document.getElementById('research-quality-status');
-            status.textContent = !hasPrice ? 'بانتظار قراءة موثقة' : (fresh ? 'قراءة موثقة الآن' : 'آخر قراءة موثقة');
-            status.className = `quality-status ${fresh ? 'fresh' : 'stale'}`;
-            document.getElementById('research-source').textContent = item.source || 'غير متاح';
-            document.getElementById('research-time').textContent = item.time ? new Date(item.time).toLocaleTimeString('ar-SA') : '—';
-            document.getElementById('research-session').textContent = item.error ? 'تعذر التحديث' : (item.isFresh ? 'طازجة' : 'مراجعة مطلوبة');
-            document.getElementById('research-price-note').textContent = hasPrice ? `آخر سعر ظاهر: $${Number(item.price).toFixed(2)} • يعتمد العرض على المصدر والوقت أعلاه.` : 'لا تعرض المنصة سعراً حتى تصل قراءة موثقة من المصدر الحالي.';
+            status.textContent = view.label;
+            status.className = `quality-status ${view.state === 'FRESH' ? 'fresh' : view.state === 'CACHED' ? 'stale' : 'unavailable'}`;
+            document.getElementById('research-source').textContent = hasCompleteReading ? item.source : 'غير متاح';
+            document.getElementById('research-time').textContent = hasCompleteReading ? portfolioTime(item.time || item.updatedAt || item.observedAt) : 'غير متاح';
+            document.getElementById('research-session').textContent = view.detail;
+            document.getElementById('research-price-note').textContent = hasCompleteReading ? `آخر سعر ظاهر: $${finiteNumber(item.price).toFixed(2)} • يعتمد العرض على المصدر والوقت أعلاه.` : 'لا تعرض المنصة سعراً حتى تكتمل القراءة مع المصدر والوقت.';
             const secUrl = `https://www.sec.gov/edgar/search/#/q=${encodeURIComponent(symbol)}`;
             document.getElementById('research-filing-link').href = secUrl;
             const notes = researchNotes();
@@ -965,18 +1065,15 @@
             if (!watchlist.includes(sym)) {
                 watchlist.push(sym);
                 saveWatchlist();
-                stockMarketData[sym] = { symbol: sym, price: null, decision: 'WAIT', text: 'بانتظار تحديث موثق', cls: 'badge-wait' };
+                stockMarketData[sym] = { symbol: sym, price: null, time: null, updated: false, isFresh: false, error: false };
                 syncTechnicalSymbolOptions();
             }
-            currentFilter = 'ALL';
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.filter-btn').classList.add('active');
-            renderTable();
+            filterAction('ALL', document.querySelector('.filter-btn[data-filter="ALL"]'));
             closeAddStockModal();
         }
 
         init();
     </script>
-    <script src="./smart-decision-lens-static.js?v=2"></script>
+    <script src="./smart-decision-lens-static.js?v=3"></script>
 </body>
 </html>

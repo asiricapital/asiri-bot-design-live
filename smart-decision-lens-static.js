@@ -1,4 +1,4 @@
-/* ASIRI Smart Decision Lens · static v27 UI layer · local, explainable and read-only. */
+/* ASIRI Quote Quality Lens · static v27 UI layer · local, explainable and read-only. */
 (() => {
   'use strict';
 
@@ -10,7 +10,7 @@
     const normalized = typeof value === 'string' ? value.replace(/[$,\s]/g, '') : value;
     if (normalized === '') return null;
     const number = Number(normalized);
-    return Number.isFinite(number) ? number : null;
+    return Number.isFinite(number) && number > 0 ? number : null;
   }
   const SCENARIOS = Object.freeze({
     current: Object.freeze({
@@ -19,26 +19,27 @@
     }),
     stale: Object.freeze({
       label: 'قراءة متأخرة',
-      description: 'محاكاة محلية: المصدر معروف، لكن القراءة متأخرة؛ تُقيَّد الثقة تحت 39 ولا تصلح للمراجعة.',
-      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: '2026-08-28T08:00:00Z', isFresh: false, decision: 'BUY', error: false })
+      description: 'محاكاة محلية: السعر والمصدر والوقت متاحة، لكن القراءة ليست حديثة؛ تُقيَّد الثقة تحت 40.',
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: '2026-08-28T08:00:00Z', updatedAt: null, observedAt: null, isFresh: false, error: false })
     }),
     failedSource: Object.freeze({
       label: 'فشل المصدر',
-      description: 'محاكاة محلية: لا سعر موثّق ولا وقت قراءة؛ تتوقف بوابات المراجعة وتصبح الثقة صفرًا.',
-      item: Object.freeze({ price: null, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: null, isFresh: false, decision: 'WAIT', error: true })
+      description: 'محاكاة محلية: لا سعر ولا مصدر ولا وقت قابل للتحقق؛ تصبح القراءة غير متاحة.',
+      item: Object.freeze({ price: null, source: null, time: null, updatedAt: null, observedAt: null, isFresh: false, error: true })
     }),
-    gatesPending: Object.freeze({
-      label: 'بوابات غير مكتملة',
-      description: 'محاكاة محلية: البيانات قوية وحديثة، لكن حالة المراجعة لم تكتمل؛ لا تتحول إلى جاهز للمراجعة.',
-      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'WAIT', error: false })
+    incompleteEvidence: Object.freeze({
+      label: 'أدلة غير مكتملة',
+      description: 'محاكاة محلية: يوجد سعر ومصدر، لكن وقت القراءة مفقود؛ لذلك لا تُعرض كقراءة مكتملة.',
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: null, isFresh: true, error: false })
     }),
-    reviewReady: Object.freeze({
-      label: 'جاهز للمراجعة',
-      description: 'محاكاة محلية: اكتملت بيانات وبوابات القراءة؛ تبقى المراجعة البشرية إلزامية ولا يُنشأ أي إجراء.',
-      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: null, updatedAt: null, observedAt: '2026-08-28T12:00:00Z', isFresh: true, decision: 'BUY', error: false })
+    completeEvidence: Object.freeze({
+      label: 'قراءة مكتملة',
+      description: 'محاكاة محلية: السعر والمصدر والوقت مكتملة وحديثة؛ يصلح السجل للعرض والمراجعة فقط.',
+      item: Object.freeze({ price: 2.26, source: 'Asiri Market Engine — محاكاة', time: '2026-08-28T12:00:00Z', updatedAt: null, observedAt: null, isFresh: true, error: false })
     })
   });
   let activeScenario = 'current';
+  let returnFocus = null;
 
   function scenarioFor(key) {
     return SCENARIOS[key] || SCENARIOS.current;
@@ -59,8 +60,9 @@
       symbol,
       price: row?.querySelector('.stock-col-price')?.textContent?.trim() || null,
       source: null,
+      time: null,
       isFresh: /موثق الآن/.test(row?.textContent || ''),
-      decision: /شراء/.test(row?.textContent || '') ? 'BUY' : 'WAIT'
+      error: /تعذر التحديث/.test(row?.textContent || '')
     };
   }
 
@@ -69,66 +71,61 @@
     return Number.isNaN(date.getTime()) ? 'غير متاح' : date.toLocaleString('ar-SA');
   }
 
-  function decisionView(item) {
-    const fresh = item?.isFresh === true;
-    const readyForReview = fresh && String(item?.decision || '').toUpperCase() === 'BUY';
-    if (readyForReview) {
+  function dataView(item) {
+    const priceAvailable = numericPrice(item?.price) !== null;
+    const sourceKnown = Boolean(String(item?.source || '').trim());
+    const timeKnown = Number.isFinite(new Date(item?.time || item?.updatedAt || item?.observedAt || '').getTime());
+    const complete = priceAvailable && sourceKnown && timeKnown;
+    const fresh = complete && item?.isFresh === true && item?.error !== true;
+    if (fresh) {
       return {
-        tone: 'ready', label: 'جاهز للمراجعة البشرية',
-        reason: 'تمت الإشارة إلى اكتمال حالة المتابعة، لكن القرار يحتاج تحققًا بشريًا مستقلاً قبل أي إجراء خارج المنصة.',
-        next: 'تحقق من المصدر، وقت القراءة، والضوابط الاستثمارية قبل اتخاذ قرار يدوي.'
+        state: 'FRESH', tone: 'ready', label: 'قراءة مكتملة وحديثة',
+        reason: 'السعر والمصدر ووقت القراءة مكتملة، والخدمة تعلن أن القراءة حديثة بلا خطأ.',
+        next: 'يمكن مراجعة السياق الفني والمصدر الأصلي؛ هذه الحالة لا تمثل توصية استثمارية.'
       };
     }
-    if (!fresh) {
+    if (complete) {
       return {
-        tone: 'attention', label: 'القراءة بحاجة تحديث',
-        reason: 'لا تُعامل القراءة المتأخرة كبث مباشر أو كأساس لمراجعة قرار جديد.',
-        next: 'انتظر وصول قراءة موثقة وحديثة ثم افتح العدسة من جديد.'
+        state: 'CACHED', tone: 'cached', label: 'قراءة محفوظة تحتاج تحديثًا',
+        reason: 'السعر والمصدر والوقت مكتملة، لكن القراءة ليست حديثة أو تعذر التحديث الأخير.',
+        next: 'استخدمها كآخر قراءة ظاهرة فقط وانتظر تحديثًا موثقًا قبل الاعتماد على حداثتها.'
       };
     }
     return {
-      tone: 'watch', label: 'تحت المراقبة',
-      reason: 'السعر موثق، لكن بوابات المراجعة لا تزال غير مكتملة؛ لا يعرض النظام توصية تنفيذية.',
-      next: 'استكمل حداثة السجل الفني والأدلة المطلوبة قبل رفع الحالة إلى مراجعة بشرية.'
+      state: 'UNAVAILABLE', tone: 'unavailable', label: 'بيانات غير مكتملة',
+      reason: 'ينقص السعر أو المصدر أو وقت القراءة، لذلك لا توجد قراءة مكتملة قابلة للتحقق.',
+      next: 'انتظر اكتمال السعر والمصدر والوقت من الخدمة ثم أعد فتح التفاصيل.'
     };
   }
 
   function evidenceConfidence(item, view) {
     const priceAvailable = numericPrice(item?.price) !== null;
     const sourceKnown = Boolean(String(item?.source || '').trim());
-    const timeKnown = Boolean(String(item?.time || item?.updatedAt || item?.observedAt || '').trim());
-    const fresh = item?.isFresh === true;
+    const timeKnown = Number.isFinite(new Date(item?.time || item?.updatedAt || item?.observedAt || '').getTime());
+    const complete = priceAvailable && sourceKnown && timeKnown;
     const noError = item?.error !== true;
-    const ready = view?.tone === 'ready';
+    const fresh = complete && item?.isFresh === true && noError;
     const components = {
       freshness: fresh ? 30 : 0,
-      completeness: (priceAvailable ? 8 : 0) + (sourceKnown ? 6 : 0) + (timeKnown ? 3 : 0) + (noError ? 3 : 0),
-      consistency: fresh && noError ? 20 : 0,
-      reviewGates: ready ? 15 : 0,
-      stability: fresh && noError ? 10 : 0,
-      reviewability: fresh && priceAvailable ? 5 : 0
+      completeness: (priceAvailable ? 10 : 0) + (sourceKnown ? 6 : 0) + (timeKnown ? 4 : 0),
+      consistency: fresh ? 20 : 0,
+      traceability: sourceKnown && timeKnown ? 15 : 0,
+      stability: complete && noError ? 10 : 0,
+      reviewability: fresh ? 5 : 0
     };
     const rawScore = Object.values(components).reduce((total, value) => total + value, 0);
-    const score = item?.error === true ? 0 : (fresh ? rawScore : Math.min(rawScore, 39));
+    const score = fresh ? rawScore : Math.min(rawScore, 39);
     let band = 'UNAVAILABLE';
     let label = 'لا تعتمد القراءة الآن';
     let reason = 'الثقة غير مكتملة لأن القراءة لا تحمل أدلة موثقة وحديثة كافية.';
-    if (ready && score >= 85) {
+    if (fresh && score >= 85) {
       band = 'REVIEWABLE';
-      label = 'أدلة قوية للمراجعة';
-      reason = 'جودة الأدلة مرتفعة، لكن المراجعة البشرية تبقى إلزامية قبل أي قرار يدوي.';
-    } else if (score >= 85) {
-      band = 'STRONG_INCOMPLETE';
-      label = 'أدلة قوية لكن غير مكتملة';
-      reason = 'جودة القراءة مرتفعة، لكن بوابة المراجعة الحالية لم تكتمل بعد.';
-    } else if (score >= 65) {
-      band = 'MONITORED';
-      label = 'مراقبة موثوقة';
-      reason = 'تتوفر أدلة مناسبة للمتابعة، لكنها لا تكفي وحدها لتغيير حالة السهم.';
-    } else if (score >= 40) {
-      band = 'PARTIAL';
-      label = 'أدلة جزئية';
-      reason = 'توجد معلومات قابلة للعرض، لكن جودة الأدلة لا تكفي لمراجعة قرار جديد.';
+      label = 'قراءة مكتملة للمراجعة';
+      reason = 'السعر والمصدر والوقت مكتملة وحديثة؛ لا يحول ذلك القراءة إلى توصية.';
+    } else if (view?.state === 'CACHED') {
+      band = 'CACHED';
+      label = 'آخر قراءة مكتملة';
+      reason = 'الأدلة الأساسية مكتملة، لكن حداثة القراءة غير مؤكدة أو تعذر التحديث الأخير.';
     }
     return { score, band, label, reason, components, isCalibrated: false };
   }
@@ -147,24 +144,32 @@
     return `<li class="smart-lens-gate ${state}"><span aria-hidden="true">${passed ? '✓' : required ? '!' : '•'}</span><div><b>${text(label)}</b><small>${text(detail)}</small></div><em>${marker}</em></li>`;
   }
 
-  function reviewGates(item, view) {
+  function qualityChecks(item) {
     const priceAvailable = numericPrice(item?.price) !== null;
     const sourceKnown = Boolean(String(item?.source || '').trim());
-    const fresh = item?.isFresh === true;
+    const timeKnown = Number.isFinite(new Date(item?.time || item?.updatedAt || item?.observedAt || '').getTime());
     const noError = item?.error !== true;
-    const ready = view?.tone === 'ready';
+    const complete = priceAvailable && sourceKnown && timeKnown;
+    const fresh = complete && item?.isFresh === true && noError;
+    const freshnessDetail = !complete
+      ? 'لا يمكن تقييم الحداثة قبل اكتمال السعر والمصدر والوقت.'
+      : !noError
+        ? 'القراءة مكتملة، لكن التحديث الأخير تعذر.'
+        : item?.isFresh !== true
+          ? 'القراءة مكتملة، لكنها غير مصنفة كحديثة.'
+          : 'قراءة مكتملة وحديثة بلا خطأ معلن.';
     return [
-      gate('حداثة القراءة', fresh, fresh ? 'القراءة معلنة كحديثة.' : 'القراءة متأخرة أو غير متاحة.'),
-      gate('قابلية التحقق', priceAvailable && sourceKnown && noError, priceAvailable && sourceKnown && noError ? 'السعر والمصدر متاحان للعرض.' : 'السعر أو المصدر أو سلامة القراءة غير مكتملة.'),
-      gate('بوابات المراجعة', ready, ready ? 'اكتملت شروط الرفع للمراجع البشري.' : 'لا تُرفع الحالة قبل اكتمال الحكم القائم.'),
-      gate('قرار المراجع', false, 'هذه البوابة لا تُحاكى ولا تُتخذ من داخل العدسة.', false)
+      gate('السعر', priceAvailable, priceAvailable ? 'قيمة رقمية متاحة.' : 'لا توجد قيمة سعر رقمية.'),
+      gate('المصدر', sourceKnown, sourceKnown ? 'اسم المصدر ظاهر.' : 'المصدر غير متاح.'),
+      gate('وقت القراءة', timeKnown, timeKnown ? 'وقت صالح وقابل للعرض.' : 'وقت القراءة مفقود أو غير صالح.'),
+      gate('الحداثة', fresh, freshnessDetail)
     ].join('');
   }
 
   function scenarioControls() {
     const current = scenarioFor(activeScenario);
     const controls = Object.entries(SCENARIOS).map(([key, scenario]) => `<button type="button" data-lens-scenario="${key}" aria-pressed="${key === activeScenario ? 'true' : 'false'}">${text(scenario.label)}</button>`).join('');
-    return `<section class="smart-lens-simulator" aria-label="مختبر سيناريوهات الثقة"><div class="smart-lens-simulator-head"><div><p class="smart-lens-eyebrow">TEST SCENARIOS · LOCAL ONLY</p><h3>مختبر سيناريوهات الثقة</h3></div><span>محاكاة محلية</span></div><p>تغيّر هذه الأزرار ما يظهر داخل العدسة فقط؛ لا تُعدّل بيانات السوق أو حالة السهم أو التنبيهات.</p><div class="smart-lens-scenario-buttons" role="group" aria-label="اختر سيناريو محاكاة">${controls}</div><p class="smart-lens-scenario-note"><b>${text(current.label)}:</b> ${text(current.description)}</p></section>`;
+    return `<section class="smart-lens-simulator" aria-label="مختبر حالات جودة القراءة"><div class="smart-lens-simulator-head"><div><p class="smart-lens-eyebrow">DATA QUALITY SCENARIOS · LOCAL ONLY</p><h3>مختبر حالات جودة القراءة</h3></div><span>محاكاة محلية</span></div><p>تغيّر هذه الأزرار ما يظهر داخل النافذة فقط؛ لا تُعدّل بيانات السوق أو حالة السهم أو التنبيهات.</p><div class="smart-lens-scenario-buttons" role="group" aria-label="اختر حالة بيانات محاكية">${controls}</div><p class="smart-lens-scenario-note"><b>${text(current.label)}:</b> ${text(current.description)}</p></section>`;
   }
 
   function createLens() {
@@ -180,10 +185,10 @@
       <article class="smart-lens-sheet" dir="rtl">
         <header class="smart-lens-head">
           <div>
-            <p class="smart-lens-kicker">DECISION LENS · READ ONLY</p>
-            <h2 id="smart-lens-title">عدسة القرار الذكية</h2>
+            <p class="smart-lens-kicker">DATA QUALITY LENS · READ ONLY</p>
+            <h2 id="smart-lens-title">تفاصيل جودة القراءة</h2>
           </div>
-          <button type="button" class="smart-lens-close" data-lens-close="true" aria-label="إغلاق عدسة القرار">إغلاق</button>
+          <button type="button" class="smart-lens-close" data-lens-close="true" aria-label="إغلاق تفاصيل القراءة">إغلاق</button>
         </header>
         <div class="smart-lens-content" id="smart-lens-content"></div>
       </article>`;
@@ -192,9 +197,19 @@
       if (scenarioButton) {
         activeScenario = scenarioButton.dataset.lensScenario in SCENARIOS ? scenarioButton.dataset.lensScenario : 'current';
         renderLens(lens.dataset.symbol || '');
+        lens.querySelector(`[data-lens-scenario="${activeScenario}"]`)?.focus({ preventScroll: true });
         return;
       }
       if (event.target.closest('[data-lens-close="true"]')) closeLens();
+    });
+    lens.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+      const focusable = [...lens.querySelectorAll('button:not([disabled]), summary')].filter((element) => element.getAttribute('aria-hidden') !== 'true');
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
     document.body.appendChild(lens);
     return lens;
@@ -209,9 +224,13 @@
     if (!lens) return;
     lens.hidden = true;
     document.body.classList.remove('smart-lens-open');
+    const focusTarget = returnFocus;
+    returnFocus = null;
+    if (focusTarget && focusTarget.isConnected !== false && typeof focusTarget.focus === 'function') focusTarget.focus({ preventScroll: true });
   }
 
-  function openLens(symbol) {
+  function openLens(symbol, trigger = document.activeElement) {
+    returnFocus = trigger && typeof trigger.focus === 'function' ? trigger : null;
     activeScenario = 'current';
     renderLens(symbol);
   }
@@ -222,14 +241,14 @@
     const lens = lensRoot();
     lens.dataset.symbol = normalized;
     const item = scenarioItem(marketItem(normalized));
-    const view = decisionView(item);
+    const view = dataView(item);
     const confidence = evidenceConfidence(item, view);
     const source = safe(item?.source, 'غير متاح');
     const observedAt = readingTime(item?.time || item?.updatedAt || item?.observedAt);
     const price = numericPrice(item?.price);
-    const priceDisplay = price === null ? 'بانتظار قراءة موثقة' : `$${price.toFixed(2)}`;
-    const isReady = view.tone === 'ready';
-    const isAttention = view.tone === 'attention';
+    const priceDisplay = view.state === 'UNAVAILABLE' || price === null ? 'غير متاح' : `$${price.toFixed(2)}`;
+    const isFresh = view.state === 'FRESH';
+    const isCached = view.state === 'CACHED';
 
     const content = lens.querySelector('#smart-lens-content');
     content.innerHTML = `
@@ -238,7 +257,7 @@
         <span class="smart-lens-state ${view.tone}">${text(view.label)}</span>
       </div>
       <p class="smart-lens-local-note">قراءة تفسيرية محلية من البيانات الظاهرة · لا تستخدم نموذج ذكاء اصطناعي ولا تجري اتصالًا شبكيًا.</p>
-      <section class="smart-lens-primary" aria-label="حالة القرار">
+      <section class="smart-lens-primary" aria-label="حالة جودة القراءة">
         <p class="smart-lens-eyebrow">الحالة الآن</p>
         <h3>${text(view.label)}</h3>
         <p>${text(view.reason)}</p>
@@ -248,31 +267,31 @@
         <div class="smart-lens-meter" role="progressbar" aria-label="درجة ثقة الأدلة" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${confidence.score}"><span style="width:${confidence.score}%"></span></div>
         <p class="smart-lens-confidence-label">${text(confidence.label)}</p><p class="smart-lens-confidence-reason">${text(confidence.reason)}</p>
         <details class="smart-lens-confidence-details"><summary>عرض مكوّنات الدرجة</summary><ul>
-          ${confidenceLine('حداثة القراءة', confidence.components.freshness, 30, item?.isFresh === true ? 'المصدر والقراءة معلنان كحديثين.' : 'القراءة المتأخرة لا تمنح نقاط حداثة.')}
+          ${confidenceLine('حداثة القراءة', confidence.components.freshness, 30, isFresh ? 'القراءة مكتملة ومعلنة كحديثة.' : 'القراءة غير المكتملة أو المتأخرة لا تمنح نقاط حداثة.')}
           ${confidenceLine('اكتمال الأدلة', confidence.components.completeness, 20, 'سعر ومصدر ووقت وحالة قراءة متاحة.')}
           ${confidenceLine('اتساق القراءة', confidence.components.consistency, 20, 'لا تُمنح النقاط إلا للقراءة الحديثة الخالية من خطأ معلن.')}
-          ${confidenceLine('بوابات المراجعة', confidence.components.reviewGates, 15, 'لا تُمنح إلا عند حالة جاهز للمراجعة البشرية.')}
+          ${confidenceLine('قابلية التتبع', confidence.components.traceability, 15, 'وجود المصدر ووقت القراءة معًا.')}
           ${confidenceLine('استقرار القراءة', confidence.components.stability, 10, 'مؤشر عرضي لسلامة القراءة الحالية، لا توقع للسعر.')}
           ${confidenceLine('قابلية المراجعة', confidence.components.reviewability, 5, 'قراءة حديثة مع سعر قابل للتحقق.')}
         </ul></details>
         <p class="smart-lens-confidence-disclaimer">مقياس لجودة الأدلة الحالية فقط · <b>ليس احتمال ربح</b> · المعايرة الإحصائية غير مفعّلة.</p>
       </section>
       <div class="smart-lens-grid">
-        <section class="smart-lens-block"><h3>ثقة البيانات</h3><dl><div><dt>المصدر</dt><dd>${text(source)}</dd></div><div><dt>وقت القراءة</dt><dd>${text(observedAt)}</dd></div><div><dt>الحالة</dt><dd>${item?.isFresh === true ? 'موثقة الآن' : 'تحتاج تحديثًا'}</dd></div></dl></section>
-        <section class="smart-lens-block"><h3>ما الذي ننتظره؟</h3><p>${text(view.next)}</p><span class="smart-lens-next">${isReady ? 'المراجعة البشرية هي الخطوة التالية' : isAttention ? 'التحديث الموثق هو الخطوة التالية' : 'اكتمال بوابات المراجعة هو الخطوة التالية'}</span></section>
+        <section class="smart-lens-block"><h3>ثقة البيانات</h3><dl><div><dt>المصدر</dt><dd>${text(source)}</dd></div><div><dt>وقت القراءة</dt><dd>${text(observedAt)}</dd></div><div><dt>الحالة</dt><dd>${view.state === 'FRESH' ? 'موثقة الآن' : view.state === 'CACHED' ? 'آخر قراءة' : 'غير متاحة'}</dd></div></dl></section>
+        <section class="smart-lens-block"><h3>الخطوة التالية</h3><p>${text(view.next)}</p><span class="smart-lens-next">${isFresh ? 'مراجعة المصدر والسياق هي الخطوة التالية' : isCached ? 'التحديث الموثق هو الخطوة التالية' : 'اكتمال حقول القراءة هو الخطوة التالية'}</span></section>
       </div>
       ${scenarioControls()}
-      <section class="smart-lens-review-gates" aria-label="بوابات المراجعة"><div class="smart-lens-journey-head"><h3>بوابات المراجعة</h3><span>تفسير للحالة لا إنشاء لقرار</span></div><ul>${reviewGates(item, view)}</ul></section>
-      <section class="smart-lens-journey" aria-label="رحلة السهم">
-        <div class="smart-lens-journey-head"><h3>رحلة السهم</h3><span>شرح الحالة لا توصية تنفيذ</span></div>
+      <section class="smart-lens-review-gates" aria-label="فحوص اكتمال القراءة"><div class="smart-lens-journey-head"><h3>فحوص اكتمال القراءة</h3><span>تفسير للبيانات لا توصية</span></div><ul>${qualityChecks(item)}</ul></section>
+      <section class="smart-lens-journey" aria-label="مسار حالة القراءة">
+        <div class="smart-lens-journey-head"><h3>مسار حالة القراءة</h3><span>شرح الحالة لا توصية تنفيذ</span></div>
         <ol>
-          ${stage('رصد القراءة', item?.isFresh === true ? 'complete' : 'attention', item?.isFresh !== true)}
-          ${stage('تحت المراقبة', isReady ? 'complete' : 'watch', !isReady && !isAttention)}
-          ${stage('اكتمال البوابات', isReady ? 'complete' : 'pending', false)}
-          ${stage('مراجعة بشرية', isReady ? 'ready' : 'pending', isReady)}
+          ${stage('استلام السعر', numericPrice(item?.price) !== null ? 'complete' : 'attention', numericPrice(item?.price) === null)}
+          ${stage('توثيق المصدر', String(item?.source || '').trim() ? 'complete' : 'pending', !String(item?.source || '').trim())}
+          ${stage('توثيق الوقت', readingTime(item?.time || item?.updatedAt || item?.observedAt) !== 'غير متاح' ? 'complete' : 'pending', readingTime(item?.time || item?.updatedAt || item?.observedAt) === 'غير متاح')}
+          ${stage('قراءة حديثة', isFresh ? 'ready' : 'pending', isFresh)}
         </ol>
       </section>
-      <p class="smart-lens-safety"><b>حدود الأمان:</b> قراءة وشرح فقط · لا تنفيذ آلي · لا أمر وسيط · المراجعة البشرية إلزامية.</p>`;
+      <p class="smart-lens-safety"><b>حدود الأمان:</b> فحص جودة وشرح فقط · لا توصية · لا تنفيذ آلي · لا أمر وسيط.</p>`;
     lens.hidden = false;
     document.body.classList.add('smart-lens-open');
     lens.querySelector('.smart-lens-close')?.focus({ preventScroll: true });
@@ -282,12 +301,14 @@
     const trigger = event.target.closest('.smart-summary-btn');
     if (!trigger) return;
     event.preventDefault();
-    openLens(trigger.dataset.symbol || trigger.getAttribute('data-symbol'));
+    openLens(trigger.dataset.symbol || trigger.getAttribute('data-symbol'), trigger);
   }, true);
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeLens();
   });
 
-  window.asiriSmartDecisionLens = Object.freeze({ open: openLens, close: closeLens });
+  const publicApi = Object.freeze({ open: openLens, close: closeLens });
+  window.asiriQuoteQualityLens = publicApi;
+  window.asiriSmartDecisionLens = publicApi; // Temporary compatibility alias for existing external consumers.
 })();

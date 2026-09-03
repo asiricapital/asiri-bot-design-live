@@ -5,35 +5,34 @@ const script = readFileSync(new URL('./smart-decision-lens-static.js', import.me
 const css = readFileSync(new URL('./smart-decision-lens-static.css', import.meta.url), 'utf8');
 
 for (const marker of [
-  'smart-decision-lens-static.css?v=2',
-  'smart-decision-lens-static.js?v=2',
+  'smart-decision-lens-static.css?v=3',
+  'smart-decision-lens-static.js?v=3',
   'class="smart-summary-btn"'
 ]) {
   if (!index.includes(marker)) throw new Error(`Static lens index marker missing: ${marker}`);
 }
 for (const marker of [
   'smart-summary-btn',
-  'عدسة القرار الذكية',
+  'تفاصيل جودة القراءة',
   'قراءة تفسيرية محلية من البيانات الظاهرة',
   'لا تستخدم نموذج ذكاء اصطناعي',
-  'رحلة السهم',
+  'مسار حالة القراءة',
   'لا تنفيذ آلي',
-  'المراجعة البشرية إلزامية',
+  'لا توصية',
   'مؤشر ثقة الأدلة',
   'ليس احتمال ربح',
   'isCalibrated: false',
   'Math.min(rawScore, 39)',
-  'TEST SCENARIOS · LOCAL ONLY',
-  'مختبر سيناريوهات الثقة',
+  'DATA QUALITY SCENARIOS · LOCAL ONLY',
+  'مختبر حالات جودة القراءة',
   "stale: Object.freeze",
   "failedSource: Object.freeze",
-  "gatesPending: Object.freeze",
-  "reviewReady: Object.freeze",
+  "incompleteEvidence: Object.freeze",
+  "completeEvidence: Object.freeze",
   'محاكاة محلية',
   'لا تُعدّل بيانات السوق أو حالة السهم أو التنبيهات',
-  'reviewGates(item, view)',
-  'هذه البوابة لا تُحاكى',
-  'asiriSmartDecisionLens'
+  'qualityChecks(item)',
+  'asiriQuoteQualityLens'
 ]) {
   if (!script.includes(marker)) throw new Error(`Static lens script marker missing: ${marker}`);
 }
@@ -42,7 +41,8 @@ for (const marker of [
   'env(safe-area-inset-bottom)',
   '@media (max-width: 520px)',
   '.smart-lens-state.ready',
-  '.smart-lens-state.attention',
+  '.smart-lens-state.cached',
+  '.smart-lens-state.unavailable',
   '.smart-lens-confidence',
   '.smart-lens-meter',
   '.smart-lens-confidence-details',
@@ -58,4 +58,4 @@ if (/\b(fetch|XMLHttpRequest)\s*\(/.test(script)) throw new Error('Static lens m
 if (script.includes('event.stopImmediatePropagation()')) throw new Error('Static lens must not suppress unrelated click handlers.');
 if (/\b(order|trade|broker|execute|submit)\b/i.test(script)) throw new Error('Static lens must not expose trading or broker actions.');
 if (/\b(fetch|XMLHttpRequest|localStorage|sessionStorage)\s*\(/.test(script)) throw new Error('Static lens simulation must remain local and network-free.');
-console.log('Static smart decision lens checks passed: v27 binding, evidence-confidence simulator, review gates, mobile safety and read-only boundaries verified.');
+console.log('Static quote-quality lens checks passed: v27 binding, evidence-confidence simulator, completeness checks, mobile safety and read-only boundaries verified.');

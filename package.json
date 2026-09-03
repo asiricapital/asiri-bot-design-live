@@ -8,6 +8,7 @@
     "start": "node live-server.js",
     "check": "node check-v720.js",
     "check:batch1": "node check-batch1-stability.mjs",
+    "check:batch2": "node check-batch2-data-truth.mjs",
     "check:research": "node check-research-center.mjs",
     "check:technicals": "node check-technicals.mjs"
   },

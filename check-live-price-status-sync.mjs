@@ -2,10 +2,11 @@ import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('./index.html', import.meta.url), 'utf8');
 const required = [
-  "const statusText = verified",
-  "أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}",
-  "document.getElementById('last-sync-label').textContent = verified",
-  "آخر تحديث موثق من محرك السوق • ${verified} أصل • ${observedAt}",
+  "const states = symbols.map((symbol) => quoteDataState(stockMarketData[symbol]))",
+  "const freshCount = states.filter((state) => state === 'FRESH').length",
+  "const cachedCount = states.filter((state) => state === 'CACHED').length",
+  "تم الفحص: ${completeCount}/${symbols.length} مكتملة • حديثة ${freshCount} • محفوظة ${cachedCount}",
+  "آخر فحص لمحرك السوق • ${checkedAt} • استلم ${receivedComplete} قراءة مكتملة",
   "const retryText = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً'",
   "document.getElementById('last-sync-label').textContent = retryText",
   "fetch(`${VERIFIED_QUOTES_API}?stocks=${encodeURIComponent(symbols.join(','))}",

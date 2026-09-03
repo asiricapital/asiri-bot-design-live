@@ -17,6 +17,8 @@ ensure(toolsIndex >= 0 && journeyIndex > toolsIndex && commandIndex > journeyInd
 ensure(journeySectionStart >= 0 && journeySectionEnd > journeySectionStart, 'قسم مسار العميل غير موجود قبل قمة القرار');
 ensure(journeySection.includes('ابدأ بالخدمة الأقرب لخطوتك التالية'), 'عنوان مسار العميل غير موجود');
 ensure(journeySection.includes('openJourneyDestination'), 'بطاقات المسار يجب أن تربط بوجهة داخلية');
+ensure(journeySection.includes("openJourneyDestination('technicals')") && journeySection.includes('حلّل السياق الفني'), 'خطوة المراجعة يجب أن تقود إلى التحليل الفني الحقيقي');
+ensure(journeySection.includes('اطلع على حالة التنبيهات') && !journeySection.includes('اضبط تنبيهك'), 'مسار العميل يجب ألا يوحي بأن التنبيهات غير المفعلة تعمل');
 ensure(!journeySection.includes('fetch(') && !journeySection.includes('VERIFIED_QUOTES_API'), 'مسار العميل يجب ألا يستدعي بيانات سوق أو وسيط');
 ensure(html.includes('document.getElementById(`sec-${tab}`)') && html.includes('pill.dataset.tab === tab'), 'التبويب الداخلي الموحد لمسار العميل غير مربوط');
 ensure(html.includes("journey: 'journey'") && html.includes('data-tab="journey"'), 'التنقل السفلي لمسار العميل غير مربوط');
