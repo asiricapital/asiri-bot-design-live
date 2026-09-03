@@ -11,6 +11,7 @@
     "check:batch2": "node check-batch2-data-truth.mjs",
     "check:batch3": "node check-batch3-honest-completeness.mjs",
     "check:batch4": "node check-batch4-data-health.mjs",
+    "check:batch5": "node check-research-center.mjs",
     "check:research": "node check-research-center.mjs",
     "check:technicals": "node check-technicals.mjs"
   },
