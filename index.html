@@ -6,6 +6,7 @@
     <title>Asiri Capital | Live Terminal v27</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link href="./smart-decision-lens-static.css?v=5" rel="stylesheet">
+    <link href="./opportunity-journey.css?v=1" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -379,6 +380,59 @@
         </div>
 
         <div id="sec-command" class="app-section">
+            <!-- Opportunity Card of the Day -->
+            <section id="opportunity-day-card" class="opportunity-card" aria-labelledby="opt-title">
+                <div class="opportunity-badge">فرصة اليوم المقترحة</div>
+                <div class="opportunity-symbol-row">
+                    <div class="opportunity-symbol" id="opt-symbol">—</div>
+                    <div class="opportunity-price">
+                        <span class="label">آخر سعر موثق</span>
+                        <span class="val" id="opt-price">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="opportunity-reason">
+                    <p id="opt-reason">بانتظار تحليل محرك السوق لاختيار أفضل فرصة بناءً على جودة البيانات الموثقة والسياق الفني.</p>
+                </div>
+
+                <div class="opportunity-journey-box">
+                    <p class="section-header-meta">مسار رحلة الفرصة · OPPORTUNITY JOURNEY</p>
+                    <div class="journey-path" id="opt-journey-path">
+                        <div class="journey-node completed" data-step="observe">
+                            <div class="node-dot">1</div>
+                            <span class="node-label">رصد</span>
+                        </div>
+                        <div class="journey-node active" data-step="analyze">
+                            <div class="node-dot">2</div>
+                            <span class="node-label">تحليل</span>
+                        </div>
+                        <div class="journey-node" data-step="review">
+                            <div class="node-dot">3</div>
+                            <span class="node-label">مراجعة</span>
+                        </div>
+                        <div class="journey-node" data-step="ready">
+                            <div class="node-dot">4</div>
+                            <span class="node-label">جاهز</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="opportunity-actions">
+                    <button class="opt-btn opt-btn-primary" onclick="openJourneyDestination('research')">فتح مركز الأبحاث</button>
+                    <button class="opt-btn opt-btn-secondary" onclick="openJourneyDestination('technicals')">التحليل الفني</button>
+                </div>
+
+                <div id="telegram-alert-preview" class="telegram-preview" hidden>
+                    <div class="tg-header">
+                        <div class="tg-icon">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        </div>
+                        <span class="tg-title">تنبيه ASIRI · Telegram Preview</span>
+                    </div>
+                    <div class="tg-message" id="tg-message-content"></div>
+                </div>
+            </section>
+
             <section class="card-section readiness-card" aria-labelledby="readiness-title">
                 <header class="readiness-head"><div><div class="readiness-kicker">DATA READINESS · VERIFIED ONLY</div><h2 id="readiness-title">ملخص جاهزية البيانات</h2><p>ملخص موحّد لحالة القراءات الظاهرة في قائمة المتابعة. لا يستنتج فرصًا أو توصيات من السعر وحده، ولا يدّعي توفر سيولة أو أحجام لحظية غير موجودة في عقد الواجهة الحالي.</p></div><span class="feature-status-badge">قراءة فقط</span></header>
                 <div class="readiness-grid" aria-label="ملخص جاهزية قراءات الأسعار">
@@ -467,6 +521,7 @@
     </div>
 
     <script src="./quote-data-health.js?v=1"></script>
+    <script src="./opportunity-journey.js?v=1"></script>
     <script>
         const INITIAL_STOCKS = [
             'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
@@ -804,6 +859,7 @@
         }
 
         function renderDataReadinessSummary() {
+            if (window.asiriOpportunity) window.asiriOpportunity.refresh();
             const total = document.getElementById('readiness-total');
             if (!total) return;
             const rows = watchlist.map((symbol) => stockMarketData[symbol] || { symbol });
