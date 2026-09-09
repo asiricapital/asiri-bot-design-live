@@ -1,0 +1,233 @@
+/* Asiri Opportunity Journey & Card of the Day · iPhone-first design */
+
+.opportunity-card {
+    background: radial-gradient(circle at 90% 10%, rgba(226, 188, 83, 0.15), transparent 40%),
+                linear-gradient(145deg, #0d1d32, #060e18);
+    border: 1px solid var(--accent-gold);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.opportunity-card::before {
+    content: 'TOP OPPORTUNITY';
+    position: absolute;
+    top: 12px;
+    left: -30px;
+    background: var(--accent-gold);
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 900;
+    padding: 2px 40px;
+    transform: rotate(-45deg);
+    letter-spacing: 1px;
+}
+
+.opportunity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(226, 188, 83, 0.1);
+    border: 1px solid rgba(226, 188, 83, 0.3);
+    color: var(--accent-gold);
+    padding: 0.4rem 0.8rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.opportunity-symbol-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.2rem;
+}
+
+.opportunity-symbol {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+}
+
+.opportunity-price {
+    text-align: left;
+}
+
+.opportunity-price .val {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    direction: ltr;
+}
+
+.opportunity-price .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.opportunity-reason {
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 3px solid var(--accent-gold);
+    padding: 0.8rem 1rem;
+    border-radius: 4px 12px 12px 4px;
+    margin-bottom: 1.5rem;
+}
+
+.opportunity-reason p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text-main);
+}
+
+/* Journey Visual Path */
+.journey-path {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 2rem 0;
+    padding: 0 0.5rem;
+}
+
+.journey-path::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border-color);
+    z-index: 1;
+}
+
+.journey-node {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 25%;
+}
+
+.node-dot {
+    width: 24px;
+    height: 24px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.journey-node.active .node-dot {
+    background: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    color: #000;
+    box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.journey-node.completed .node-dot {
+    background: var(--success);
+    border-color: var(--success);
+    color: #000;
+}
+
+.node-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.journey-node.active .node-label {
+    color: var(--accent-cyan);
+}
+
+.journey-node.completed .node-label {
+    color: var(--success);
+}
+
+/* Action Buttons */
+.opportunity-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.opt-btn {
+    padding: 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.opt-btn-primary {
+    background: var(--accent-gold);
+    color: #000;
+}
+
+.opt-btn-secondary {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.3);
+    color: var(--accent-cyan);
+}
+
+.opt-btn:active {
+    transform: scale(0.96);
+}
+
+/* Telegram Alert Preview */
+.telegram-preview {
+    margin-top: 1rem;
+    background: #1d2733;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid #2b394a;
+}
+
+.tg-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.tg-icon {
+    width: 20px;
+    height: 20px;
+    background: #24A1DE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tg-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.tg-message {
+    font-size: 0.8rem;
+    color: #dce7f4;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
