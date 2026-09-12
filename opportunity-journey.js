@@ -1,23 +1,50 @@
-/* Asiri Opportunity Journey & Card of the Day Logic · Design Environment v2 */
+/* Asiri Opportunity Journey & Card of the Day Logic · Design Environment v3 */
 (() => {
     'use strict';
 
-    function updateOpportunityCard() {
+    // Internal cache for technical snapshots to avoid redundant calculations
+    const technicalsCache = new Map();
+
+    async function getTechnicals(symbol) {
+        if (technicalsCache.has(symbol)) return technicalsCache.get(symbol);
+        
+        try {
+            // Attempt to fetch real technicals from the design environment's service
+            // This usually fetches history and calculates RSI/VolumeRatio
+            const response = await fetch(`/api/technicals/${symbol}`);
+            if (!response.ok) return null;
+            const data = await response.json();
+            if (data.ok && data.indicators) {
+                technicalsCache.set(symbol, data.indicators);
+                return data.indicators;
+            }
+        } catch (e) {
+            console.warn(`Could not fetch real technicals for ${symbol}`, e);
+        }
+        return null;
+    }
+
+    async function updateOpportunityCard() {
         if (typeof stockMarketData === 'undefined') return;
 
         const symbols = Object.keys(stockMarketData);
         if (!symbols.length) return;
 
         // Logic to pick "Opportunity of the Day"
-        // In this design phase, we prioritize FRESH stocks with volume data
+        // Prioritize symbols that have real technical data and are fresh
         let bestSymbol = null;
         let bestItem = null;
+        let bestTechnicals = null;
 
-        for (const sym of symbols) {
-            const item = stockMarketData[sym];
-            if (item.isFresh && item.price && item.volume) {
+        // Sort symbols by price or volume to find a candidate
+        const candidates = symbols.filter(s => stockMarketData[s].isFresh);
+        
+        for (const sym of candidates) {
+            const tech = await getTechnicals(sym);
+            if (tech && tech.quality >= 60) {
                 bestSymbol = sym;
-                bestItem = item;
+                bestItem = stockMarketData[sym];
+                bestTechnicals = tech;
                 break;
             }
         }
@@ -25,6 +52,7 @@
         if (!bestSymbol) {
             bestSymbol = symbols[0];
             bestItem = stockMarketData[bestSymbol];
+            bestTechnicals = await getTechnicals(bestSymbol);
         }
 
         // Update UI elements
@@ -34,28 +62,29 @@
         const momentumEl = document.getElementById('opt-momentum');
         const liquidityEl = document.getElementById('opt-liquidity');
         const tgPreview = document.getElementById('telegram-alert-preview');
-        const tgContent = document.getElementById('tg-message-content');
 
         if (symbolEl) symbolEl.textContent = bestSymbol;
         if (priceEl) priceEl.textContent = bestItem.price ? `$${Number(bestItem.price).toFixed(2)}` : 'غير متاح';
         
-        // Simulated Analysis for Design Environment
-        const rsi = Math.floor(Math.random() * (70 - 40) + 40); // Simulated RSI
-        const volRatio = (Math.random() * (2.5 - 0.8) + 0.8).toFixed(2); // Simulated Vol Ratio
+        // Use real technicals if available, fallback to quote volumeRatio or simulation
+        const rsi = bestTechnicals?.rsi14 ? Math.round(bestTechnicals.rsi14) : '—';
+        const volRatio = bestTechnicals?.historicalVolumeRatio ? bestTechnicals.historicalVolumeRatio.toFixed(2) : 
+                         (bestItem.volumeRatio ? bestItem.volumeRatio.toFixed(2) : '—');
         
         if (momentumEl) momentumEl.textContent = rsi;
-        if (liquidityEl) liquidityEl.textContent = `x${volRatio}`;
+        if (liquidityEl) liquidityEl.textContent = volRatio !== '—' ? `x${volRatio}` : '—';
 
         if (reasonEl) {
-            if (bestItem.isFresh) {
-                const momentumText = rsi > 60 ? 'زخم صاعد قوي' : rsi < 40 ? 'منطقة تجميع' : 'زخم مستقر';
-                const liquidityText = volRatio > 1.5 ? 'سيولة مرتفعة' : 'سيولة طبيعية';
+            if (bestItem.isFresh && bestTechnicals) {
+                const momentumText = rsi !== '—' ? (rsi > 60 ? 'زخم صاعد قوي' : rsi < 40 ? 'منطقة تجميع' : 'زخم مستقر') : 'زخم غير مؤكد';
+                const liquidityText = volRatio !== '—' ? (volRatio > 1.5 ? 'سيولة مرتفعة' : 'سيولة طبيعية') : 'سيولة عادية';
+                const trendText = bestTechnicals.trendLabel || 'اتجاه غير محدد';
                 
-                reasonEl.textContent = `سهم ${bestSymbol} يظهر ${momentumText} و ${liquidityText}. البيانات الموثقة من ${bestItem.source || 'Yahoo'} تدعم الانتقال لمرحلة المراجعة البشرية.`;
+                reasonEl.textContent = `سهم ${bestSymbol} في مسار ${trendText} مع ${momentumText} و ${liquidityText}. البيانات الموثقة تدعم المراجعة البشرية.`;
                 updateJourneyPath('review');
-                showTelegramPreview(bestSymbol, bestItem.price, rsi, volRatio);
+                showTelegramPreview(bestSymbol, bestItem.price, rsi, volRatio, trendText);
             } else {
-                reasonEl.textContent = `سهم ${bestSymbol} قيد الرصد؛ بانتظار اكتمال القراءة الموثقة وتحديث مؤشرات السيولة لتفعيل مسار التحليل.`;
+                reasonEl.textContent = `سهم ${bestSymbol} قيد الرصد؛ بانتظار اكتمال القراءة الموثقة وتوفر البيانات التاريخية لتفعيل مسار التحليل الفني.`;
                 updateJourneyPath('analyze');
                 if (tgPreview) tgPreview.hidden = true;
             }
@@ -77,21 +106,22 @@
         });
     }
 
-    function showTelegramPreview(symbol, price, rsi, volRatio) {
+    function showTelegramPreview(symbol, price, rsi, volRatio, trend) {
         const tgPreview = document.getElementById('telegram-alert-preview');
         const tgContent = document.getElementById('tg-message-content');
         if (!tgPreview || !tgContent) return;
 
         const time = new Date().toLocaleTimeString('ar-SA');
-        const message = `🚨 تنبيه ASIRI: فرصة مكتملة البيانات\n` +
+        const message = `🚨 تنبيه ASIRI: فرصة حقيقية مكتملة\n` +
                         `--------------------------\n` +
                         `الرمز: ${symbol}\n` +
                         `السعر: $${Number(price).toFixed(2)}\n` +
+                        `الاتجاه: ${trend || '—'}\n` +
                         `الزخم (RSI): ${rsi}\n` +
                         `السيولة (Vol): x${volRatio}\n` +
                         `الحالة: جاهز للمراجعة البشرية\n` +
                         `الوقت: ${time}\n` +
-                        `المصدر: موثق (Snapshot v29)\n` +
+                        `المصدر: محرك Asiri (بيانات حقيقية)\n` +
                         `--------------------------\n` +
                         `رابط المراجعة: https://asiri-bot.onrender.com`;
         
