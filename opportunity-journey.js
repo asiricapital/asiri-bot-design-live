@@ -1,9 +1,9 @@
-/* Asiri Opportunity Journey · verified data + mobile truth v2 */
+/* Asiri Opportunity Journey · verified data + decision room v3 */
 (() => {
     'use strict';
 
-    if (window.__asiriOpportunityJourneyV2) return;
-    window.__asiriOpportunityJourneyV2 = true;
+    if (window.__asiriOpportunityJourneyV3) return;
+    window.__asiriOpportunityJourneyV3 = true;
 
     const TECHNICALS_ENDPOINT = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
     const TECHNICAL_CACHE_MS = 60 * 1000;
@@ -123,6 +123,48 @@
                     <p id="opt-data-note">لن تُستكمل رحلة الفرصة بقيم ناقصة أو مفترضة.</p>
                 </section>`);
         }
+
+        if (!document.getElementById('opt-decision-room')) {
+            const truthPanel = document.getElementById('opt-data-truth');
+            truthPanel?.insertAdjacentHTML('afterend', `
+                <section id="opt-decision-room" class="opportunity-decision-room" aria-live="polite">
+                    <div class="decision-room-head">
+                        <div><span class="decision-room-kicker">ASIRI DECISION ROOM</span><b>قرار المتابعة الآن</b></div>
+                        <span id="opt-decision-status" class="decision-status pending">قيد التحقق</span>
+                    </div>
+                    <div class="decision-room-summary" aria-label="ملخص قرار المتابعة">
+                        <article>
+                            <span>الوضع</span>
+                            <strong id="opt-decision-mode">قيد التحقق</strong>
+                            <small>وصف تشغيلي، لا توصية</small>
+                        </article>
+                        <article>
+                            <span>الأدلة المتاحة</span>
+                            <strong id="opt-decision-evidence-count">—</strong>
+                            <small>حقائق ظاهرة فقط</small>
+                        </article>
+                        <article class="next-step">
+                            <span>الخطوة الآمنة</span>
+                            <strong id="opt-decision-next">انتظار البيانات</strong>
+                            <small>قبل المراجعة البشرية</small>
+                        </article>
+                    </div>
+                    <details class="decision-room-details">
+                        <summary><span>لماذا؟ وما الذي ينقص؟</span><small>عرض الأدلة والبوابات</small></summary>
+                        <div class="decision-evidence-grid">
+                            <div>
+                                <b>ما يدعم المتابعة</b>
+                                <ul id="opt-decision-signals"><li>قيد التحقق من البيانات</li></ul>
+                            </div>
+                            <div class="decision-blockers">
+                                <b>بوابات لم تُستكمل</b>
+                                <ul id="opt-decision-blockers"><li>فحص المخاطر والمراجعة البشرية</li></ul>
+                            </div>
+                        </div>
+                    </details>
+                    <p class="decision-safety"><b>حد الأمان:</b> لا شراء، لا بيع، ولا تنفيذ آلي من هذه اللوحة.</p>
+                </section>`);
+        }
     }
 
     function setText(id, value) {
@@ -135,6 +177,65 @@
         if (!element) return;
         element.textContent = available ? value : 'قيد التحقق';
         element.classList.toggle('is-pending', !available);
+    }
+
+    function setList(id, items, fallback) {
+        const element = document.getElementById(id);
+        if (!element) return;
+        const rows = items.length ? items : [fallback];
+        element.innerHTML = rows.map((item) => `<li>${escapeMarkup(item)}</li>`).join('');
+    }
+
+    function momentumLabel(rsi) {
+        if (rsi === null) return null;
+        if (rsi >= 70) return `RSI ${Math.round(rsi)} · زخم مرتفع يحتاج حذرًا`;
+        if (rsi <= 30) return `RSI ${Math.round(rsi)} · تشبع بيعي محتمل يحتاج تحققًا`;
+        return `RSI ${Math.round(rsi)} · زخم ضمن النطاق الوسطي`;
+    }
+
+    function buildDecisionBrief({ item, state, technicals, quoteReady, technicalReady, rsi, volumeRatio }) {
+        const signals = [];
+        const blockers = [];
+        const price = finiteNumber(item?.price);
+
+        if (quoteReady && price !== null) signals.push(`سعر موثق ظاهر: $${price.toFixed(2)}`);
+        if (technicals?.indicators?.trendLabel) signals.push(`الاتجاه التاريخي: ${technicals.indicators.trendLabel}`);
+        const momentum = momentumLabel(rsi);
+        if (momentum) signals.push(momentum);
+        if (volumeRatio !== null) signals.push(`الحجم: ${volumeRatio.toFixed(2)}× من المتوسط`);
+
+        if (!quoteReady) blockers.push('لا توجد قراءة سعر موثقة صالحة للتحليل.');
+        else if (state !== 'FRESH') blockers.push('السعر ليس لحظيًا؛ يبقى المرشح للمراقبة فقط.');
+        if (!technicals) blockers.push('السجل الفني غير متاح من المصدر.');
+        else if (technicals.stale) blockers.push('السجل الفني متأخر ويحتاج تحديثًا.');
+        else if (!technicalReady) blockers.push('المؤشرات الفنية غير مكتملة.');
+        blockers.push('ملاءمة المخاطر مع المحفظة لم تُفحص بعد.');
+        blockers.push('المراجعة البشرية مطلوبة قبل أي قرار.');
+
+        if (!quoteReady) {
+            return { status: 'متوقف', cls: 'unavailable', mode: 'لا قرار', next: 'انتظر سعرًا موثقًا', signals, blockers };
+        }
+        if (state !== 'FRESH' || technicals?.stale) {
+            return { status: 'مراقبة فقط', cls: 'watch', mode: 'انتظار منضبط', next: 'حدّث القراءة أولًا', signals, blockers };
+        }
+        if (!technicalReady) {
+            return { status: 'قيد التحقق', cls: 'pending', mode: 'بيانات غير مكتملة', next: 'أكمل السجل الفني', signals, blockers };
+        }
+        return { status: 'جاهز لفحص المخاطر', cls: 'ready', mode: 'فحص المخاطر', next: 'تحقق من ملاءمة المحفظة', signals, blockers };
+    }
+
+    function renderDecisionRoom(context) {
+        const brief = buildDecisionBrief(context);
+        const status = document.getElementById('opt-decision-status');
+        if (status) {
+            status.textContent = brief.status;
+            status.className = `decision-status ${brief.cls}`;
+        }
+        setText('opt-decision-mode', brief.mode);
+        setText('opt-decision-evidence-count', `${brief.signals.length} ${brief.signals.length === 1 ? 'إشارة فعلية' : 'إشارات فعلية'}`);
+        setText('opt-decision-next', brief.next);
+        setList('opt-decision-signals', brief.signals, 'لا توجد إشارة مكتملة بعد.');
+        setList('opt-decision-blockers', brief.blockers, 'لا توجد بوابات معلّقة.');
     }
 
     function updateJourneyPath({ quoteReady, technicalReady, riskReady = false }) {
@@ -209,6 +310,7 @@
                 setText('opt-symbol', '—');
                 setText('opt-price', 'غير متاح');
                 setText('opt-reason', 'أضف رمزًا إلى قائمة المتابعة لبدء رحلة فرصة موثقة.');
+                renderDecisionRoom({ item: null, state: 'UNAVAILABLE', technicals: null, quoteReady: false, technicalReady: false, rsi: null, volumeRatio: null });
                 updateJourneyPath({ quoteReady: false, technicalReady: false });
                 return;
             }
@@ -233,6 +335,7 @@
             setMetric('opt-momentum', rsi !== null ? String(Math.round(rsi)) : '', rsi !== null);
             setMetric('opt-liquidity', volumeRatio !== null ? `${volumeRatio.toFixed(2)}×` : '', volumeRatio !== null);
             renderTruthPanel(item, state, technicals);
+            renderDecisionRoom({ item, state, technicals, quoteReady, technicalReady, rsi, volumeRatio });
 
             if (!quoteReady) {
                 setText('opt-reason', `تم رصد ${symbol}، لكن لا توجد قراءة سعر موثقة صالحة لبناء التحليل.`);
