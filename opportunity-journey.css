@@ -1,4 +1,4 @@
-/* Asiri Opportunity Journey · verified data + decision room v3 */
+/* Asiri Opportunity Journey · verified data + decision room + plan simulator v4 */
 
 .opportunity-card {
     background: radial-gradient(circle at 90% 10%, rgba(226, 188, 83, 0.15), transparent 40%),
@@ -172,6 +172,68 @@
 .decision-safety { margin: 0.72rem 0 0; border-inline-start: 2px solid var(--success); padding-inline-start: 0.55rem; color: #b9f7df; font-size: 0.65rem; line-height: 1.65; }
 .decision-safety b { color: var(--success); }
 
+.opportunity-plan-lab {
+    margin-top: 0.85rem;
+    padding: 0.9rem;
+    border: 1px solid rgba(0, 229, 255, 0.24);
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(0, 229, 255, 0.055), rgba(5, 14, 25, 0.62));
+}
+.plan-lab-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.plan-lab-head b { display: block; margin-top: 0.18rem; color: #f8fafc; font-size: 0.84rem; }
+.plan-lab-kicker { color: var(--accent-cyan); font-size: 0.6rem; font-weight: 900; letter-spacing: 0.13em; }
+.plan-status { flex: none; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.34rem 0.58rem; border: 1px solid currentColor; border-radius: 999px; font-size: 0.62rem; font-weight: 900; }
+.plan-status::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ''; }
+.plan-status.locked { color: #cbd5e1; background: rgba(148, 163, 184, 0.08); }
+.plan-status.ready { color: #9cf4ff; background: rgba(0, 229, 255, 0.07); }
+.plan-status.calculated { color: #8ce6c1; background: rgba(16, 185, 129, 0.08); }
+.plan-lab-intro { margin: 0.65rem 0 0; color: #c9d6e5; font-size: 0.66rem; line-height: 1.7; }
+.plan-controls { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 0.55rem; margin-top: 0.75rem; }
+.plan-controls label { min-width: 0; display: grid; gap: 0.34rem; color: var(--text-muted); font-size: 0.62rem; font-weight: 700; }
+.plan-controls input,
+.plan-controls select {
+    width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    border: 1px solid rgba(30, 51, 86, 0.95);
+    border-radius: 10px;
+    padding: 0.65rem 0.72rem;
+    color: #f8fafc;
+    background: rgba(5, 14, 25, 0.92);
+    font: inherit;
+    font-size: 0.74rem;
+    outline: none;
+}
+.plan-controls input { direction: ltr; text-align: left; }
+.plan-controls input:focus,
+.plan-controls select:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.1); }
+.plan-gate { margin-top: 0.65rem; border-inline-start: 2px solid currentColor; padding: 0.48rem 0.58rem; font-size: 0.64rem; line-height: 1.65; }
+.plan-gate.locked { color: #ffe4a3; background: rgba(226, 188, 83, 0.045); }
+.plan-gate.ready { color: #b9f7df; background: rgba(16, 185, 129, 0.045); }
+.plan-scenarios { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; margin-top: 0.72rem; }
+.plan-scenario { min-width: 0; padding: 0.72rem; border: 1px solid rgba(30, 51, 86, 0.86); border-radius: 12px; background: rgba(4, 12, 22, 0.68); }
+.plan-scenario.conservative { border-color: rgba(226, 188, 83, 0.25); }
+.plan-scenario.balanced { border-color: rgba(0, 229, 255, 0.22); }
+.plan-scenario.locked { opacity: 0.58; }
+.plan-scenario-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.55rem; }
+.plan-scenario-title span { display: block; color: var(--text-muted); font-size: 0.56rem; font-weight: 800; letter-spacing: 0.06em; }
+.plan-scenario-title b { display: block; margin-top: 0.2rem; color: #f8fafc; font-size: 0.69rem; line-height: 1.45; }
+.plan-scenario-title em { flex: none; color: var(--accent-gold); font-size: 0.57rem; font-style: normal; font-weight: 900; direction: ltr; }
+.plan-scenario.balanced .plan-scenario-title em { color: var(--accent-cyan); }
+.plan-levels { display: grid; grid-template-columns: 1fr 1fr; gap: 0.42rem; margin-top: 0.62rem; }
+.plan-levels > div { min-width: 0; padding: 0.5rem; border: 1px solid rgba(30, 51, 86, 0.68); border-radius: 9px; background: rgba(9, 22, 37, 0.72); }
+.plan-levels span { display: block; color: var(--text-muted); font-size: 0.54rem; line-height: 1.45; }
+.plan-levels b { display: block; margin-top: 0.22rem; color: #e7f7fb; font-size: 0.66rem; line-height: 1.5; direction: ltr; text-align: right; overflow-wrap: anywhere; }
+.plan-position { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.22rem 0.5rem; margin-top: 0.55rem; border-top: 1px solid rgba(30, 51, 86, 0.65); padding-top: 0.52rem; }
+.plan-position span { color: var(--text-muted); font-size: 0.58rem; }
+.plan-position b { color: #f8fafc; font-size: 0.68rem; }
+.plan-position small { grid-column: 1 / -1; color: #b9f7df; font-size: 0.57rem; }
+.plan-budget-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin-top: 0.65rem; border: 1px solid rgba(16, 185, 129, 0.18); border-radius: 10px; padding: 0.62rem 0.7rem; background: rgba(16, 185, 129, 0.04); }
+.plan-budget-row span { color: #c9d6e5; font-size: 0.62rem; }
+.plan-budget-row b { color: #8ce6c1; font-size: 0.75rem; direction: ltr; }
+.plan-disclaimer { margin: 0.65rem 0 0; color: #aebdce; font-size: 0.6rem; line-height: 1.65; }
+.plan-disclaimer b { color: var(--accent-gold); }
+
 .opportunity-journey-box { margin-top: 0.35rem; }
 .journey-title-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .journey-title-row .section-header-meta { margin: 0; }
@@ -244,6 +306,9 @@
     .decision-room-summary { display: flex; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
     .decision-room-summary::-webkit-scrollbar { display: none; }
     .decision-room-summary article { flex: 0 0 142px; scroll-snap-align: start; }
+    .plan-scenarios { display: flex; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+    .plan-scenarios::-webkit-scrollbar { display: none; }
+    .plan-scenario { flex: 0 0 min(270px, 82vw); scroll-snap-align: start; }
     .journey-path {
         display: flex;
         justify-content: flex-start;
@@ -268,6 +333,9 @@
     .decision-room-head { align-items: flex-start; flex-direction: column; }
     .decision-evidence-grid { grid-template-columns: 1fr; }
     .decision-room-details summary small { display: none; }
+    .opportunity-plan-lab { padding: 0.78rem; }
+    .plan-lab-head { flex-direction: column; }
+    .plan-controls { grid-template-columns: 1fr; }
     .journey-title-row { align-items: flex-start; flex-direction: column; }
     .journey-stage-pill { white-space: normal; }
     .opportunity-actions { grid-template-columns: 1fr; }

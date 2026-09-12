@@ -93,6 +93,7 @@ const readinessIds = [
 ];
 const readinessElements = Object.fromEntries(readinessIds.map((id) => [id, { textContent: '' }]));
 const readinessContext = vm.createContext({
+  window: {},
   watchlist: ['FRESH1', 'DELAY1', 'STALE1', 'MISSING'],
   stockMarketData: {
     FRESH1: { ...complete, price: 1, source: 'Provider A', isFresh: true, error: false },

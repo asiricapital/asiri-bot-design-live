@@ -1,9 +1,9 @@
-/* Asiri Opportunity Journey · verified data + decision room v3 */
+/* Asiri Opportunity Journey · verified data + decision room + plan simulator v4 */
 (() => {
     'use strict';
 
-    if (window.__asiriOpportunityJourneyV3) return;
-    window.__asiriOpportunityJourneyV3 = true;
+    if (window.__asiriOpportunityJourneyV4) return;
+    window.__asiriOpportunityJourneyV4 = true;
 
     const TECHNICALS_ENDPOINT = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
     const TECHNICAL_CACHE_MS = 60 * 1000;
@@ -11,6 +11,7 @@
     const technicalsCache = new Map();
     let refreshInFlight = false;
     let refreshTimer = null;
+    let latestOpportunityContext = null;
 
     const finiteNumber = (value) => {
         if (value === null || value === undefined || value === '') return null;
@@ -165,6 +166,50 @@
                     <p class="decision-safety"><b>حد الأمان:</b> لا شراء، لا بيع، ولا تنفيذ آلي من هذه اللوحة.</p>
                 </section>`);
         }
+
+        if (!document.getElementById('opt-plan-simulator')) {
+            const decisionRoom = document.getElementById('opt-decision-room');
+            const safetyNote = decisionRoom?.querySelector('.decision-safety');
+            safetyNote?.insertAdjacentHTML('beforebegin', `
+                <section id="opt-plan-simulator" class="opportunity-plan-lab" aria-live="polite">
+                    <div class="plan-lab-head">
+                        <div><span class="plan-lab-kicker">ASIRI PLAN LAB</span><b>محاكي خطة الفرصة</b></div>
+                        <span id="opt-plan-status" class="plan-status locked">مسودة مقفلة</span>
+                    </div>
+                    <p class="plan-lab-intro">حوّل القراءة المكتملة إلى سيناريو قياس قبل المراجعة. المستويات حسابية مبنية على ATR وليست توقعًا لحركة السعر.</p>
+                    <div class="plan-controls">
+                        <label><span>رأس المال المخصص ($)</span><input id="opt-plan-capital" type="number" min="1" step="100" inputmode="decimal" placeholder="أدخل المبلغ" autocomplete="off"></label>
+                        <label><span>حد المخاطرة</span><select id="opt-plan-risk" aria-label="نسبة المخاطرة القصوى"><option value="0.5">0.5% · حذر</option><option value="1" selected>1% · منضبط</option><option value="2">2% · مرتفع</option></select></label>
+                    </div>
+                    <div id="opt-plan-gate" class="plan-gate locked">بانتظار سعر حديث وسجل فني مكتمل.</div>
+                    <div class="plan-scenarios" aria-label="سيناريوهات محاكاة خطة الفرصة">
+                        <article class="plan-scenario conservative" data-plan-scenario="conservative">
+                            <div class="plan-scenario-title"><div><span>سيناريو 01</span><b>محافظ · انتظار تراجع</b></div><em>1.5R / 2R</em></div>
+                            <div class="plan-levels">
+                                <div><span>نطاق الدخول الافتراضي</span><b id="opt-plan-conservative-entry">—</b></div>
+                                <div><span>وقف الحماية الحسابي</span><b id="opt-plan-conservative-stop">—</b></div>
+                                <div><span>الهدف الأول</span><b id="opt-plan-conservative-target1">—</b></div>
+                                <div><span>الهدف الثاني</span><b id="opt-plan-conservative-target2">—</b></div>
+                            </div>
+                            <div class="plan-position"><span>الكمية وفق الحد</span><b id="opt-plan-conservative-quantity">أدخل رأس المال</b><small id="opt-plan-conservative-loss">أقصى خسارة: —</small></div>
+                        </article>
+                        <article class="plan-scenario balanced" data-plan-scenario="balanced">
+                            <div class="plan-scenario-title"><div><span>سيناريو 02</span><b>متوازن · قرب السعر</b></div><em>1.25R / 1.75R</em></div>
+                            <div class="plan-levels">
+                                <div><span>نطاق الدخول الافتراضي</span><b id="opt-plan-balanced-entry">—</b></div>
+                                <div><span>وقف الحماية الحسابي</span><b id="opt-plan-balanced-stop">—</b></div>
+                                <div><span>الهدف الأول</span><b id="opt-plan-balanced-target1">—</b></div>
+                                <div><span>الهدف الثاني</span><b id="opt-plan-balanced-target2">—</b></div>
+                            </div>
+                            <div class="plan-position"><span>الكمية وفق الحد</span><b id="opt-plan-balanced-quantity">أدخل رأس المال</b><small id="opt-plan-balanced-loss">أقصى خسارة: —</small></div>
+                        </article>
+                    </div>
+                    <div class="plan-budget-row"><span>ميزانية المخاطرة القصوى</span><b id="opt-plan-risk-budget">—</b></div>
+                    <p class="plan-disclaimer"><b>محاكاة فقط:</b> لا تحفظ أمرًا، ولا تتصل بوسيط، ولا تضمن الوصول إلى أي هدف. راجع السيولة والأخبار والانزلاق السعري قبل أي قرار بشري.</p>
+                </section>`);
+        }
+
+        bindPlanControls();
     }
 
     function setText(id, value) {
@@ -191,6 +236,108 @@
         if (rsi >= 70) return `RSI ${Math.round(rsi)} · زخم مرتفع يحتاج حذرًا`;
         if (rsi <= 30) return `RSI ${Math.round(rsi)} · تشبع بيعي محتمل يحتاج تحققًا`;
         return `RSI ${Math.round(rsi)} · زخم ضمن النطاق الوسطي`;
+    }
+
+    function bindPlanControls() {
+        const capital = document.getElementById('opt-plan-capital');
+        const risk = document.getElementById('opt-plan-risk');
+        [capital, risk].forEach((control) => {
+            if (!control || control.dataset.planBound === 'true') return;
+            control.dataset.planBound = 'true';
+            const eventName = control.tagName === 'SELECT' ? 'change' : 'input';
+            control.addEventListener(eventName, () => {
+                if (latestOpportunityContext) renderPlanSimulator(latestOpportunityContext);
+            });
+        });
+    }
+
+    function formatPlanPrice(value) {
+        return Number.isFinite(value) ? `$${Math.max(0.01, value).toFixed(2)}` : '—';
+    }
+
+    function buildPlanScenario(price, atr, kind) {
+        const conservative = kind === 'conservative';
+        const entryLow = Math.max(0.01, price - atr * (conservative ? 0.35 : 0.15));
+        const entryHigh = Math.max(entryLow, price + atr * (conservative ? -0.05 : 0.10));
+        const entryMid = (entryLow + entryHigh) / 2;
+        const stop = Math.max(0.01, entryLow - atr * (conservative ? 1.25 : 0.95));
+        const perShareRisk = Math.max(0.01, entryMid - stop);
+        const firstReward = conservative ? 1.5 : 1.25;
+        const secondReward = conservative ? 2 : 1.75;
+        return {
+            entryLow,
+            entryHigh,
+            entryMid,
+            stop,
+            perShareRisk,
+            target1: entryMid + perShareRisk * firstReward,
+            target2: entryMid + perShareRisk * secondReward
+        };
+    }
+
+    function positionForScenario(scenario, capital, riskPercent) {
+        if (!(capital > 0) || !(riskPercent > 0)) return null;
+        const riskBudget = capital * riskPercent / 100;
+        const byRisk = Math.floor(riskBudget / scenario.perShareRisk);
+        const byCapital = Math.floor(capital / scenario.entryHigh);
+        const quantity = Math.max(0, Math.min(byRisk, byCapital));
+        return {
+            quantity,
+            maxLoss: quantity * scenario.perShareRisk,
+            riskBudget
+        };
+    }
+
+    function setPlanScenario(kind, scenario, position, locked) {
+        const card = document.querySelector(`[data-plan-scenario="${kind}"]`);
+        card?.classList.toggle('locked', locked);
+        const prefix = `opt-plan-${kind}`;
+        setText(`${prefix}-entry`, locked ? '—' : `${formatPlanPrice(scenario.entryLow)} – ${formatPlanPrice(scenario.entryHigh)}`);
+        setText(`${prefix}-stop`, locked ? '—' : formatPlanPrice(scenario.stop));
+        setText(`${prefix}-target1`, locked ? '—' : formatPlanPrice(scenario.target1));
+        setText(`${prefix}-target2`, locked ? '—' : formatPlanPrice(scenario.target2));
+        setText(`${prefix}-quantity`, locked ? 'محجوب حتى اكتمال البيانات' : position ? `${position.quantity.toLocaleString('ar-SA')} سهم` : 'أدخل رأس المال');
+        setText(`${prefix}-loss`, locked ? 'أقصى خسارة: —' : position ? `أقصى خسارة حسابية: $${position.maxLoss.toFixed(2)}` : 'أقصى خسارة: —');
+    }
+
+    function renderPlanSimulator(context) {
+        const price = finiteNumber(context?.item?.price);
+        const atr = finiteNumber(context?.technicals?.indicators?.atr14);
+        const canSimulate = Boolean(
+            context?.quoteReady
+            && context?.state === 'FRESH'
+            && context?.technicalReady
+            && context?.technicals
+            && !context.technicals.stale
+            && atr > 0
+            && price > 0
+        );
+        const capital = finiteNumber(document.getElementById('opt-plan-capital')?.value);
+        const riskPercent = finiteNumber(document.getElementById('opt-plan-risk')?.value) ?? 1;
+        const status = document.getElementById('opt-plan-status');
+        const gate = document.getElementById('opt-plan-gate');
+
+        if (status) {
+            status.textContent = canSimulate ? (capital > 0 ? 'محاكاة محسوبة' : 'جاهز للحساب') : 'مسودة مقفلة';
+            status.className = `plan-status ${canSimulate ? (capital > 0 ? 'calculated' : 'ready') : 'locked'}`;
+        }
+        if (gate) {
+            gate.textContent = !context?.quoteReady ? 'مقفل: لا توجد قراءة سعر موثقة.'
+                : context.state !== 'FRESH' ? 'مسودة تعليمية: حدّث السعر اللحظي قبل إظهار المستويات.'
+                    : !context?.technicals || context.technicals.stale ? 'مقفل: السجل الفني غير متاح أو متأخر.'
+                        : !(atr > 0) ? 'مقفل: قيمة ATR غير متاحة لحساب حدود المخاطرة.'
+                            : capital > 0 ? `الحساب مبني على ATR ${atr.toFixed(2)} ومخاطرة ${riskPercent}% من المبلغ المدخل.`
+                                : `المستويات جاهزة من ATR ${atr.toFixed(2)}؛ أدخل رأس المال لحساب الكمية وأقصى خسارة.`;
+            gate.className = `plan-gate ${canSimulate ? 'ready' : 'locked'}`;
+        }
+
+        const conservative = buildPlanScenario(price || 0.01, atr || 0.01, 'conservative');
+        const balanced = buildPlanScenario(price || 0.01, atr || 0.01, 'balanced');
+        const conservativePosition = canSimulate ? positionForScenario(conservative, capital, riskPercent) : null;
+        const balancedPosition = canSimulate ? positionForScenario(balanced, capital, riskPercent) : null;
+        setPlanScenario('conservative', conservative, conservativePosition, !canSimulate);
+        setPlanScenario('balanced', balanced, balancedPosition, !canSimulate);
+        setText('opt-plan-risk-budget', canSimulate && capital > 0 ? `$${(capital * riskPercent / 100).toFixed(2)}` : '—');
     }
 
     function buildDecisionBrief({ item, state, technicals, quoteReady, technicalReady, rsi, volumeRatio }) {
@@ -236,6 +383,8 @@
         setText('opt-decision-next', brief.next);
         setList('opt-decision-signals', brief.signals, 'لا توجد إشارة مكتملة بعد.');
         setList('opt-decision-blockers', brief.blockers, 'لا توجد بوابات معلّقة.');
+        latestOpportunityContext = context;
+        renderPlanSimulator(context);
     }
 
     function updateJourneyPath({ quoteReady, technicalReady, riskReady = false }) {
@@ -368,6 +517,9 @@
 
     window.asiriOpportunity = {
         refresh: updateOpportunityCard,
+        refreshPlan() {
+            if (latestOpportunityContext) renderPlanSimulator(latestOpportunityContext);
+        },
         clearCache() {
             technicalsCache.clear();
             return updateOpportunityCard();
