@@ -14,6 +14,7 @@ function element(id = '') {
   return {
     id,
     textContent: '',
+    innerHTML: '',
     className: '',
     dataset: {},
     hidden: false,
@@ -29,7 +30,9 @@ async function verifyRuntime(js) {
     'opportunity-day-card', 'opt-symbol', 'opt-price', 'opt-reason',
     'opt-momentum', 'opt-liquidity', 'opt-current-stage', 'opt-data-truth',
     'opt-quote-state', 'opt-source', 'opt-observed-at', 'opt-technical-state',
-    'opt-data-note', 'telegram-alert-preview'
+    'opt-data-note', 'opt-decision-room', 'opt-decision-status',
+    'opt-decision-mode', 'opt-decision-evidence-count', 'opt-decision-next',
+    'opt-decision-signals', 'opt-decision-blockers', 'telegram-alert-preview'
   ].map((id) => [id, element(id)]));
 
   const journeyBox = element();
@@ -119,10 +122,20 @@ async function verifyRuntime(js) {
   if (ids['opt-quote-state'].textContent !== 'حديثة الآن') throw new Error('Quote truth state did not render.');
   if (!ids['opt-technical-state'].textContent.includes('252 شمعة')) throw new Error('Technical history state did not render.');
   if (!ids['opt-reason'].textContent.includes('لا يوجد أمر تنفيذ')) throw new Error('Human-review safety copy is missing.');
+  if (ids['opt-decision-status'].textContent !== 'جاهز لفحص المخاطر') throw new Error('Decision room did not select the safe next gate.');
+  if (ids['opt-decision-mode'].textContent !== 'فحص المخاطر') throw new Error('Decision room mode is inaccurate.');
+  if (ids['opt-decision-evidence-count'].textContent !== '4 إشارات فعلية') throw new Error('Decision evidence count is inaccurate.');
+  if (!ids['opt-decision-signals'].innerHTML.includes('الاتجاه التاريخي: صاعد')) throw new Error('Decision evidence omits the verified trend.');
+  if (!ids['opt-decision-blockers'].innerHTML.includes('المراجعة البشرية مطلوبة')) throw new Error('Decision blockers omit human review.');
   if (!nodes[3].classList.contains('active')) throw new Error('Risk gate should be the active step.');
   if (!nodes[4].classList.contains('blocked')) throw new Error('Human review must remain blocked.');
   if (ids['opt-current-stage'].textContent !== 'التالي: فحص المخاطر') throw new Error('Current stage is inaccurate.');
   if (!ids['telegram-alert-preview'].hidden) throw new Error('Telegram preview must stay hidden before risk completion.');
+
+  window.asiriQuoteDataHealth.classifyQuote = () => ({ state: 'DELAYED' });
+  await window.asiriOpportunity.refresh();
+  if (ids['opt-decision-status'].textContent !== 'مراقبة فقط') throw new Error('Delayed quotes must remain watch-only.');
+  if (!ids['opt-decision-blockers'].innerHTML.includes('السعر ليس لحظيًا')) throw new Error('Delayed-quote blocker is missing.');
 }
 
 async function verify() {
@@ -137,6 +150,11 @@ async function verify() {
     "payload?.availability === 'available'",
     'id="opt-data-truth"',
     'id="opt-current-stage"',
+    'id="opt-decision-room"',
+    'ASIRI DECISION ROOM',
+    'لماذا؟ وما الذي ينقص؟',
+    'لا شراء، لا بيع، ولا تنفيذ آلي',
+    'buildDecisionBrief',
     "data-step=\"quote\"",
     "data-step=\"technical\"",
     "data-step=\"risk\"",
@@ -152,6 +170,10 @@ async function verify() {
     '.truth-status.fresh',
     '.journey-stage-pill',
     '.journey-node.active',
+    '.opportunity-decision-room',
+    '.decision-room-summary',
+    '.decision-room-details',
+    '.decision-status.watch',
     'env(safe-area-inset-bottom, 0px)',
     'scroll-snap-type: x proximity'
   ];
@@ -163,13 +185,13 @@ async function verify() {
     if (!css.includes(token)) throw new Error(`Missing journey v2 style: ${token}`);
   }
 
-  const forbiddenClaims = ['فرصة حقيقية مكتملة', 'جاهز للمراجعة البشرية\\n', 'TOP OPPORTUNITY'];
+  const forbiddenClaims = ['فرصة حقيقية مكتملة', 'جاهز للمراجعة البشرية\\n', 'TOP OPPORTUNITY', 'توصية شراء', 'توصية بيع'];
   for (const token of forbiddenClaims) {
     if (js.includes(token)) throw new Error(`Unsafe completion claim remains: ${token}`);
   }
 
   await verifyRuntime(js);
-  console.log('Opportunity Journey v2 contract passed.');
+  console.log('Opportunity Journey v3 contract passed: decision room, evidence trace, safety gates and mobile layout verified.');
 }
 
 verify().catch((error) => {
