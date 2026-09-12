@@ -81,10 +81,11 @@ async function verifyRuntime(js) {
       return {
         ok: true,
         json: async () => ({
-          ok: true,
+        ok: true,
+          availability: 'available',
           source: 'Verified Provider',
           candles: 252,
-          freshness: { isStale: false },
+          historyStatus: 'CURRENT',
           indicators: {
             rsi14: 57.4,
             historicalVolumeRatio: 1.32,
@@ -133,6 +134,7 @@ async function verify() {
 
   const requiredJs = [
     'https://asiri-bot.onrender.com/api/live-terminal/technicals',
+    "payload?.availability === 'available'",
     'id="opt-data-truth"',
     'id="opt-current-stage"',
     "data-step=\"quote\"",
@@ -146,6 +148,7 @@ async function verify() {
 
   const requiredCss = [
     '.opportunity-data-truth',
+    "content: 'REVIEW CANDIDATE'",
     '.truth-status.fresh',
     '.journey-stage-pill',
     '.journey-node.active',
@@ -160,7 +163,7 @@ async function verify() {
     if (!css.includes(token)) throw new Error(`Missing journey v2 style: ${token}`);
   }
 
-  const forbiddenClaims = ['فرصة حقيقية مكتملة', 'جاهز للمراجعة البشرية\\n'];
+  const forbiddenClaims = ['فرصة حقيقية مكتملة', 'جاهز للمراجعة البشرية\\n', 'TOP OPPORTUNITY'];
   for (const token of forbiddenClaims) {
     if (js.includes(token)) throw new Error(`Unsafe completion claim remains: ${token}`);
   }

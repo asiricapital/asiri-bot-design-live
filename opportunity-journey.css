@@ -13,7 +13,7 @@
 }
 
 .opportunity-card::before {
-    content: 'TOP OPPORTUNITY';
+    content: 'REVIEW CANDIDATE';
     position: absolute;
     top: 12px;
     left: -30px;

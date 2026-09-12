@@ -50,13 +50,14 @@
 
     function technicalQuality(payload) {
         const indicators = payload?.indicators;
-        if (!payload?.ok || !indicators) return null;
+        const available = payload?.availability === 'available' || payload?.ok === true;
+        if (!available || !indicators) return null;
         return {
             indicators,
             source: payload.source || 'محرك ASIRI الفني',
             endOfHistory: payload.endOfHistory || null,
             candles: finiteNumber(payload.candles),
-            stale: payload?.freshness?.isStale === true
+            stale: payload?.historyStatus === 'STALE' || payload?.freshness?.isStale === true
         };
     }
 
@@ -85,6 +86,9 @@
     function ensureEnhancedMarkup() {
         const card = document.getElementById('opportunity-day-card');
         if (!card) return;
+
+        const badge = card.querySelector('.opportunity-badge');
+        if (badge) badge.textContent = 'مرشح اليوم · قيد التحقق';
 
         const journeyBox = card.querySelector('.opportunity-journey-box');
         if (journeyBox && journeyBox.dataset.version !== '2') {
