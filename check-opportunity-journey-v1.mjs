@@ -10,6 +10,8 @@ async function verify() {
     'id="opt-symbol"',
     'id="opt-price"',
     'id="opt-reason"',
+    'id="opt-momentum"',
+    'id="opt-liquidity"',
     'id="opt-journey-path"',
     'id="telegram-alert-preview"',
     'opportunity-journey.css',
