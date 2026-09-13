@@ -20,9 +20,11 @@ function element(id = '') {
     hidden: false,
     value: '',
     tagName: 'DIV',
+    checked: false,
+    listeners: {},
     classList: new TokenList(),
     setAttribute(name, value) { this[name] = value; },
-    addEventListener() {},
+    addEventListener(name, callback) { this.listeners[name] = callback; },
     querySelector() { return null; },
     insertAdjacentHTML() {}
   };
@@ -43,13 +45,26 @@ async function verifyRuntime(js) {
     'opt-plan-conservative-quantity', 'opt-plan-conservative-loss',
     'opt-plan-balanced-entry', 'opt-plan-balanced-stop',
     'opt-plan-balanced-target1', 'opt-plan-balanced-target2',
-    'opt-plan-balanced-quantity', 'opt-plan-balanced-loss'
+    'opt-plan-balanced-quantity', 'opt-plan-balanced-loss',
+    'opt-portfolio-equity', 'opt-portfolio-cash', 'opt-portfolio-open-risk',
+    'opt-portfolio-exposure', 'opt-portfolio-total-limit', 'opt-portfolio-symbol-limit',
+    'opt-portfolio-confirm', 'opt-portfolio-status', 'opt-portfolio-issues', 'opt-portfolio-symbol',
+    'opt-plan-conservative-size-label', 'opt-plan-balanced-size-label',
+    'opt-plan-conservative-portfolio', 'opt-plan-balanced-portfolio'
   ].map((id) => [id, element(id)]));
 
   ids['opt-plan-capital'].tagName = 'INPUT';
   ids['opt-plan-capital'].value = '10000';
   ids['opt-plan-risk'].tagName = 'SELECT';
   ids['opt-plan-risk'].value = '1';
+  let now = Date.now();
+  class Clock extends Date { static now() { return now; } }
+  const change = (id, value) => {
+    const e = ids[id];
+    if (id === 'opt-portfolio-confirm') e.checked = value;
+    else e.value = value;
+    (e.listeners.change || e.listeners.input)?.();
+  };
 
   const journeyBox = element();
   journeyBox.dataset.version = '2';
@@ -74,13 +89,15 @@ async function verifyRuntime(js) {
     querySelectorAll: (selector) => selector === '#opt-journey-path .journey-node' ? nodes : [],
     addEventListener() {}
   };
+  let intervalStarts = 0;
+  const windowEvents = {};
   const window = {
     asiriQuoteDataHealth: { classifyQuote: () => ({ state: 'FRESH' }) },
     setTimeout: () => 1,
     clearTimeout() {},
-    setInterval: () => 2,
+    setInterval: () => ++intervalStarts,
     clearInterval() {},
-    addEventListener() {}
+    addEventListener(name, callback) { windowEvents[name] = callback; }
   };
   const context = {
     window,
@@ -117,7 +134,7 @@ async function verifyRuntime(js) {
     },
     AbortController,
     console,
-    Date,
+    Date: Clock,
     Intl,
     Number,
     Object,
@@ -127,6 +144,8 @@ async function verifyRuntime(js) {
     encodeURIComponent
   };
 
+  vm.runInNewContext(await readFile(new URL('./plan-risk.js', import.meta.url), 'utf8'), context);
+  window.asiriPlanRisk = context.asiriPlanRisk;
   vm.runInNewContext(js, context);
   await window.asiriOpportunity.refresh();
 
@@ -155,6 +174,42 @@ async function verifyRuntime(js) {
   if (ids['opt-current-stage'].textContent !== 'التالي: فحص المخاطر') throw new Error('Current stage is inaccurate.');
   if (!ids['telegram-alert-preview'].hidden) throw new Error('Telegram preview must stay hidden before risk completion.');
 
+  if (ids['opt-portfolio-status'].textContent !== 'الفحص غير مكتمل') throw new Error('Missing portfolio must not pass.');
+  for (const [id, value] of Object.entries({
+    'opt-portfolio-equity': '10000', 'opt-portfolio-cash': '5000', 'opt-portfolio-open-risk': '100',
+    'opt-portfolio-exposure': '1000', 'opt-portfolio-total-limit': '3', 'opt-portfolio-symbol-limit': '20'
+  })) change(id, value);
+  change('opt-portfolio-confirm', true);
+  if (ids['opt-portfolio-status'].textContent !== 'اجتياز تقديري · بيانات يدوية') throw new Error('Complete confirmed snapshot should pass preliminarily.');
+  if (!ids['opt-plan-conservative-portfolio'].textContent.includes('السيولة المتبقية')) throw new Error('Portfolio projection missing.');
+  if (nodes[3].classList.contains('completed') || !nodes[4].classList.contains('blocked')) throw new Error('Manual values must not unlock verified risk or human review.');
+  if (ids['opt-current-stage'].textContent !== 'التالي: توثيق المحفظة') throw new Error('Manual result must require statement verification.');
+  change('opt-portfolio-cash', '0');
+  if (ids['opt-portfolio-confirm'].checked || ids['opt-portfolio-status'].textContent !== 'الفحص غير مكتمل') throw new Error('Editing must invalidate confirmation.');
+  change('opt-portfolio-confirm', true);
+  if (ids['opt-portfolio-status'].textContent !== 'الحدود لا تسمح بكمية') throw new Error('Zero cash must block quantity.');
+  change('opt-portfolio-cash', '5000');
+  change('opt-portfolio-confirm', true);
+  now += 5 * 60 * 1000;
+  window.asiriOpportunity.refreshPlan();
+  if (ids['opt-portfolio-confirm'].checked || ids['opt-portfolio-status'].textContent !== 'الفحص غير مكتمل') throw new Error('Confirmation must expire at five minutes.');
+  change('opt-portfolio-confirm', true);
+  now -= 1;
+  window.asiriOpportunity.refreshPlan();
+  if (ids['opt-portfolio-confirm'].checked) throw new Error('Clock rollback must invalidate confirmation.');
+  change('opt-portfolio-confirm', true);
+  windowEvents.pagehide();
+  windowEvents.pageshow({ persisted: true });
+  if (ids['opt-portfolio-confirm'].checked || ids['opt-portfolio-status'].textContent.includes('اجتياز')) throw new Error('BFCache restore must invalidate old confirmation.');
+  if (intervalStarts !== 2) throw new Error('BFCache restore must restart refresh timer.');
+  windowEvents.pageshow({ persisted: true });
+  if (intervalStarts !== 2) throw new Error('Restore must not duplicate the refresh timer.');
+  // Let the async refresh started by pageshow finish before the next transition.
+  await new Promise((resolve) => setImmediate(resolve));
+  window.asiriQuoteDataHealth.classifyQuote = () => ({ state: 'UNAVAILABLE' });
+  window.asiriOpportunity.refreshPlan();
+  if (nodes[1].classList.contains('completed') || ids['opt-decision-status'].textContent !== 'متوقف') throw new Error('Unavailable quote must revoke verified price state immediately.');
+
   window.asiriQuoteDataHealth.classifyQuote = () => ({ state: 'DELAYED' });
   await window.asiriOpportunity.refresh();
   if (ids['opt-decision-status'].textContent !== 'مراقبة فقط') throw new Error('Delayed quotes must remain watch-only.');
@@ -162,6 +217,12 @@ async function verifyRuntime(js) {
   if (ids['opt-plan-status'].textContent !== 'مسودة مقفلة') throw new Error('Delayed quotes must lock the plan simulator.');
   if (ids['opt-plan-conservative-entry'].textContent !== '—') throw new Error('Delayed quotes must hide simulated price levels.');
   if (!ids['opt-plan-gate'].textContent.includes('مسودة تعليمية')) throw new Error('Delayed simulator state is not explained.');
+  if (ids['opt-portfolio-status'].textContent.includes('اجتياز')) throw new Error('Stale data must remove a prior manual pass.');
+  window.asiriQuoteDataHealth.classifyQuote = () => ({ state: 'FRESH' });
+  context.stockMarketData.AAA = { ...context.stockMarketData.SNAP, symbol: 'AAA' };
+  await window.asiriOpportunity.refresh();
+  if (ids['opt-portfolio-exposure'].value !== '' || ids['opt-portfolio-confirm'].checked) throw new Error('Changing symbol must clear the previous symbol exposure and confirmation.');
+  if (!ids['telegram-alert-preview'].hidden) throw new Error('No manual snapshot may show an execution notification.');
 }
 
 async function verify() {
@@ -226,7 +287,7 @@ async function verify() {
   }
 
   await verifyRuntime(js);
-  console.log('Opportunity Journey v4 contract passed: decision room, risk-sized plan simulator, safety gates and mobile layout verified.');
+  console.log('Opportunity Journey v5 runtime passed: manual portfolio limits, input/symbol/expiry invalidation, data gates and human-review lock.');
 }
 
 verify().catch((error) => {
