@@ -58,6 +58,7 @@ const historyButton=click('#row-SG [data-action="history"]');await delay();asser
 const history={ok:true,availability:'available',symbol:'SG',source:'Verified daily source',interval:'1d',historyStatus:'RECENT_DAILY',observedAt:new Date().toISOString(),candles:35,endOfHistory:new Date(Date.now()-86400000).toISOString(),indicators:{sparkline:[]}};
 history.indicators.sparkline=[{date:new Date(Date.now()-2*86400000).toISOString(),close:6.76},{date:history.endOfHistory,close:7.1}];
 pendingTechnical.resolve({ok:true,json:async()=>history});await delay();assert.ok(d.querySelector('#row-SG .watchlist-chart svg'));assert.equal(historyButton.disabled,false);
+const sessionEnd=w.asiriWatchlistEvidence.evaluate(history,'SG').endDate;assert.ok([...d.querySelectorAll('#row-SG .watchlist-chart bdi')].some(el=>el.textContent===sessionEnd),'Trading session dates must be shown without local timezone conversion');
 click('#row-SG [data-action="history"]');await delay();pendingTechnical.resolve({ok:true,json:async()=>({...history,symbol:'CHPT'})});await delay();assert.equal(d.querySelector('#row-SG .watchlist-chart svg'),null);assert.match(d.querySelector('#row-SG .watchlist-chart').textContent,/لا يطابق/);
 click('#row-SG .watchlist-toggle');
 // Rapid symbol changes must reject the first technical response and request the latest symbol.
