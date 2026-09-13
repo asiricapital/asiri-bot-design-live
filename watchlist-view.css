@@ -145,7 +145,8 @@
     line-height: 1.75;
     overflow-wrap: anywhere;
 }
-#watchlist-preference-note {
+#watchlist-preference-note,
+#watchlist-sort-note {
     color: #e1cf9d;
     font-size: .66rem;
     line-height: 1.6;
