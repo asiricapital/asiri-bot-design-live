@@ -15,7 +15,8 @@
     "check:research": "node check-research-center.mjs",
     "check:technicals": "node check-technicals.mjs",
     "check:journey": "node check-opportunity-journey-v1.mjs",
-    "check:plan-risk": "node check-plan-risk.mjs"
+    "check:plan-risk": "node check-plan-risk.mjs",
+    "check:watchlist": "node check-watchlist-evidence.mjs && node check-watchlist-view.mjs"
   },
   "engines": {
     "node": "22.x"
@@ -26,5 +27,8 @@
     "node-fetch": "^2.7.0",
     "ws": "^8.21.3",
     "yahoo-finance2": "^3.15.4"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
   }
 }
