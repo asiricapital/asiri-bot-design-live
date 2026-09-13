@@ -2,15 +2,49 @@
 (() => {
   'use strict';
   const PREF_KEY = 'asiri_watchlist_view_v1';
+  const CHANGE_SORTS = ['change-desc','change-asc'];
+  const sessionFormatter = new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'});
   const safe = value => String(value ?? '').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
   const validSymbol = value => typeof value === 'string' && /^[A-Z][A-Z0-9.-]{0,9}$/.test(value);
   function preferences(raw) {
     const data = raw && typeof raw === 'object' ? raw : {};
-    return { pins: Array.isArray(data.pins) ? [...new Set(data.pins.filter(validSymbol))].slice(0,80) : [], sort: ['name','recent','original'].includes(data.sort) ? data.sort : 'original' };
+    return { pins: Array.isArray(data.pins) ? [...new Set(data.pins.filter(validSymbol))].slice(0,80) : [], sort: ['name','recent','original',...CHANGE_SORTS].includes(data.sort) ? data.sort : 'original' };
   }
-  function selectSymbols(symbols, data, {query = '', filter = 'ALL', pins = [], favoritesOnly = false, sort = 'original'}, health, now = Date.now()) {
+  function sessionDate(value) {
+    if (typeof value !== 'string') return null;
+    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.exec(value);
+    if (!match) return null;
+    const [year,month,day,hour,minute,second] = match.slice(1).map(Number);
+    const calendar = new Date(Date.UTC(year,month-1,day)), at = Date.parse(value);
+    if (!Number.isFinite(at) || calendar.getUTCFullYear() !== year || calendar.getUTCMonth() !== month-1 || calendar.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59) return null;
+    const parts = Object.fromEntries(sessionFormatter.formatToParts(new Date(at)).map(({type,value:part})=>[type,part]));
+    return `${parts.year}-${parts.month}-${parts.day}`;
+  }
+  function comparisonFor(symbols,data,now) {
+    const rows = new Map(); let date = '';
+    for (const symbol of symbols) {
+      const item = data[symbol] || {}, change = window.asiriWatchlistEvidence.quoteChange(item,now);
+      const day = change.available && Number.isFinite(change.percent) ? sessionDate(change.toDate) : null;
+      const valid = Boolean(day) && (!item.symbol || item.symbol === symbol);
+      rows.set(symbol,{change,date:valid ? day : null,percent:null,reason:change.reason || 'وقت القراءة أو رمزها غير صالح للمقارنة.'});
+      if (valid && day > date) date = day;
+    }
+    for (const row of rows.values()) {
+      if (row.date === date) { row.percent = row.change.percent; row.reason = ''; }
+      else if (row.date) row.reason = `قراءة جلسة ${row.date}؛ أحدث جلسة متاحة ${date}.`;
+    }
+    return {rows,date};
+  }
+  function selectSymbols(symbols, data, {query = '', filter = 'ALL', pins = [], favoritesOnly = false, sort = 'original'}, health, now = Date.now(), comparison) {
     const positions = new Map(symbols.map((symbol,index) => [symbol,index]));
+    const ranked = CHANGE_SORTS.includes(sort) ? comparison || comparisonFor(symbols,data,now) : null;
     return symbols.filter(symbol => symbol.includes(query.trim().toUpperCase()) && (!favoritesOnly || pins.includes(symbol)) && (filter === 'ALL' || health(data[symbol] || {},now).state === filter)).sort((a,b) => {
+      if (ranked) {
+        const aa = ranked.rows.get(a).percent, bb = ranked.rows.get(b).percent;
+        if ((aa === null) !== (bb === null)) return aa === null ? 1 : -1;
+        if (aa !== null && aa !== bb) return sort === 'change-desc' ? (aa > bb ? -1 : 1) : (aa < bb ? -1 : 1);
+        return positions.get(a) - positions.get(b);
+      }
       const pinned = Number(pins.includes(b)) - Number(pins.includes(a));
       if (pinned) return pinned;
       if (sort === 'name') return a.localeCompare(b,'en');
@@ -70,7 +104,9 @@
     function render() {
       const {symbols,data,filter} = options.getState();
       const now = Date.now();
-      const selected = selectSymbols(symbols,data,{query,filter,pins:prefs.pins,favoritesOnly,sort:prefs.sort},health,now);
+      const comparison = CHANGE_SORTS.includes(prefs.sort) ? comparisonFor(symbols,data,now) : null;
+      const selected = selectSymbols(symbols,data,{query,filter,pins:prefs.pins,favoritesOnly,sort:prefs.sort},health,now,comparison);
+      const focused = wrapper.contains(doc.activeElement) ? doc.activeElement : null;
       const selectedSet = new Set(selected);
       for (const [symbol,row] of rows) {
         if (!selectedSet.has(symbol)) row.remove();
@@ -83,8 +119,8 @@
         const price = row.querySelector('.watchlist-price');
         price.className = `watchlist-price stock-col-price ${h.state === 'UNAVAILABLE' ? 'val-neutral' : 'val-price'}`;
         price.textContent = h.state === 'UNAVAILABLE' ? 'غير متاح' : `$${Number(item.price).toFixed(2)}`;
-        const change = host.asiriWatchlistEvidence.quoteChange(item,now);
-        const daily = row.querySelector('.watchlist-daily'); daily.textContent = changeText(change); daily.className = `watchlist-daily ${change.available ? (change.absolute > 0 ? 'val-pos' : change.absolute < 0 ? 'val-neg' : 'val-neutral') : 'val-neutral'}`;
+        const rank = comparison?.rows.get(symbol), change = rank?.change || host.asiriWatchlistEvidence.quoteChange(item,now);
+        const daily = row.querySelector('.watchlist-daily'); daily.textContent = changeText(change) + (rank?.percent === null ? ` • خارج المقارنة: ${rank.reason}` : ''); daily.className = `watchlist-daily ${change.available ? (change.absolute > 0 ? 'val-pos' : change.absolute < 0 ? 'val-neg' : 'val-neutral') : 'val-neutral'}`;
         const badge = row.querySelector('.badge-data-state'); badge.textContent = view.label; badge.className = `badge-data-state ${view.cls}`;
         const pin = row.querySelector('.watchlist-pin'), pinned = prefs.pins.includes(symbol);
         pin.setAttribute('aria-pressed',String(pinned)); pin.setAttribute('aria-label',`${pinned ? 'إلغاء تثبيت' : 'تثبيت'} ${symbol}`); pin.textContent = pinned ? '★' : '☆';
@@ -95,6 +131,12 @@
         if (open) renderHistory(symbol,row,now);
         const at = wrapper.children[index]; if (at !== row) wrapper.insertBefore(row,at || null);
       });
+      // Moving an existing row can blur its focused control, including in Safari.
+      if (focused?.isConnected && doc.activeElement !== focused) focused.focus({preventScroll:true});
+      const sortNote = get('watchlist-sort-note');
+      sortNote.hidden = !comparison;
+      const sortText = comparison ? (comparison.date ? `حسب نسبة التغيّر لجلسة ${comparison.date}؛ القراءات غير القابلة للمقارنة في النهاية. المفضلة لا تغيّر ترتيب النسب.` : 'لا تتوفر تغيّرات موثقة للمقارنة؛ تُعرض الأسهم بترتيبها الأصلي.') : '';
+      if (sortNote.textContent !== sortText) sortNote.textContent = sortText;
       if (!selected.length) {
         const empty = doc.createElement('p'); empty.className='watchlist-empty'; empty.textContent = !symbols.length ? 'قائمة المتابعة فارغة. أضف رمزًا للبدء.' : favoritesOnly && !prefs.pins.some(s=>symbols.includes(s)) ? 'لم تثبّت أسهمًا بعد. اعرض الكل واضغط النجمة بجوار السهم.' : 'لا توجد أسهم تطابق البحث والتصفية. جرّب مسح البحث أو تغيير حالة البيانات.'; wrapper.appendChild(empty);
       }
