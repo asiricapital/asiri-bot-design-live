@@ -234,6 +234,20 @@
 .plan-disclaimer { margin: 0.65rem 0 0; color: #aebdce; font-size: 0.6rem; line-height: 1.65; }
 .plan-disclaimer b { color: var(--accent-gold); }
 
+.plan-portfolio-inputs { margin-top: 0.8rem; border: 1px solid rgba(0, 229, 255, 0.22); border-radius: 12px; padding: 0.75rem; min-width: 0; }
+.plan-portfolio-inputs summary { min-height: 44px; color: #e7f7fb; cursor: pointer; font-size: 0.8rem; font-weight: 800; }
+.plan-portfolio-inputs summary small { display: block; margin-top: 0.3rem; color: #ffe4a3; font-size: 0.68rem; }
+.plan-portfolio-inputs p, .portfolio-confirm, .scenario-portfolio { color: #c9d6e5; font-size: 0.72rem; line-height: 1.7; overflow-wrap: anywhere; }
+.portfolio-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.portfolio-controls input[aria-invalid="true"] { border-color: #d7b85b; }
+.portfolio-confirm { display: flex; align-items: flex-start; gap: 0.6rem; min-height: 44px; margin-top: 1rem; cursor: pointer; }
+.portfolio-confirm input { flex: none; width: 22px; height: 22px; margin-top: 0.2rem; accent-color: #00e5ff; }
+.plan-portfolio-inputs .portfolio-expiry { color: #aebdce; font-size: 0.65rem; }
+.portfolio-result { margin-top: 0.8rem; padding: 0.75rem; background: rgba(226, 188, 83, 0.06); border-inline-start: 2px solid #d7b85b; border-radius: 8px; }
+.portfolio-result b { color: #ffe4a3; font-size: 0.78rem; }
+.portfolio-result ul { color: #c9d6e5; margin: 0.5rem 0 0; padding-inline-start: 1.1rem; font-size: 0.7rem; line-height: 1.7; }
+.scenario-portfolio { margin-bottom: 0; }
+
 .opportunity-journey-box { margin-top: 0.35rem; }
 .journey-title-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .journey-title-row .section-header-meta { margin: 0; }
@@ -336,6 +350,8 @@
     .opportunity-plan-lab { padding: 0.78rem; }
     .plan-lab-head { flex-direction: column; }
     .plan-controls { grid-template-columns: 1fr; }
+    .plan-controls input, .plan-controls select { font-size: 16px; }
+    .plan-scenarios { display: grid; grid-template-columns: minmax(0, 1fr); overflow: visible; }
     .journey-title-row { align-items: flex-start; flex-direction: column; }
     .journey-stage-pill { white-space: normal; }
     .opportunity-actions { grid-template-columns: 1fr; }
