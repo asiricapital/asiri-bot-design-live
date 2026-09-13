@@ -63,7 +63,7 @@
       if (!record) return;
       const evidence = host.asiriWatchlistEvidence.evaluate(record.payload,symbol,now);
       const html = evidence.available
-        ? `<svg viewBox="${safe(evidence.chart.viewBox)}" role="img" aria-label="${safe(evidence.chart.label)}" preserveAspectRatio="none"><path d="${safe(evidence.chart.path)}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" /></svg><p>${safe(evidence.chart.label)}</p><p>${safe(evidence.source)} • نهاية السجل ${safe(time(evidence.endOfHistory))}</p>${evidence.change.available ? `<p>${safe(changeText(evidence.change))} • مقارنة ${safe(time(evidence.change.fromDate))} و${safe(time(evidence.change.toDate))}</p>` : ''}`
+        ? `<svg viewBox="${safe(evidence.chart.viewBox)}" role="img" aria-label="${safe(evidence.chart.label)}" preserveAspectRatio="none"><path d="${safe(evidence.chart.path)}" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" /></svg><p>${safe(evidence.chart.label)}</p><p>${safe(evidence.source)} • نهاية السجل <bdi>${safe(evidence.endDate)}</bdi></p>${evidence.change.available ? `<p>${safe(changeText(evidence.change))} • مقارنة <bdi>${safe(evidence.change.fromDate)}</bdi> و<bdi>${safe(evidence.change.toDate)}</bdi></p>` : ''}`
         : `<p>السجل اليومي غير متاح — ${safe(record.error || evidence.reason)}</p>`;
       if (el.innerHTML !== html) el.innerHTML = html;
     }
