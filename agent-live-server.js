@@ -1,16 +1,21 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runEmbeddedResearch } from './embedded-research.js';
+import { getQuotes } from './market.js';
 
 const app = express();
 const root = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
-const RESEARCH_BASE_URL = String(process.env.RESEARCH_BASE_URL || 'https://asiri-research-intelligence-preview.onrender.com').replace(/\/$/, '');
 const SERVER_LLM_BASE_URL = String(process.env.ASIRI_LLM_BASE_URL || '').replace(/\/$/, '');
 const SERVER_LLM_API_KEY = String(process.env.ASIRI_LLM_API_KEY || '');
 const SERVER_LLM_MODEL = String(process.env.ASIRI_LLM_MODEL || '');
 const POLLINATIONS_BASE_URL = 'https://gen.pollinations.ai/v1';
-const CLIENT_MODELS = new Set(['openai-fast','gpt-5.6-sol','claude-fast','gemini-fast','qwen-large']);
+const CLIENT_MODELS = new Set([
+  'openai', 'openai-fast', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna',
+  'claude-fast', 'claude-sonnet-5', 'gemini-fast', 'gemini-search',
+  'deepseek', 'kimi', 'glm', 'qwen-large', 'perplexity-fast',
+]);
 const rateBuckets = new Map();
 
 app.disable('x-powered-by');
@@ -37,7 +42,7 @@ function rateLimit(req, res, next) {
   if (now - bucket.start > 60000) { bucket.start = now; bucket.count = 0; }
   bucket.count += 1;
   rateBuckets.set(ip, bucket);
-  if (bucket.count > 20) return res.status(429).json({ error: 'تم تجاوز الحد المؤقت. حاول بعد دقيقة.' });
+  if (bucket.count > 24) return res.status(429).json({ error: 'تم تجاوز الحد المؤقت. حاول بعد دقيقة.' });
   next();
 }
 
@@ -60,8 +65,29 @@ function cleanText(value, max = 3200) {
   return String(value || '').replace(/[<>]/g, '').trim().slice(0, max);
 }
 
+function symbolsFromQuery(value) {
+  const text = String(value || '').toUpperCase();
+  const cashTags = [...text.matchAll(/\$([A-Z]{1,6})\b/g)].map((m) => m[1]);
+  const standalone = [...text.matchAll(/\b([A-Z]{2,5})\b/g)]
+    .map((m) => m[1])
+    .filter((s) => !['THE','AND','FOR','WITH','FROM','RISK','NEWS','TODAY','ASIRI','DEEP','QUICK'].includes(s));
+  return [...new Set([...cashTags, ...standalone])].slice(0, 4);
+}
+
+async function enrichMarketContext(research, message, domainId) {
+  if (domainId !== 'markets' && !/\$[A-Za-z]{1,6}\b/.test(message)) return research;
+  const symbols = symbolsFromQuery(message);
+  if (!symbols.length) return research;
+  try {
+    const quotes = await getQuotes(symbols);
+    return { ...research, marketContext: quotes };
+  } catch {
+    return research;
+  }
+}
+
 function citationsFromResearch(research) {
-  return (research?.results || []).slice(0, 12).map((r, i) => ({
+  return (research?.results || []).slice(0, 14).map((r, i) => ({
     id: i + 1,
     title: r.title,
     url: r.url,
@@ -80,31 +106,33 @@ function evidenceText(citations) {
     `المصدر: ${c.source || 'غير محدد'} (${c.provider || 'provider'})`,
     `التاريخ: ${c.publishedAt || 'غير متاح'}`,
     `Evidence Score: ${c.evidenceScore ?? 'n/a'}`,
-    `المقتطف: ${String(c.snippet || '').slice(0, 520)}`,
+    `المقتطف: ${String(c.snippet || '').slice(0, 600)}`,
     `الرابط: ${c.url}`,
   ].join('\n')).join('\n\n');
 }
 
 function buildSystemPrompt(agentId, domainId) {
   const agent = agents[agentId] || agents.research;
-  return `أنت ASIRI Intelligence Agent. اكتب بالعربية الواضحة والمنظمة.\nالمهمة: ${agent.label}. ${agent.instruction}\nالمجال: ${domains[domainId] || domains.general}.\nقواعد إلزامية:\n1) استخدم فقط الأدلة المرقمة المقدمة لك.\n2) كل ادعاء جوهري يجب أن يحمل مرجعًا بصيغة [1] أو [2].\n3) لا تختلق مصدرًا أو رقمًا أو حدثًا أو اقتباسًا.\n4) افصل الحقائق عن الاستنتاجات والسيناريوهات.\n5) اذكر التعارضات وفجوات الأدلة صراحة.\n6) إذا لم تكف الأدلة فقل ذلك بوضوح.\n7) لا تصدر أمر تداول أو إجراء تنفيذي تلقائي.\n8) اجعل أول فقرة خلاصة عملية، ثم التفاصيل، ثم ما يحتاج تحققًا إضافيًا.`;
+  return `أنت ASIRI Intelligence Agent. اكتب بالعربية الواضحة والمنظمة.\nالمهمة: ${agent.label}. ${agent.instruction}\nالمجال: ${domains[domainId] || domains.general}.\nقواعد إلزامية:\n1) استخدم فقط الأدلة المرقمة المقدمة لك.\n2) كل ادعاء جوهري يجب أن يحمل مرجعًا بصيغة [1] أو [2].\n3) لا تختلق مصدرًا أو رقمًا أو حدثًا أو اقتباسًا.\n4) افصل الحقائق عن الاستنتاجات والسيناريوهات.\n5) اذكر التعارضات وفجوات الأدلة صراحة.\n6) إذا لم تكف الأدلة فقل ذلك بوضوح.\n7) لا تصدر أمر تداول أو إجراء تنفيذي تلقائي.\n8) فضّل المصادر الرسمية والأبحاث والمصادر الحديثة عندما تتعارض النتائج.\n9) اجعل أول فقرة خلاصة عملية، ثم التفاصيل، ثم ما يحتاج تحققًا إضافيًا.`;
 }
 
 function fallbackSynthesis(message, research) {
   const refs = citationsFromResearch(research);
   if (!refs.length) {
+    const failures = (research.providers || []).filter((p) => !p.ok).map((p) => p.source).filter(Boolean);
     return {
       engine: 'evidence-fallback', model: null, confidence: 0,
-      answer: 'لم تُرجع المصادر الحالية أدلة كافية لبناء إجابة موثقة. جرّب إعادة صياغة السؤال أو توسيع المصادر.',
+      answer: `لم تُرجع المصادر المتاحة أدلة كافية لهذه الصياغة. ${failures.length ? `المصادر التي تعثرت: ${failures.join('، ')}.` : ''} جرّب صياغة أكثر تحديدًا أو غيّر المجال.`,
       citations: [],
     };
   }
-  const top = refs.slice(0, 6);
+  const top = refs.slice(0, 8);
   const avg = Math.round(top.reduce((sum, x) => sum + Number(x.evidenceScore || 0), 0) / top.length);
-  const bullets = top.slice(0, 5).map((x) => `- ${x.snippet || x.title} [${x.id}]`).join('\n');
+  const bullets = top.slice(0, 6).map((x) => `- ${x.snippet || x.title} [${x.id}]`).join('\n');
+  const providerCount = new Set(top.map((x) => x.provider).filter(Boolean)).size;
   return {
     engine: 'evidence-fallback', model: null, confidence: avg,
-    answer: `## الخلاصة\nوجد ASIRI ${research.total || refs.length} نتيجة مرتبطة بسؤالك. أعلى الأدلة الحالية متوسطها ${avg}/100.\n\n## أهم ما وجدناه\n${bullets}\n\n## ما يحتاج تحققًا إضافيًا\nهذه خلاصة مستندة إلى مقتطفات المصادر فقط وليست استنتاجًا لغويًا كاملًا. افتح أقوى المراجع أو فعّل نموذج AI من زر «ربط الذكاء الاصطناعي» للحصول على synthesis أعمق.`,
+    answer: `## الخلاصة\nوجد ASIRI ${research.total || refs.length} نتيجة مرتبطة بسؤالك من عدة قنوات بحثية. أقوى ${top.length} أدلة موزعة على ${providerCount} مزودات، ومتوسط Evidence Score هو ${avg}/100.\n\n## أهم ما وجدناه\n${bullets}\n\n## جودة البحث\nالمحرك الحالي يجمع الويب والأخبار والمراجع العلمية والمناقشات وGitHub حسب المجال، ويستخدم أكثر من محرك لبعض الفئات لتقليل الاعتماد على مصدر واحد.\n\n## ما يحتاج تحققًا إضافيًا\nهذه خلاصة مبنية على مقتطفات ومعلومات المصادر. فعّل نموذج AI للحصول على synthesis لغوي أعمق، أو استخدم Verify إذا كان هناك ادعاء محدد تريد حسمه.`,
     citations: refs,
   };
 }
@@ -123,15 +151,15 @@ function resolveProvider(body) {
 
 async function synthesizeWithModel({ provider, message, agentId, domainId, conversation, citations }) {
   const history = Array.isArray(conversation)
-    ? conversation.slice(-8).filter((m) => ['user','assistant'].includes(m?.role)).map((m) => ({ role: m.role, content: cleanText(m.content, 2600) }))
+    ? conversation.slice(-8).filter((m) => ['user','assistant'].includes(m?.role)).map((m) => ({ role: m.role, content: cleanText(m.content, 2800) }))
     : [];
   const payload = {
     model: provider.model,
-    temperature: 0.15,
+    temperature: 0.12,
     messages: [
       { role: 'system', content: buildSystemPrompt(agentId, domainId) },
       ...history,
-      { role: 'user', content: `السؤال الحالي:\n${message}\n\nالأدلة المتاحة:\n${evidenceText(citations)}\n\nكوّن إجابة عربية مترابطة وموثقة داخل النص بالمراجع الرقمية.` },
+      { role: 'user', content: `السؤال الحالي:\n${message}\n\nالأدلة المتاحة:\n${evidenceText(citations)}\n\nكوّن إجابة عربية مترابطة وموثقة داخل النص بالمراجع الرقمية. لا تضف أي حقيقة غير موجودة في الأدلة.` },
     ],
   };
   const headers = { 'Content-Type': 'application/json' };
@@ -139,15 +167,16 @@ async function synthesizeWithModel({ provider, message, agentId, domainId, conve
   const data = await fetchJson(`${provider.baseUrl}/chat/completions`, { method: 'POST', headers, body: JSON.stringify(payload) }, 60000);
   const answer = data?.choices?.[0]?.message?.content;
   if (!answer) throw new Error('لم يعد النموذج محتوى صالحًا');
-  const avg = citations.length ? Math.round(citations.slice(0, 6).reduce((s, x) => s + Number(x.evidenceScore || 0), 0) / Math.min(6, citations.length)) : 0;
+  const avg = citations.length ? Math.round(citations.slice(0, 8).reduce((s, x) => s + Number(x.evidenceScore || 0), 0) / Math.min(8, citations.length)) : 0;
   return { engine: provider.type, model: provider.model, confidence: avg, answer, citations };
 }
 
 app.get('/health', (_req, res) => res.json({
   ok: true,
   service: 'asiri-agent-intelligence-live-llm',
-  version: '4.1-provider-connected',
-  researchBackend: RESEARCH_BASE_URL,
+  version: '4.2-self-contained-research',
+  embeddedResearch: true,
+  externalResearchDependency: false,
   serverLLMConfigured: Boolean(SERVER_LLM_BASE_URL && SERVER_LLM_MODEL),
   clientBYOPSupported: true,
   supportedClientModels: [...CLIENT_MODELS],
@@ -156,7 +185,8 @@ app.get('/health', (_req, res) => res.json({
 }));
 
 app.get('/api/status', (_req, res) => res.json({
-  researchBackend: RESEARCH_BASE_URL,
+  researchEngine: 'embedded-resilient-v1',
+  researchProviders: ['Google News','Bing News','Bing Web','Wikipedia','DuckDuckGo','OpenAlex','Crossref','arXiv','Hacker News','GitHub'],
   serverLLMConfigured: Boolean(SERVER_LLM_BASE_URL && SERVER_LLM_MODEL),
   byop: { provider: 'Pollinations', baseUrl: POLLINATIONS_BASE_URL, models: [...CLIENT_MODELS] },
   agents,
@@ -172,16 +202,16 @@ app.post('/api/chat', rateLimit, async (req, res) => {
   const sources = Array.isArray(req.body?.sources)
     ? req.body.sources.filter((s) => ['web','news','papers','discussions','github'].includes(s)).slice(0, 5)
     : [];
-  const params = new URLSearchParams({ q: message, domain: domainId, mode });
-  if (sources.length) params.set('sources', sources.join(','));
 
   const started = Date.now();
   try {
-    const research = await fetchJson(`${RESEARCH_BASE_URL}/api/research/search?${params}`, {}, 26000);
+    let research = await runEmbeddedResearch({ query: message, domainId, modeId: mode, sources });
+    research = await enrichMarketContext(research, message, domainId);
     const citations = citationsFromResearch(research);
     const provider = resolveProvider(req.body);
     let synthesis = null;
     let providerError = null;
+
     if (provider && citations.length) {
       try {
         synthesis = await synthesizeWithModel({
@@ -193,6 +223,7 @@ app.post('/api/chat', rateLimit, async (req, res) => {
         providerError = cleanText(error?.message || 'LLM provider error', 500);
       }
     }
+
     if (!synthesis) synthesis = fallbackSynthesis(message, research);
 
     res.set('Cache-Control', 'no-store');
@@ -203,8 +234,11 @@ app.post('/api/chat', rateLimit, async (req, res) => {
       domain: { id: domainId, label: domains[domainId] },
       durationMs: Date.now() - started,
       research: {
+        engine: research.researchEngine,
         total: research.total || 0,
         providers: research.providers || [],
+        sourceTypes: research.sourceTypes || [],
+        queryVariants: research.queryVariants || [message],
         marketContext: research.marketContext || [],
         fetchedAt: research.fetchedAt,
       },
@@ -216,11 +250,24 @@ app.post('/api/chat', rateLimit, async (req, res) => {
         'ما أقوى دليل في هذه النتيجة؟',
         'اعرض التعارضات بين المصادر فقط',
         'ما الذي لا نعرفه حتى الآن؟',
-        'لخص النتيجة في خمس نقاط',
+        'تحقق من أهم ادعاء من مصدرين مستقلين',
       ],
     });
   } catch (error) {
-    res.status(502).json({ error: 'تعذر تشغيل طبقة البحث.', detail: cleanText(error?.message || 'backend error', 500) });
+    res.set('Cache-Control', 'no-store');
+    res.status(200).json({
+      id: `asiri-${Date.now().toString(36)}`,
+      message,
+      agent: { id: agentId, ...agents[agentId] },
+      domain: { id: domainId, label: domains[domainId] },
+      durationMs: Date.now() - started,
+      research: { engine: 'embedded-resilient-v1', total: 0, providers: [], marketContext: [] },
+      engine: 'evidence-fallback', model: null, confidence: 0, citations: [], providerActive: false,
+      answer: `تعذر الوصول إلى مزودات البحث في هذه المحاولة، لكن خدمة ASIRI نفسها تعمل. الخطأ الفني: ${cleanText(error?.message || 'research provider error', 260)}. أعد الإرسال بعد لحظات أو غيّر المجال/المصادر.`,
+      providerError: null,
+      guardrails: ['research-only','no-broker','no-portfolio-write','citations-required'],
+      followUps: ['أعد البحث الآن', 'استخدم الأخبار والويب فقط', 'حوّل إلى Verify', 'صياغة بحث أدق'],
+    });
   }
 });
 
@@ -230,5 +277,5 @@ app.get(['/', '/agent', '/agent-live.html'], (_req, res) => {
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`ASIRI Agent Intelligence v4.1 provider-connected listening on ${port}`);
+  console.log(`ASIRI Agent Intelligence v4.2 self-contained research listening on ${port}`);
 });
