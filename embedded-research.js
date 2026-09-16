@@ -1,16 +1,16 @@
-const USER_AGENT = 'ASIRI-Agent-Intelligence/4.2 (+https://asiri-agent-intelligence-live.onrender.com)';
-const FETCH_TIMEOUT_MS = 7500;
+const USER_AGENT = 'ASIRI-Deep-Intelligence/5.2 (+https://asiri-deep-intelligence-os.onrender.com)';
+const FETCH_TIMEOUT_MS = 8000;
 
 const providerWeights = {
-  'Google News': 78,
-  'Bing News': 76,
+  'Google News': 82,
+  'Bing News': 79,
   'Bing Web': 72,
-  Wikipedia: 78,
-  DuckDuckGo: 62,
-  OpenAlex: 92,
-  Crossref: 88,
-  arXiv: 90,
-  'Hacker News': 52,
+  Wikipedia: 76,
+  DuckDuckGo: 60,
+  OpenAlex: 91,
+  Crossref: 87,
+  arXiv: 89,
+  'Hacker News': 50,
   GitHub: 70,
 };
 
@@ -27,14 +27,14 @@ const domainSources = {
   documents: ['web', 'papers'],
 };
 
-const maxByMode = {
-  quick: 14,
-  deep: 36,
-  compare: 28,
-  verify: 24,
-  timeline: 30,
-  decision: 24,
-};
+const maxByMode = { quick: 14, deep: 36, compare: 28, verify: 24, timeline: 30, decision: 24 };
+
+const STOPWORDS = new Set([
+  'هذا','هذه','ذلك','التي','الذي','على','الى','إلى','عن','من','في','ما','ماذا','هل','ماهي','ماهيه','ماهو','ماهو','اخر','آخر','أخر','الجديد','اليوم','الآن','الان','حاليا','حاليًا','تطورات','التطورات','اخبار','أخبار','خبر','اهم','أهم','حول','بخصوص','اعطني','أعطني','اريد','أريد',
+  'why','what','the','and','for','with','from','that','this','today','latest','news','current','now','about','update','updates',
+]);
+
+const LOW_QUALITY_RX = /(porn|xxx|sex\s?video|casino|betting|viagra|adult\s?video|anal\s|escort)/i;
 
 function stripHtml(value) {
   return String(value || '')
@@ -63,8 +63,56 @@ function clip(value, max = 430) {
   return text.length > max ? `${text.slice(0, max - 1).trim()}…` : text;
 }
 
-function tokens(value) {
-  return [...new Set((String(value || '').toLowerCase().normalize('NFKC').match(/[\p{L}\p{N}]{2,}/gu) || []).slice(0, 36))];
+function normalize(value) {
+  return String(value || '').toLowerCase().normalize('NFKC')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/ة/g, 'ه');
+}
+
+function rawTokens(value) {
+  return normalize(value).match(/[\p{L}\p{N}]{2,}/gu) || [];
+}
+
+function topicTokens(value) {
+  return [...new Set(rawTokens(value).filter((x) => !STOPWORDS.has(x)).slice(0, 36))];
+}
+
+function topicAliases(query) {
+  const q = normalize(query);
+  const aliases = new Set();
+  const add = (...xs) => xs.forEach((x) => aliases.add(normalize(x)));
+  if (/اليمن|yemen/.test(q)) add('اليمن','يمن','يمني','الحوثي','حوثي','الحوثيين','صنعاء','عدن','المخا','مأرب','مارب','تعز','الحديدة','yemen','yemeni','houthi','sanaa','aden','mukalla','mokha');
+  if (/غزه|gaza|فلسطين|palestin/.test(q)) add('غزة','غزه','فلسطين','حماس','gaza','palestine','hamas');
+  if (/ايران|iran/.test(q)) add('ايران','إيران','طهران','الحرس الثوري','iran','tehran','irgc');
+  if (/اوكرانيا|ukrain/.test(q)) add('اوكرانيا','أوكرانيا','كييف','روسيا','ukraine','kyiv','russia');
+  if (/هرمز|hormuz/.test(q)) add('هرمز','مضيق هرمز','hormuz','strait of hormuz');
+  return [...aliases];
+}
+
+function relevance(item, query, domainId) {
+  const text = normalize(`${item.title || ''} ${item.snippet || ''} ${item.source || ''}`);
+  if (!text || LOW_QUALITY_RX.test(text)) return { keep: false, overlap: 0, reason: 'low-quality' };
+
+  const core = topicTokens(query);
+  const aliases = topicAliases(query);
+  const matchedCore = core.filter((t) => text.includes(t));
+  const matchedAliases = aliases.filter((t) => text.includes(t));
+  const overlap = new Set([...matchedCore, ...matchedAliases]).size;
+  const title = normalize(item.title || '');
+  const titleOverlap = new Set([...core, ...aliases].filter((t) => title.includes(t))).size;
+
+  if (!core.length && !aliases.length) {
+    return { keep: item.type === 'news' || item.provider === 'Google News' || item.provider === 'Bing News', overlap: 0, reason: 'generic' };
+  }
+
+  let keep = overlap >= 1;
+  if (domainId === 'markets' && /\$?[a-z]{1,6}\b/i.test(query)) keep = keep || titleOverlap >= 1;
+  if (item.type === 'paper' && overlap < 1) keep = false;
+  if (item.provider === 'DuckDuckGo' && overlap < 1) keep = false;
+  return { keep, overlap, titleOverlap, reason: keep ? 'matched' : 'no-topic-overlap' };
 }
 
 function xmlTag(block, tag) {
@@ -78,23 +126,21 @@ function canonicalKey(item) {
     .replace(/[?#].*$/, '')
     .replace(/\/$/, '')
     .toLowerCase();
-  return raw || String(item.title || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return raw || normalize(item.title || '').replace(/\s+/g, ' ').trim();
 }
 
-function evidenceScore(item, query) {
+function evidenceScore(item, query, rel) {
   let score = providerWeights[item.provider] || 55;
-  const q = tokens(query);
-  const hay = `${item.title || ''} ${item.snippet || ''}`.toLowerCase();
-  const overlap = q.filter((t) => hay.includes(t)).length;
-  score += Math.min(15, overlap * 3);
+  score += Math.min(20, Number(rel?.overlap || 0) * 5);
+  score += Math.min(8, Number(rel?.titleOverlap || 0) * 4);
   if (item.publishedAt) {
     const time = new Date(item.publishedAt).getTime();
     if (Number.isFinite(time)) {
       const ageDays = Math.max(0, (Date.now() - time) / 86400000);
-      score += ageDays <= 1 ? 9 : ageDays <= 3 ? 7 : ageDays <= 7 ? 5 : ageDays <= 30 ? 2 : 0;
+      score += ageDays <= 1 ? 10 : ageDays <= 3 ? 8 : ageDays <= 7 ? 6 : ageDays <= 30 ? 2 : 0;
     }
   }
-  if (item.type === 'paper') score += 3;
+  if (item.type === 'paper') score += 2;
   if (item.official) score += 6;
   return Math.max(1, Math.min(99, Math.round(score)));
 }
@@ -106,37 +152,23 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS)
     const response = await fetch(url, {
       ...options,
       signal: controller.signal,
-      headers: {
-        'User-Agent': USER_AGENT,
-        Accept: '*/*',
-        ...(options.headers || {}),
-      },
+      headers: { 'User-Agent': USER_AGENT, Accept: '*/*', ...(options.headers || {}) },
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response;
-  } finally {
-    clearTimeout(timer);
-  }
+  } finally { clearTimeout(timer); }
 }
 
-async function fetchJson(url, options) {
-  const response = await fetchWithTimeout(url, options);
-  return response.json();
-}
-
-async function fetchText(url, options) {
-  const response = await fetchWithTimeout(url, options);
-  return response.text();
-}
+async function fetchJson(url, options) { return (await fetchWithTimeout(url, options)).json(); }
+async function fetchText(url, options) { return (await fetchWithTimeout(url, options)).text(); }
 
 function rssItems(xml, provider, type = 'web', fallbackSource = provider) {
-  return [...String(xml).matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 14).map((match) => {
+  return [...String(xml).matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0, 16).map((match) => {
     const block = match[1];
-    const source = xmlTag(block, 'source') || fallbackSource;
     return {
       type,
       provider,
-      source,
+      source: xmlTag(block, 'source') || fallbackSource,
       title: xmlTag(block, 'title'),
       url: xmlTag(block, 'link'),
       snippet: clip(xmlTag(block, 'description')),
@@ -145,22 +177,25 @@ function rssItems(xml, provider, type = 'web', fallbackSource = provider) {
   }).filter((item) => item.title && item.url);
 }
 
+function isFreshQuery(q) {
+  return /(اليوم|الان|الآن|هذه الساعه|هذه الساعة|اخر|آخر|أخر|الجديد|عاجل|latest|today|now|breaking|current)/i.test(q);
+}
+
 function expandQueries(query, domainId) {
   const q = String(query || '').trim();
   const list = [q];
   const arabic = /[\u0600-\u06ff]/.test(q);
-  const vague = q.length < 55 || /(اليوم|آخر|اخر|الجديد|أخبار|اخبار|latest|today|news)/i.test(q);
-  if (!vague) return list;
-
-  if (domainId === 'technology') {
+  if (domainId === 'politics') {
+    if (/اليمن/i.test(q)) list.push(arabic ? `${q} اليمن الحوثيين صنعاء عدن البحر الأحمر` : `${q} Yemen Houthi Red Sea`);
+    else if (/غزه|غزة/i.test(q)) list.push(`${q} غزة فلسطين إسرائيل`);
+    else if (q.length < 70) list.push(arabic ? `${q} الشرق الأوسط بيان رسمي` : `${q} Middle East official statement`);
+  } else if (domainId === 'technology' && q.length < 70) {
     list.push(arabic ? `${q} الذكاء الاصطناعي الأمن السيبراني أشباه الموصلات` : `${q} AI cybersecurity semiconductors`);
-  } else if (domainId === 'politics') {
-    list.push(arabic ? `${q} العالم الشرق الأوسط` : `${q} world Middle East`);
-  } else if (domainId === 'markets') {
-    list.push(arabic ? `${q} السوق الأمريكي الشركات` : `${q} US market companies`);
-  } else if (domainId === 'science') {
+  } else if (domainId === 'markets' && q.length < 70) {
+    list.push(arabic ? `${q} السوق الأمريكي الشركة إفصاح` : `${q} US market company filing`);
+  } else if (domainId === 'science' && q.length < 70) {
     list.push(arabic ? `${q} دراسة بحث مراجعة` : `${q} study research review`);
-  } else if (domainId === 'cyber') {
+  } else if (domainId === 'cyber' && q.length < 70) {
     list.push(arabic ? `${q} ثغرة تحديث أمني` : `${q} vulnerability security advisory`);
   }
   return [...new Set(list)].slice(0, 2);
@@ -168,15 +203,14 @@ function expandQueries(query, domainId) {
 
 async function searchGoogleNews(query) {
   const arabic = /[\u0600-\u06ff]/.test(query);
-  const params = new URLSearchParams({ q: query, hl: arabic ? 'ar' : 'en', gl: arabic ? 'SA' : 'US', ceid: arabic ? 'SA:ar' : 'US:en' });
-  const xml = await fetchText(`https://news.google.com/rss/search?${params}`);
-  return rssItems(xml, 'Google News', 'news', 'Google News');
+  const q = isFreshQuery(query) ? `${query} when:7d` : query;
+  const params = new URLSearchParams({ q, hl: arabic ? 'ar' : 'en', gl: arabic ? 'SA' : 'US', ceid: arabic ? 'SA:ar' : 'US:en' });
+  return rssItems(await fetchText(`https://news.google.com/rss/search?${params}`), 'Google News', 'news', 'Google News');
 }
 
 async function searchBingNews(query) {
   const params = new URLSearchParams({ q: query, format: 'RSS' });
-  const xml = await fetchText(`https://www.bing.com/news/search?${params}`);
-  return rssItems(xml, 'Bing News', 'news', 'Bing News');
+  return rssItems(await fetchText(`https://www.bing.com/news/search?${params}`), 'Bing News', 'news', 'Bing News');
 }
 
 async function searchNews(query) {
@@ -186,8 +220,7 @@ async function searchNews(query) {
 
 async function searchBingWeb(query) {
   const params = new URLSearchParams({ q: query, format: 'rss' });
-  const xml = await fetchText(`https://www.bing.com/search?${params}`);
-  return rssItems(xml, 'Bing Web', 'web', 'Bing Web');
+  return rssItems(await fetchText(`https://www.bing.com/search?${params}`), 'Bing Web', 'web', 'Bing Web');
 }
 
 async function searchWikipedia(query) {
@@ -195,13 +228,8 @@ async function searchWikipedia(query) {
   const params = new URLSearchParams({ action: 'query', list: 'search', srsearch: query, utf8: '1', format: 'json', srlimit: '7', origin: '*' });
   const data = await fetchJson(`https://${lang}.wikipedia.org/w/api.php?${params}`);
   return (data?.query?.search || []).map((row) => ({
-    type: 'web',
-    provider: 'Wikipedia',
-    source: `${lang}.wikipedia.org`,
-    title: row.title,
-    url: `https://${lang}.wikipedia.org/?curid=${row.pageid}`,
-    snippet: clip(row.snippet),
-    publishedAt: row.timestamp || null,
+    type: 'web', provider: 'Wikipedia', source: `${lang}.wikipedia.org`, title: row.title,
+    url: `https://${lang}.wikipedia.org/?curid=${row.pageid}`, snippet: clip(row.snippet), publishedAt: row.timestamp || null,
   }));
 }
 
@@ -218,39 +246,24 @@ async function searchDuckDuckGo(query) {
   const params = new URLSearchParams({ q: query, format: 'json', no_html: '1', no_redirect: '1', skip_disambig: '1' });
   const data = await fetchJson(`https://api.duckduckgo.com/?${params}`);
   const results = [];
-  if (data.AbstractText && data.AbstractURL) {
-    results.push({
-      type: 'web', provider: 'DuckDuckGo', source: data.AbstractSource || 'DuckDuckGo',
-      title: data.Heading || query, url: data.AbstractURL, snippet: clip(data.AbstractText), publishedAt: null,
-    });
-  }
-  for (const row of flattenDdgTopics(data.RelatedTopics)) {
-    results.push({ type: 'web', provider: 'DuckDuckGo', source: 'DuckDuckGo', title: clip(row.Text, 140), url: row.FirstURL, snippet: clip(row.Text), publishedAt: null });
-  }
+  if (data.AbstractText && data.AbstractURL) results.push({ type: 'web', provider: 'DuckDuckGo', source: data.AbstractSource || 'DuckDuckGo', title: data.Heading || query, url: data.AbstractURL, snippet: clip(data.AbstractText), publishedAt: null });
+  for (const row of flattenDdgTopics(data.RelatedTopics)) results.push({ type: 'web', provider: 'DuckDuckGo', source: 'DuckDuckGo', title: clip(row.Text, 140), url: row.FirstURL, snippet: clip(row.Text), publishedAt: null });
   return results.slice(0, 7);
 }
 
 async function searchWeb(query, domainId) {
   const extra = [];
-  if (domainId === 'government' && /[\u0600-\u06ff]/.test(query)) {
-    extra.push(searchBingWeb(`${query} site:gov.sa OR site:etimad.sa`));
-  }
+  if (domainId === 'government' && /[\u0600-\u06ff]/.test(query)) extra.push(searchBingWeb(`${query} site:gov.sa OR site:etimad.sa`));
   const settled = await Promise.allSettled([searchBingWeb(query), searchWikipedia(query), searchDuckDuckGo(query), ...extra]);
   return settled.flatMap((row) => row.status === 'fulfilled' ? row.value : []);
 }
 
 async function searchOpenAlex(query) {
-  const params = new URLSearchParams({ search: query, 'per-page': '9' });
-  const data = await fetchJson(`https://api.openalex.org/works?${params}`);
+  const data = await fetchJson(`https://api.openalex.org/works?${new URLSearchParams({ search: query, 'per-page': '9' })}`);
   return (data?.results || []).map((work) => ({
-    type: 'paper', provider: 'OpenAlex', source: work?.primary_location?.source?.display_name || 'OpenAlex',
-    title: work.display_name,
+    type: 'paper', provider: 'OpenAlex', source: work?.primary_location?.source?.display_name || 'OpenAlex', title: work.display_name,
     url: work?.primary_location?.landing_page_url || work.doi || work.id,
-    snippet: clip([
-      work.publication_year ? `سنة النشر ${work.publication_year}` : '',
-      work.cited_by_count != null ? `الاستشهادات ${work.cited_by_count}` : '',
-      (work.authorships || []).slice(0, 3).map((a) => a?.author?.display_name).filter(Boolean).join('، '),
-    ].filter(Boolean).join(' · ')),
+    snippet: clip([work.publication_year ? `سنة النشر ${work.publication_year}` : '', work.cited_by_count != null ? `الاستشهادات ${work.cited_by_count}` : '', (work.authorships || []).slice(0, 3).map((a) => a?.author?.display_name).filter(Boolean).join('، ')].filter(Boolean).join(' · ')),
     publishedAt: work.publication_date || null,
   })).filter((item) => item.title && item.url);
 }
@@ -259,16 +272,9 @@ async function searchCrossref(query) {
   const params = new URLSearchParams({ query, rows: '8', select: 'DOI,title,published,URL,container-title,author' });
   const data = await fetchJson(`https://api.crossref.org/works?${params}`);
   return (data?.message?.items || []).map((work) => {
-    const dateParts = work?.published?.['date-parts']?.[0] || [];
-    const publishedAt = dateParts.length ? `${dateParts[0]}-${String(dateParts[1] || 1).padStart(2, '0')}-${String(dateParts[2] || 1).padStart(2, '0')}` : null;
-    const authors = (work.author || []).slice(0, 3).map((a) => [a.given, a.family].filter(Boolean).join(' ')).filter(Boolean).join('، ');
-    return {
-      type: 'paper', provider: 'Crossref', source: work?.['container-title']?.[0] || 'Crossref',
-      title: work?.title?.[0] || work.DOI,
-      url: work.URL || (work.DOI ? `https://doi.org/${work.DOI}` : ''),
-      snippet: clip([authors, work.DOI ? `DOI ${work.DOI}` : ''].filter(Boolean).join(' · ')),
-      publishedAt,
-    };
+    const d = work?.published?.['date-parts']?.[0] || [];
+    const publishedAt = d.length ? `${d[0]}-${String(d[1] || 1).padStart(2, '0')}-${String(d[2] || 1).padStart(2, '0')}` : null;
+    return { type: 'paper', provider: 'Crossref', source: work?.['container-title']?.[0] || 'Crossref', title: work?.title?.[0] || work.DOI, url: work.URL || (work.DOI ? `https://doi.org/${work.DOI}` : ''), snippet: clip(work.DOI ? `DOI ${work.DOI}` : ''), publishedAt };
   }).filter((item) => item.title && item.url);
 }
 
@@ -278,11 +284,7 @@ async function searchArxiv(query) {
   const xml = await fetchText(`https://export.arxiv.org/api/query?${params}`);
   return [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/gi)].map((match) => {
     const block = match[1];
-    const id = xmlTag(block, 'id');
-    return {
-      type: 'paper', provider: 'arXiv', source: 'arXiv', title: xmlTag(block, 'title'), url: id,
-      snippet: clip(xmlTag(block, 'summary')), publishedAt: xmlTag(block, 'published') || null,
-    };
+    return { type: 'paper', provider: 'arXiv', source: 'arXiv', title: xmlTag(block, 'title'), url: xmlTag(block, 'id'), snippet: clip(xmlTag(block, 'summary')), publishedAt: xmlTag(block, 'published') || null };
   }).filter((item) => item.title && item.url);
 }
 
@@ -292,107 +294,76 @@ async function searchPapers(query) {
 }
 
 async function searchDiscussions(query) {
-  const params = new URLSearchParams({ query, tags: 'story', hitsPerPage: '9' });
-  const data = await fetchJson(`https://hn.algolia.com/api/v1/search?${params}`);
-  return (data?.hits || []).map((hit) => ({
-    type: 'discussion', provider: 'Hacker News', source: 'news.ycombinator.com',
-    title: hit.title || hit.story_title,
-    url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
-    snippet: clip(`النقاط ${hit.points ?? 0} · التعليقات ${hit.num_comments ?? 0} · ${hit.author || ''}`),
-    publishedAt: hit.created_at || null,
-  })).filter((item) => item.title && item.url);
+  const data = await fetchJson(`https://hn.algolia.com/api/v1/search?${new URLSearchParams({ query, tags: 'story', hitsPerPage: '9' })}`);
+  return (data?.hits || []).map((hit) => ({ type: 'discussion', provider: 'Hacker News', source: 'news.ycombinator.com', title: hit.title || hit.story_title, url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`, snippet: clip(`النقاط ${hit.points ?? 0} · التعليقات ${hit.num_comments ?? 0} · ${hit.author || ''}`), publishedAt: hit.created_at || null })).filter((item) => item.title && item.url);
 }
 
 async function searchGitHub(query) {
-  const params = new URLSearchParams({ q: query, sort: 'stars', order: 'desc', per_page: '9' });
-  const data = await fetchJson(`https://api.github.com/search/repositories?${params}`, { headers: { Accept: 'application/vnd.github+json' } });
-  return (data?.items || []).map((repo) => ({
-    type: 'github', provider: 'GitHub', source: repo.full_name, title: repo.full_name, url: repo.html_url,
-    snippet: clip(`${repo.description || 'بدون وصف'} · ★ ${repo.stargazers_count || 0} · ${repo.language || 'n/a'} · ${repo.license?.spdx_id || 'license n/a'}`),
-    publishedAt: repo.updated_at || null,
-  }));
+  const data = await fetchJson(`https://api.github.com/search/repositories?${new URLSearchParams({ q: query, sort: 'stars', order: 'desc', per_page: '9' })}`, { headers: { Accept: 'application/vnd.github+json' } });
+  return (data?.items || []).map((repo) => ({ type: 'github', provider: 'GitHub', source: repo.full_name, title: repo.full_name, url: repo.html_url, snippet: clip(`${repo.description || 'بدون وصف'} · ★ ${repo.stargazers_count || 0} · ${repo.language || 'n/a'} · ${repo.license?.spdx_id || 'license n/a'}`), publishedAt: repo.updated_at || null }));
 }
 
 const adapters = {
-  news: (q, domain) => searchNews(q, domain),
-  web: (q, domain) => searchWeb(q, domain),
-  papers: (q, domain) => searchPapers(q, domain),
-  discussions: (q, domain) => searchDiscussions(q, domain),
-  github: (q, domain) => searchGitHub(q, domain),
+  news: (q) => searchNews(q), web: (q, d) => searchWeb(q, d), papers: (q) => searchPapers(q), discussions: (q) => searchDiscussions(q), github: (q) => searchGitHub(q),
 };
 
-function normalizeSources(domainId, requested) {
+function normalizeSources(domainId, requested, query) {
   const allowed = Object.keys(adapters);
   const fromUser = Array.isArray(requested) ? requested.filter((s) => allowed.includes(s)) : [];
-  return [...new Set(fromUser.length ? fromUser : (domainSources[domainId] || domainSources.general))];
+  let selected = [...new Set(fromUser.length ? fromUser : (domainSources[domainId] || domainSources.general))];
+  if (domainId === 'politics' && isFreshQuery(query)) selected = selected.filter((s) => s !== 'papers' && s !== 'discussions');
+  return selected;
 }
 
 export async function runEmbeddedResearch({ query, domainId = 'general', modeId = 'deep', sources = [] }) {
   const cleanQuery = String(query || '').trim().slice(0, 650);
-  const requestedSources = normalizeSources(domainId, sources);
+  const requestedSources = normalizeSources(domainId, sources, cleanQuery);
   const queries = expandQueries(cleanQuery, domainId);
   const started = Date.now();
-
   const jobs = [];
-  for (const source of requestedSources) {
-    for (const q of queries) {
-      jobs.push((async () => {
-        const t0 = Date.now();
-        try {
-          const items = await adapters[source](q, domainId);
-          return { source, query: q, ok: true, ms: Date.now() - t0, count: items.length, items };
-        } catch (error) {
-          return { source, query: q, ok: false, ms: Date.now() - t0, count: 0, items: [], error: error?.name === 'AbortError' ? 'timeout' : (error?.message || 'provider error') };
-        }
-      })());
+
+  for (const source of requestedSources) for (const q of queries) jobs.push((async () => {
+    const t0 = Date.now();
+    try {
+      const items = await adapters[source](q, domainId);
+      return { source, query: q, ok: true, ms: Date.now() - t0, count: items.length, items };
+    } catch (error) {
+      return { source, query: q, ok: false, ms: Date.now() - t0, count: 0, items: [], error: error?.name === 'AbortError' ? 'timeout' : (error?.message || 'provider error') };
     }
-  }
+  })());
 
   const rows = await Promise.all(jobs);
   const providerSummary = {};
   const seen = new Set();
   let results = [];
+  let rejectedByRelevance = 0;
 
   for (const row of rows) {
-    if (!providerSummary[row.source]) providerSummary[row.source] = { source: row.source, ok: false, count: 0, ms: 0, attempts: 0, errors: [] };
+    if (!providerSummary[row.source]) providerSummary[row.source] = { source: row.source, ok: false, count: 0, accepted: 0, rejected: 0, ms: 0, attempts: 0, errors: [] };
     const p = providerSummary[row.source];
-    p.ok = p.ok || row.ok;
-    p.count += row.count;
-    p.ms = Math.max(p.ms, row.ms);
-    p.attempts += 1;
+    p.ok = p.ok || row.ok; p.count += row.count; p.ms = Math.max(p.ms, row.ms); p.attempts += 1;
     if (row.error) p.errors.push(row.error);
     for (const item of row.items) {
       const key = canonicalKey(item);
       if (!key || seen.has(key)) continue;
       seen.add(key);
-      results.push({ ...item, evidenceScore: evidenceScore(item, cleanQuery) });
+      const rel = relevance(item, cleanQuery, domainId);
+      if (!rel.keep) { p.rejected += 1; rejectedByRelevance += 1; continue; }
+      p.accepted += 1;
+      results.push({ ...item, relevanceOverlap: rel.overlap, evidenceScore: evidenceScore(item, cleanQuery, rel) });
     }
   }
 
-  results.sort((a, b) => b.evidenceScore - a.evidenceScore || String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')));
+  results.sort((a, b) => b.evidenceScore - a.evidenceScore || b.relevanceOverlap - a.relevanceOverlap || String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')));
   results = results.slice(0, maxByMode[modeId] || 28);
-
-  const strongest = results.slice(0, 8).map((r) => ({
-    title: r.title, source: r.source, provider: r.provider, url: r.url, snippet: r.snippet,
-    evidenceScore: r.evidenceScore, publishedAt: r.publishedAt, type: r.type,
-  }));
-  const timeline = results.filter((r) => r.publishedAt).slice().sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)).slice(0, 14);
 
   return {
     query: cleanQuery,
-    domain: { id: domainId },
-    mode: { id: modeId },
-    sources: requestedSources,
-    queryVariants: queries,
-    durationMs: Date.now() - started,
-    total: results.length,
-    sourceTypes: [...new Set(results.map((r) => r.type))],
-    providers: Object.values(providerSummary),
-    results,
-    strongest,
-    timeline,
-    marketContext: [],
-    researchEngine: 'embedded-resilient-v1',
-    fetchedAt: new Date().toISOString(),
+    domain: { id: domainId }, mode: { id: modeId }, sources: requestedSources, queryVariants: queries,
+    durationMs: Date.now() - started, total: results.length, sourceTypes: [...new Set(results.map((r) => r.type))],
+    providers: Object.values(providerSummary), results,
+    strongest: results.slice(0, 8).map((r) => ({ title: r.title, source: r.source, provider: r.provider, url: r.url, snippet: r.snippet, evidenceScore: r.evidenceScore, publishedAt: r.publishedAt, type: r.type })),
+    timeline: results.filter((r) => r.publishedAt).slice().sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)).slice(0, 14),
+    marketContext: [], researchEngine: 'embedded-strict-relevance-v2', rejectedByRelevance, fetchedAt: new Date().toISOString(),
   };
 }
