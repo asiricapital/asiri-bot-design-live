@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { runDeepInvestigationWithX } from './deep-intelligence-engine-x.js';
 import { getQuotes } from './market.js';
@@ -63,7 +64,7 @@ async function fetchJson(url, options = {}, timeoutMs = 70_000) {
 
 function resolveProvider(body) {
   const clientKey = String(body?.providerKey || '');
-  const clientModel = CLIENT_MODELS.has(body?.providerModel) ? body.providerModel : 'openai-fast';
+  const clientModel = CLIENT_MODELS.has(body?.providerModel) ? body.providerModel : 'openai';
   if (clientKey && /^(sk_|pk_)/.test(clientKey)) {
     return { type: 'pollinations-byop', baseUrl: POLLINATIONS_BASE_URL, apiKey: clientKey, model: clientModel };
   }
@@ -179,7 +180,7 @@ app.post('/api/x/disconnect', disconnectX);
 app.get('/health', (_req, res) => res.json({
   ok: true,
   service: 'asiri-deep-intelligence-os',
-  version: '5.1-x-intelligence',
+  version: '5.2-x-intelligence-ai-connect-fix',
   pipeline: ['understand','search','read','claims','x-intelligence','gap-search','cross-check','synthesize','challenge'],
   xIntegration: true,
   xBackendReady: isXBackendReady(),
@@ -278,11 +279,30 @@ app.post('/api/deep-research', rateLimit, async (req, res) => {
   }
 });
 
-app.get(['/', '/deep', '/deep-intelligence.html'], (_req, res) => {
+const AI_CONNECT_FIX = `<script>
+(() => {
+  const connect = document.getElementById('aiConnect');
+  if (!connect) return;
+  connect.onclick = () => {
+    const redirect = location.origin + location.pathname;
+    const params = new URLSearchParams({ redirect_url: redirect, expiry: '7' });
+    location.href = 'https://enter.pollinations.ai/authorize?' + params.toString();
+  };
+  const info = document.querySelector('#settings .card p');
+  if (info) info.textContent = 'البحث يعمل بدون نموذج. عند ربط AI يمنح Pollinations مفتاح جلسة محدودًا، ثم يستخدم ASIRI النموذج الذي تختاره لتركيب الإجابة وتشغيل Challenge Agent. لا نقيّد التفويض بأسماء نماذج ثابتة حتى لا يتعطل عند تغيّر كتالوج المزود.';
+})();
+</script>`;
+
+app.get(['/', '/deep', '/deep-intelligence.html'], async (_req, res) => {
   res.set('Cache-Control', 'no-store');
-  res.sendFile(path.join(root, 'deep-intelligence-x.html'));
+  try {
+    const html = await fs.readFile(path.join(root, 'deep-intelligence-x.html'), 'utf8');
+    res.type('html').send(html.replace('</body>', `${AI_CONNECT_FIX}</body>`));
+  } catch {
+    res.status(500).send('ASIRI UI unavailable');
+  }
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`ASIRI Deep Intelligence OS v5.1 + X Intelligence listening on ${port}`);
+  console.log(`ASIRI Deep Intelligence OS v5.2 + X Intelligence listening on ${port}`);
 });
