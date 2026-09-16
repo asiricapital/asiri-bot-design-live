@@ -1,9 +1,50 @@
 import { runDeepInvestigation } from './deep-intelligence-engine.js';
 
+const STOPWORDS = new Set([
+  'هذا','هذه','ذلك','التي','الذي','على','الى','إلى','عن','من','في','ما','ماذا','هل','ماهي','ماهو','اخر','آخر','أخر','الجديد','اليوم','الآن','الان','حاليا','حاليًا','تطورات','التطورات','اخبار','أخبار','خبر','اهم','أهم','حول','بخصوص','اعطني','أعطني','اريد','أريد',
+  'why','what','the','and','for','with','from','that','this','today','latest','news','current','now','about','update','updates',
+]);
+const LOW_QUALITY_RX = /(porn|xxx|sex\s?video|casino|betting|viagra|adult\s?video|anal\s|escort)/i;
+
+function normalize(value) {
+  return String(value || '').toLowerCase().normalize('NFKC')
+    .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').replace(/ة/g, 'ه');
+}
+
 function tokens(value) {
-  return [...new Set((String(value || '').toLowerCase().normalize('NFKC').match(/[\p{L}\p{N}]{2,}/gu) || [])
-    .filter((x) => !['هذا','هذه','ذلك','التي','الذي','على','الى','إلى','عن','من','في','ما','ماذا','هل','why','what','the','and','for','with','from','that','this','today'].includes(x))
-    .slice(0, 80))];
+  return [...new Set((normalize(value).match(/[\p{L}\p{N}]{2,}/gu) || []).filter((x) => !STOPWORDS.has(x)).slice(0, 80))];
+}
+
+function topicAliases(query) {
+  const q = normalize(query);
+  const a = new Set();
+  const add = (...xs) => xs.forEach((x) => a.add(normalize(x)));
+  if (/اليمن|yemen/.test(q)) add('اليمن','يمن','يمني','الحوثي','حوثي','الحوثيين','صنعاء','عدن','المخا','مأرب','مارب','تعز','الحديدة','البحر الأحمر','yemen','yemeni','houthi','sanaa','aden','mokha','red sea');
+  if (/غزه|gaza|فلسطين|palestin/.test(q)) add('غزة','غزه','فلسطين','حماس','gaza','palestine','hamas');
+  if (/ايران|iran/.test(q)) add('ايران','إيران','طهران','الحرس الثوري','iran','tehran','irgc');
+  if (/هرمز|hormuz/.test(q)) add('هرمز','مضيق هرمز','hormuz','strait of hormuz');
+  return [...a];
+}
+
+function specificQuery(query) {
+  return tokens(query).length > 0 || topicAliases(query).length > 0;
+}
+
+function relevanceOverlap(text, query) {
+  const hay = normalize(text);
+  if (LOW_QUALITY_RX.test(hay)) return 0;
+  const qs = [...tokens(query), ...topicAliases(query)];
+  return new Set(qs.filter((t) => hay.includes(t))).size;
+}
+
+function filterXResults(results, query) {
+  const specific = specificQuery(query);
+  return (results || []).filter((item) => {
+    const text = `${item.title || ''} ${item.snippet || ''} ${item.source || ''}`;
+    if (LOW_QUALITY_RX.test(text)) return false;
+    if (!specific) return true;
+    return relevanceOverlap(text, query) >= 1;
+  }).map((item) => ({ ...item, queryRelevance: relevanceOverlap(`${item.title || ''} ${item.snippet || ''}`, query) }));
 }
 
 function jaccard(a, b) {
@@ -15,23 +56,14 @@ function jaccard(a, b) {
   return intersection / (A.size + B.size - intersection);
 }
 
-function hasNegation(value) {
-  return /(ليس|لم |لن |لا |غير |نفى|نفت|not\b|no\b|denied|false)/i.test(String(value || ''));
-}
-
-function numbers(value) {
-  return new Set(String(value || '').match(/\b\d+(?:[.,]\d+)?%?\b/g) || []);
-}
+function hasNegation(value) { return /(ليس|لم |لن |لا |غير |نفى|نفت|not\b|no\b|denied|false)/i.test(String(value || '')); }
+function numbers(value) { return new Set(String(value || '').match(/\b\d+(?:[.,]\d+)?%?\b/g) || []); }
 
 function possibleConflict(a, b) {
   if (jaccard(a, b) < 0.28) return false;
   if (hasNegation(a) !== hasNegation(b)) return true;
-  const A = numbers(a);
-  const B = numbers(b);
-  if (A.size && B.size) {
-    const common = [...A].some((x) => B.has(x));
-    if (!common) return true;
-  }
+  const A = numbers(a); const B = numbers(b);
+  if (A.size && B.size && ![...A].some((x) => B.has(x))) return true;
   return false;
 }
 
@@ -50,23 +82,15 @@ function mergeResults(base, extras) {
   for (const item of extras || []) {
     const key = canonicalResultKey(item);
     if (!key || seen.has(key)) continue;
-    seen.add(key);
-    out.push(item);
+    seen.add(key); out.push(item);
   }
   return out.slice(0, 52);
 }
 
-function xPostsOnly(results) {
-  return (results || []).filter((x) => x?.provider === 'X Timeline' && x?.snippet);
-}
+function xPostsOnly(results) { return (results || []).filter((x) => x?.provider === 'X Timeline' && x?.snippet); }
 
 function mergeClaims(baseClaims, xResults, baseResultCount) {
-  const claims = (baseClaims || []).map((c) => ({
-    ...c,
-    providers: [...(c.providers || [])],
-    sourceDomains: [...(c.sourceDomains || [])],
-    items: [...(c.items || [])],
-  }));
+  const claims = (baseClaims || []).map((c) => ({ ...c, providers: [...(c.providers || [])], sourceDomains: [...(c.sourceDomains || [])], items: [...(c.items || [])] }));
   const conflicts = [];
   const posts = xPostsOnly(xResults);
 
@@ -74,55 +98,25 @@ function mergeClaims(baseClaims, xResults, baseResultCount) {
     const post = posts[idx];
     const text = String(post.snippet || '').replace(/\s+/g, ' ').trim();
     if (text.length < 25) continue;
-    let best = null;
-    let similarity = 0;
+    let best = null; let similarity = 0;
     for (const claim of claims) {
       const sim = jaccard(text, claim.claim);
       if (sim > similarity) { best = claim; similarity = sim; }
     }
     const sourceKey = post.independenceKey || post.source || 'x';
-    const item = {
-      text,
-      score: post.evidenceScore || 55,
-      url: post.url,
-      source: post.source,
-      provider: post.provider,
-      rootDomain: sourceKey,
-      publishedAt: post.publishedAt,
-      evidenceScore: post.evidenceScore,
-    };
+    const item = { text, score: post.evidenceScore || 55, url: post.url, source: post.source, provider: post.provider, rootDomain: sourceKey, publishedAt: post.publishedAt, evidenceScore: post.evidenceScore };
 
     if (best && similarity >= 0.30) {
       const alreadyIndependent = best.sourceDomains.includes(sourceKey);
-      best.items.push(item);
-      best.supportCount = Number(best.supportCount || 0) + 1;
-      if (!alreadyIndependent) {
-        best.sourceDomains.push(sourceKey);
-        best.independentSources = Number(best.independentSources || 0) + 1;
-      }
+      best.items.push(item); best.supportCount = Number(best.supportCount || 0) + 1;
+      if (!alreadyIndependent) { best.sourceDomains.push(sourceKey); best.independentSources = Number(best.independentSources || 0) + 1; }
       if (!best.providers.includes('X Timeline')) best.providers.push('X Timeline');
-      best.confidence = Math.min(99, Math.round(Number(best.confidence || 0) + (alreadyIndependent ? 1 : 5)));
-      if (possibleConflict(text, best.claim)) {
-        best.possibleConflict = true;
-        conflicts.push({ claim: best.claim, xClaim: text, source: post.source, url: post.url });
-      }
+      best.confidence = Math.min(99, Math.round(Number(best.confidence || 0) + (alreadyIndependent ? 1 : 4)));
+      if (possibleConflict(text, best.claim)) { best.possibleConflict = true; conflicts.push({ claim: best.claim, xClaim: text, source: post.source, url: post.url }); }
     } else {
-      claims.push({
-        id: claims.length + 1,
-        claim: text,
-        supportCount: 1,
-        independentSources: 1,
-        providers: ['X Timeline'],
-        sourceDomains: [sourceKey],
-        confidence: Math.min(90, Math.max(35, Number(post.evidenceScore || 55))),
-        possibleConflict: false,
-        items: [item],
-        xOnly: true,
-        citationId: baseResultCount + idx + 1,
-      });
+      claims.push({ id: claims.length + 1, claim: text, supportCount: 1, independentSources: 1, providers: ['X Timeline'], sourceDomains: [sourceKey], confidence: Math.min(78, Math.max(35, Number(post.evidenceScore || 55))), possibleConflict: false, items: [item], xOnly: true, citationId: baseResultCount + idx + 1 });
     }
   }
-
   return { claims: claims.slice(0, 24).map((c, i) => ({ ...c, id: i + 1 })), conflicts };
 }
 
@@ -130,13 +124,10 @@ function mergeIndependence(base, extras) {
   const map = new Map((base || []).map((x) => [x.domain, { ...x, providers: [...(x.providers || [])] }]));
   for (const item of extras || []) {
     let key = item.independenceKey;
-    if (!key) {
-      try { key = new URL(item.url).hostname.replace(/^www\./, ''); } catch { key = item.source || item.provider; }
-    }
+    if (!key) { try { key = new URL(item.url).hostname.replace(/^www\./, ''); } catch { key = item.source || item.provider; } }
     if (!key) continue;
     if (!map.has(key)) map.set(key, { domain: key, count: 0, providers: [] });
-    const row = map.get(key);
-    row.count += 1;
+    const row = map.get(key); row.count += 1;
     if (item.provider && !row.providers.includes(item.provider)) row.providers.push(item.provider);
   }
   return [...map.values()];
@@ -144,14 +135,8 @@ function mergeIndependence(base, extras) {
 
 function mergeTimeline(base, extras) {
   const rows = [...(base || [])];
-  for (const item of extras || []) {
-    if (!item.publishedAt) continue;
-    rows.push({ date: item.publishedAt, title: item.title, source: item.source || item.provider, url: item.url, viaX: Boolean(item.fromX) });
-  }
-  return rows
-    .filter((x) => x.date)
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(-18);
+  for (const item of extras || []) if (item.publishedAt) rows.push({ date: item.publishedAt, title: item.title, source: item.source || item.provider, url: item.url, viaX: Boolean(item.fromX) });
+  return rows.filter((x) => x.date).sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-18);
 }
 
 function xSection(xResults, baseResultCount) {
@@ -164,62 +149,32 @@ function xSection(xResults, baseResultCount) {
 
 export async function runDeepInvestigationWithX(query, options = {}) {
   const base = await runDeepInvestigation(query, options);
-  const xResults = Array.isArray(options.xResults) ? options.xResults : [];
+  const rawX = Array.isArray(options.xResults) ? options.xResults : [];
+  const xResults = filterXResults(rawX, query);
   if (!xResults.length) {
-    return {
-      ...base,
-      x: { connected: Boolean(options.xConnected), used: 0, accounts: 0, error: options.xError || null },
-    };
+    return { ...base, x: { connected: Boolean(options.xConnected), used: 0, accounts: 0, rejected: rawX.length, error: options.xError || null } };
   }
 
   const baseResultCount = base.results?.length || 0;
   const results = mergeResults(base.results, xResults);
   const mergedClaims = mergeClaims(base.claims, xResults, baseResultCount);
-  const contradictions = [
-    ...(base.contradictions || []),
-    ...mergedClaims.conflicts.map((x) => ({ claim: x.claim, xClaim: x.xClaim, source: x.source, url: x.url, possibleConflict: true })),
-  ].slice(0, 10);
+  const contradictions = [...(base.contradictions || []), ...mergedClaims.conflicts.map((x) => ({ claim: x.claim, xClaim: x.xClaim, source: x.source, url: x.url, possibleConflict: true }))].slice(0, 10);
   const independence = mergeIndependence(base.independence, xResults);
   const timeline = mergeTimeline(base.timeline, xResults);
   const xPosts = xPostsOnly(xResults);
   const accounts = new Set(xPosts.map((x) => x.independenceKey || x.source).filter(Boolean));
-  const strongX = xPosts.filter((x) => Number(x.evidenceScore || 0) >= 68).length;
-  const confidence = Math.min(99, Math.round(Number(base.confidence || 0) + Math.min(8, accounts.size * 1.5) + Math.min(5, strongX)));
-  const sourcesRead = [
-    ...(base.sourcesRead || []),
-    ...xPosts.slice(0, 12).map((x) => ({
-      title: x.title,
-      url: x.url,
-      source: x.source,
-      provider: x.provider,
-      publishedAt: x.publishedAt,
-      evidenceScore: x.evidenceScore,
-      readStatus: 'x-api',
-      chars: String(x.snippet || '').length,
-      excerpt: String(x.snippet || '').slice(0, 900),
-    })),
-  ];
-
-  const stages = [
-    ...(base.stages || []),
-    { id: 'x-intelligence', label: 'مطابقة Home Timeline من X مع السؤال', ms: 0, posts: xPosts.length, accounts: accounts.size },
-  ];
-
+  const strongX = xPosts.filter((x) => Number(x.evidenceScore || 0) >= 72).length;
+  const confidence = Math.min(99, Math.round(Number(base.confidence || 0) + Math.min(5, accounts.size) + Math.min(3, strongX)));
+  const sourcesRead = [...(base.sourcesRead || []), ...xPosts.slice(0, 12).map((x) => ({ title: x.title, url: x.url, source: x.source, provider: x.provider, publishedAt: x.publishedAt, evidenceScore: x.evidenceScore, readStatus: 'x-api', chars: String(x.snippet || '').length, excerpt: String(x.snippet || '').slice(0, 900) }))];
+  const stages = [...(base.stages || []), { id: 'x-intelligence', label: 'مطابقة Home Timeline من X مع السؤال', ms: 0, posts: xPosts.length, accounts: accounts.size, rejected: rawX.length - xResults.length }];
   const gaps = [...(base.gaps || [])];
   if (xPosts.length && accounts.size < 2) gaps.push('إشارات X ذات الصلة جاءت من عدد محدود من الحسابات، لذلك لم تُعامل كتأكيد مستقل كافٍ.');
 
   return {
     ...base,
     answer: `${base.answer}${xSection(xResults, baseResultCount)}`,
-    confidence,
-    results,
-    sourcesRead,
-    claims: mergedClaims.claims,
-    contradictions,
-    gaps: [...new Set(gaps)],
-    independence,
-    timeline,
-    x: { connected: true, used: xPosts.length, accounts: accounts.size, error: options.xError || null },
+    confidence, results, sourcesRead, claims: mergedClaims.claims, contradictions, gaps: [...new Set(gaps)], independence, timeline,
+    x: { connected: true, used: xPosts.length, accounts: accounts.size, rejected: rawX.length - xResults.length, error: options.xError || null },
     stages,
   };
 }
