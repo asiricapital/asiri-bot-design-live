@@ -21,7 +21,7 @@ const portfolio = JSON.parse(fs.readFileSync('portfolio.json','utf8'));
 if (!Array.isArray(portfolio)) throw new Error('portfolio.json must contain an array');
 
 const pkg = JSON.parse(fs.readFileSync('package.json','utf8'));
-if (pkg.scripts?.start !== 'node startup-v683.js') throw new Error('Production start script must use startup-v683.js');
+if (pkg.scripts?.start !== 'node live-server.js') throw new Error('Production start script must use live-server.js');
 if (pkg.engines?.node !== '22.x') throw new Error('Node 22.x is required');
 if (pkg.version !== '7.1.0') throw new Error('Expected Asiri Capital v7.1.0');
 

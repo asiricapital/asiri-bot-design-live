@@ -2,948 +2,534 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asiri Capital - Live Portfolio Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Asiri Capital | Live Terminal v27</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-base: #060e18;
+            --bg-card: #0c1a2c;
+            --border-color: #1e3356;
+            --accent-gold: #e2bc53;
+            --accent-cyan: #00e5ff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
         }
 
-        :root {
-            --bg-dark: #0a0e27;
-            --bg-darker: #050810;
-            --card-bg: #0f1429;
-            --border-color: #1a2847;
-            --text-primary: #ffffff;
-            --text-secondary: #a0aec0;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --accent-blue: #3b82f6;
-            --accent-gold: #fbbf24;
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
-            color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 100px;
             overflow-x: hidden;
         }
 
-        .header {
-            background: rgba(15, 20, 41, 0.8);
-            backdrop-filter: blur(10px);
+        .account-bar {
+            background: rgba(12, 26, 44, 0.98);
             border-bottom: 1px solid var(--border-color);
-            padding: 1.2rem 1.5rem;
+            padding: 0.9rem 1.2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
+        .account-status { font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.4rem; }
+        .live-dot { width: 8px; height: 8px; background: var(--accent-cyan); border-radius: 50%; box-shadow: 0 0 8px var(--accent-cyan); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--accent-green);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .header-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .header-status {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .header-right {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .alert-badge {
-            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
-            padding: 0.5rem 1rem;
+        .btn-account {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            color: var(--accent-cyan);
+            padding: 0.4rem 1rem;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .alert-badge:hover {
-            transform: scale(1.05);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
-            padding-bottom: 100px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            color: var(--accent-blue);
-        }
-
-        .add-stock-btn {
-            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
-            border: none;
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .add-stock-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .portfolio-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .stock-item {
-            background: linear-gradient(135deg, rgba(15, 20, 41, 0.8) 0%, rgba(26, 40, 71, 0.4) 100%);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .stock-item:hover {
-            border-color: var(--accent-blue);
-            background: linear-gradient(135deg, rgba(15, 20, 41, 0.95) 0%, rgba(26, 40, 71, 0.6) 100%);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
-        }
-
-        .stock-item.alert-active {
-            border-color: var(--accent-red);
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
-        }
-
-        .stock-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex: 1;
-        }
-
-        .stock-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: white;
-            flex-shrink: 0;
-            position: relative;
-        }
-
-        .stock-icon.alert {
-            animation: alertPulse 1s infinite;
-        }
-
-        @keyframes alertPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-        }
-
-        .stock-info {
-            flex: 1;
-        }
-
-        .stock-symbol {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-        }
-
-        .stock-name {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .stock-right {
-            display: flex;
-            align-items: flex-end;
-            gap: 1.5rem;
-            text-align: right;
-        }
-
-        .stock-price {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-        }
-
-        .price-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .price-change {
-            font-size: 0.95rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 0.3rem;
-        }
-
-        .price-change.positive {
-            color: var(--accent-green);
-        }
-
-        .price-change.negative {
-            color: var(--accent-red);
-        }
-
-        .stock-details {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .detail-badge {
-            background: rgba(59, 130, 246, 0.1);
-            padding: 0.3rem 0.8rem;
-            border-radius: 6px;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .alert-btn {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--accent-red);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
             font-size: 0.8rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .alert-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: var(--accent-red);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.8rem;
-            color: var(--text-primary);
-            font-size: 1rem;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-gold) 100%);
-            color: white;
+        .nav-pills-container {
+            display: flex; gap: 0.6rem; padding: 0.8rem 1rem;
+            overflow-x: auto; background: rgba(6, 14, 24, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap; scrollbar-width: none;
+            position: sticky; top: 57px; z-index: 99;
         }
+        .nav-pills-container::-webkit-scrollbar { display: none; }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
+        .nav-pill {
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            color: var(--text-secondary);
+            color: var(--text-main);
+            padding: 0.5rem 1.2rem; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+        }
+        .nav-pill.active {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(226, 188, 83, 0.2));
+            border-color: var(--accent-cyan); color: #fff;
         }
 
-        .btn-secondary:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
+        .main-container { padding: 1rem; max-width: 1200px; margin: 0 auto; }
+
+        .notice-banner {
+            background: linear-gradient(135deg, #162b4d, #0c1a2c);
+            border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 1rem;
+            text-align: center; margin-bottom: 1rem;
+        }
+        .notice-banner h3 { font-size: 0.9rem; color: #fff; margin-bottom: 0.2rem; }
+        .notice-banner p { font-size: 0.75rem; color: var(--accent-gold); }
+
+        .app-section { display: none; }
+        .app-section.active { display: block; }
+
+        .card-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 1.2rem;
+            margin-bottom: 1rem; min-height: 400px;
         }
 
-        .alerts-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            max-height: 400px;
-            overflow-y: auto;
+        .section-header-meta { font-size: 0.7rem; color: var(--accent-gold); letter-spacing: 1px; margin-bottom: 0.3rem; text-transform: uppercase; }
+        .section-title-main { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+        .section-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4; }
+
+        .filter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+        .filter-btn {
+            background: var(--bg-base); border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 0.6rem 0.2rem; border-radius: 10px;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center;
         }
+        .filter-btn.active { background: rgba(0, 229, 255, 0.15); border-color: var(--accent-cyan); color: var(--accent-cyan); }
 
-        .alert-item {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 8px;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .table-headers {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr;
+            background: rgba(255, 255, 255, 0.03); padding: 0.6rem 0.8rem;
+            border-radius: 8px; font-size: 0.75rem; color: var(--text-muted);
+            text-align: center; font-weight: 600; margin-bottom: 0.6rem;
         }
+        .table-headers div:first-child { text-align: right; }
 
-        .alert-item-info {
-            flex: 1;
+        .stock-row {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr;
+            background: rgba(6, 14, 24, 0.6); border: 1px solid var(--border-color);
+            padding: 0.8rem; border-radius: 10px; align-items: center;
+            margin-bottom: 0.5rem; min-height: 64px;
+            transition: background 0.3s ease;
         }
+        .stock-row.tick-flash { background: rgba(0, 229, 255, 0.15); border-color: var(--accent-cyan); }
 
-        .alert-item-symbol {
-            font-weight: 700;
-            margin-bottom: 0.3rem;
+        .stock-col-name { text-align: right; }
+        .stock-col-name .sym { font-size: 1rem; font-weight: 700; color: #fff; }
+        .stock-col-name .name { font-size: 0.7rem; color: var(--text-muted); }
+
+        .stock-col-price, .stock-col-change, .stock-col-action { text-align: center; font-size: 0.85rem; font-weight: 600; }
+        .val-pos { color: var(--success); }
+        .val-neg { color: var(--danger); }
+        .val-neutral { color: var(--text-muted); }
+
+        .badge-decision { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; display: inline-block; width: 85px; text-align: center; }
+        .badge-buy { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-wait { background: rgba(226, 188, 83, 0.15); color: var(--accent-gold); border: 1px solid rgba(226, 188, 83, 0.3); }
+        .badge-avoid { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .remove-symbol-btn { margin-top: 0.35rem; min-height: 28px; padding: 0.2rem 0.5rem; border: 1px solid rgba(239, 68, 68, 0.42); border-radius: 6px; background: rgba(239, 68, 68, 0.08); color: #fca5a5; font: inherit; font-size: 0.68rem; font-weight: 700; cursor: pointer; }
+        .remove-symbol-btn:active { transform: scale(0.97); background: rgba(239, 68, 68, 0.18); }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(12, 26, 44, 0.98); backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-color);
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            padding: 0.6rem 0.4rem; z-index: 1000;
         }
-
-        .alert-item-details {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+        .nav-item {
+            background: none; border: none; color: var(--text-muted);
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.2rem; font-size: 0.7rem; font-weight: 600; cursor: pointer;
         }
+        .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
+        .nav-item.active { color: var(--accent-gold); }
 
-        .alert-item-remove {
-            background: transparent;
-            border: none;
-            color: var(--accent-red);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0.5rem;
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(6, 14, 24, 0.85); display: none;
+            justify-content: center; align-items: center; z-index: 2000; padding: 1rem;
         }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-secondary);
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 16px; width: 100%; max-width: 400px; padding: 1.5rem;
         }
-
-        .spinner {
-            border: 3px solid rgba(59, 130, 246, 0.2);
-            border-top: 3px solid var(--accent-blue);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
+        .modal-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+        .modal-input {
+            width: 100%; background: var(--bg-base); border: 1px solid var(--border-color);
+            border-radius: 10px; padding: 0.8rem; color: #fff; font-size: 1rem;
+            margin-bottom: 1rem; text-align: right; text-transform: uppercase;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
-            z-index: 2000;
-            animation: slideIn 0.3s ease;
-            max-width: 400px;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(500px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .notification-title {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .notification-message {
-            font-size: 0.95rem;
-        }
-
-        @media (max-width: 768px) {
-            .stock-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .stock-right {
-                width: 100%;
-                justify-content: space-between;
-                text-align: left;
-                margin-top: 1rem;
-                padding-top: 1rem;
-                border-top: 1px solid var(--border-color);
-            }
-
-            .stock-details {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-
-            .container {
-                padding: 1rem;
-            }
-
-            .notification {
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-        }
+        .modal-actions { display: flex; gap: 0.8rem; }
+        .modal-btn { flex: 1; padding: 0.7rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; }
+        .btn-confirm { background: var(--accent-cyan); color: #000; }
+        .btn-cancel { background: var(--bg-base); color: var(--text-muted); border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-left">
-            <div class="status-dot"></div>
-            <div>
-                <div class="header-title">ASIRI CAPITAL</div>
-                <div class="header-status">LIVE PORTFOLIO</div>
+
+    <div class="account-bar">
+        <button class="btn-account" onclick="openAddStockModal()">+ إضافة أصل</button>
+        <div class="account-status">
+            <span class="live-dot" id="ws-dot"></span>
+            <span id="sync-status-text">جاري الاتصال بقناة السوق المباشرة...</span>
+        </div>
+    </div>
+
+    <div class="nav-pills-container">
+        <button class="nav-pill active" onclick="switchMainTab('tools', this)">أدوات القرار</button>
+        <button class="nav-pill" onclick="switchMainTab('command', this)">قمة القرار ⚡</button>
+        <button class="nav-pill" onclick="switchMainTab('alerts', this)">التنبيهات</button>
+        <button class="nav-pill" onclick="switchMainTab('portfolio', this)">المحفظة الذكية</button>
+    </div>
+
+    <div class="main-container">
+        <div class="notice-banner">
+            <h3>⚡ محطة الأسعار الموثقة للأسهم</h3>
+            <p id="last-sync-label">بانتظار أول تحديث موثق من محرك السوق...</p>
+        </div>
+
+        <div id="sec-tools" class="app-section active">
+            <div class="card-section">
+                <div class="section-header-meta">VERIFIED QUOTES • بيانات موثقة</div>
+                <div class="section-title-main">القرار التنفيذي لكل سهم</div>
+                <div class="section-desc">تُعرض آخر قراءة موثقة مع المصدر ووقت التحديث؛ لا يتم إنشاء أسعار أو توصيات بديلة عند تعذر المصدر.</div>
+
+                <div class="filter-grid">
+                    <button class="filter-btn active" onclick="filterAction('ALL', this)">الكل</button>
+                    <button class="filter-btn" onclick="filterAction('BUY', this)">شراء</button>
+                    <button class="filter-btn" onclick="filterAction('WAIT', this)">انتظار</button>
+                    <button class="filter-btn" onclick="filterAction('AVOID', this)">تجنب</button>
+                </div>
+
+                <div class="table-headers">
+                    <div>السهم</div>
+                    <div>السعر الحي</div>
+                    <div>الحالة</div>
+                    <div>قرار التنفيذ</div>
+                </div>
+
+                <div id="stocks-list-wrapper">
+                    <!-- الحقن -->
+                </div>
             </div>
         </div>
-        <div class="header-right">
-            <div class="alert-badge" onclick="openAlertsModal()">
-                🔔 <span id="alert-count">0</span> تنبيهات
+
+        <div id="sec-command" class="app-section">
+            <div class="card-section">
+                <div class="section-title-main">قمة القرار الذكي والسيولة</div>
+                <div style="padding: 1rem 0; color: var(--accent-cyan);">إحصائيات البث المباشر وأحجام التداول اللحظية.</div>
+            </div>
+        </div>
+
+        <div id="sec-alerts" class="app-section">
+            <div class="card-section">
+                <div class="section-title-main">سجل التنبيهات الذكية</div>
+                <div style="padding: 1rem 0; color: var(--text-muted);">التنبيهات تفعل فور تجاوز السعر الحي للعتبات.</div>
+            </div>
+        </div>
+
+        <div id="sec-portfolio" class="app-section">
+            <div class="card-section">
+                <div class="section-title-main">ملخص المحفظة النشطة</div>
+                <div style="padding: 1rem 0;">إجمالي الأصول المتابعة: <span id="portfolio-count" style="color:var(--accent-cyan); font-weight:700;">0</span> أصل.</div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="container">
-        <div class="section-header">
-            <div class="section-title">📊 محفظتي</div>
-            <button class="add-stock-btn" onclick="openAddModal()">+ إضافة سهم</button>
-        </div>
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="bottomNavClick('tools', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
+            <span>الأدوات</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('alerts', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <span>التنبيهات</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('opportunities', this)">
+            <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            <span>الفرص</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('portfolio', this)">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+            <span>المحفظة</span>
+        </button>
+        <button class="nav-item" onclick="bottomNavClick('back', this)">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <span>السابق</span>
+        </button>
+    </nav>
 
-        <div id="error-container"></div>
-        <div class="portfolio-list" id="portfolio-list">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>جاري تحميل البيانات الحية...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Stock Modal -->
-    <div class="modal" id="addStockModal">
-        <div class="modal-content">
-            <div class="modal-title">إضافة سهم جديد</div>
-            <div class="form-group">
-                <label class="form-label">رمز السهم (مثال: AAPL)</label>
-                <input type="text" class="form-input" id="newStockSymbol" placeholder="أدخل رمز السهم" style="text-transform: uppercase;">
-            </div>
-            <div class="form-group">
-                <label class="form-label">اسم الشركة</label>
-                <input type="text" class="form-input" id="newStockName" placeholder="أدخل اسم الشركة">
-            </div>
-            <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="addNewStock()">إضافة</button>
-                <button class="btn btn-secondary" onclick="closeAddModal()">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Alert Modal -->
-    <div class="modal" id="addAlertModal">
-        <div class="modal-content">
-            <div class="modal-title">تعيين تنبيهات - <span id="alert-stock-symbol"></span></div>
-            <div class="form-group">
-                <label class="form-label">السعر المستهدف (أعلى)</label>
-                <input type="number" class="form-input" id="alertPriceHigh" placeholder="أدخل السعر الأعلى" step="0.01">
-            </div>
-            <div class="form-group">
-                <label class="form-label">السعر المستهدف (أقل)</label>
-                <input type="number" class="form-input" id="alertPriceLow" placeholder="أدخل السعر الأقل" step="0.01">
-            </div>
-            <div class="modal-buttons">
-                <button class="btn btn-primary" onclick="saveAlert()">حفظ التنبيهات</button>
-                <button class="btn btn-secondary" onclick="closeAlertModal()">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alerts List Modal -->
-    <div class="modal" id="alertsListModal">
-        <div class="modal-content">
-            <div class="modal-title">التنبيهات النشطة</div>
-            <div class="alerts-list" id="alerts-list">
-                <p style="color: var(--text-secondary); text-align: center;">لا توجد تنبيهات نشطة</p>
-            </div>
-            <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closeAlertsModal()" style="flex: 1;">إغلاق</button>
+    <div class="modal-overlay" id="addStockModal">
+        <div class="modal-card">
+            <div class="modal-title">إضافة أصل جديد للمحفظة</div>
+            <input type="text" id="modalSymbolInput" class="modal-input" placeholder="مثال: AAPL">
+            <div class="modal-actions">
+                <button class="modal-btn btn-confirm" onclick="confirmAddStock()">إضافة</button>
+                <button class="modal-btn btn-cancel" onclick="closeAddStockModal()">إلغاء</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Alpha Vantage API Configuration
-        const ALPHA_VANTAGE_API_KEY = 'SR8IZVAS9PQH763P';
-        const API_BASE = 'https://www.alphavantage.co/query';
-
-        // Default stocks
-        let STOCKS = [
-            { symbol: 'SNAP', name: 'Snap Inc' },
-            { symbol: 'MVIS', name: 'MicroVision, Inc' },
-            { symbol: 'SG', name: 'Sweetgreen, Inc' },
-            { symbol: 'RKLB', name: 'Rocket Lab USA, Inc' },
-            { symbol: 'CHPT', name: 'ChargePoint Holdings, Inc' },
-            { symbol: 'BLNK', name: 'Blink Charging Co' },
-            { symbol: 'HUMA', name: 'Humacyte, Inc' },
-            { symbol: 'AGEN', name: 'Agenus Inc' },
-            { symbol: 'ENSC', name: 'Ensysce Biosciences, Inc' },
-            { symbol: 'TMCI', name: 'Treace Medical Concepts, Inc' },
-            { symbol: 'AMPL', name: 'Amplitude, Inc' },
-            { symbol: 'OCCN', name: 'Ocugen, Inc' },
-            { symbol: 'RDW', name: 'Redwire Corp' },
-            { symbol: 'INO', name: 'Inovio Pharmaceuticals, Inc' },
-            { symbol: 'LASE', name: 'Laser Photonics Corporation' },
-            { symbol: 'PLUG', name: 'Plug Power Inc' },
-            { symbol: 'CRDL', name: 'Cardiol Therapeutics Inc' },
-            { symbol: 'ADMA', name: 'ADMA Biologics, Inc' },
-            { symbol: 'OPTT', name: 'Ocean Power Technologies, Inc' },
-            { symbol: 'INLF', name: 'INLIF Limited' }
+        const INITIAL_STOCKS = [
+            'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
+            'BLNK', 'HUMA', 'AGEN', 'ENSC', 'TMCI',
+            'AMPL', 'RDW', 'INO', 'LASE', 'PLUG',
+            'CRDL', 'ADMA', 'OPTT', 'INLF'
         ];
 
-        let stockData = {};
-        let alerts = {};
-        let currentAlertSymbol = '';
+        let watchlist = [];
+        let stockMarketData = {};
+        let currentFilter = 'ALL';
+        let quoteRefreshInFlight = false;
+        const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';
+        const QUOTE_REFRESH_MS = 10000; // 10 seconds; quoteRefreshInFlight prevents overlapping requests.
+        const QUOTE_SNAPSHOT_KEY = 'asiri_verified_quote_snapshot_v1';
+        const QUOTE_SNAPSHOT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-        // Load data from localStorage
-        function loadData() {
-            const saved = localStorage.getItem('asiri_stocks');
+        function init() {
+            const saved = localStorage.getItem('asiri_ws_portfolio_v27');
             if (saved) {
-                STOCKS = JSON.parse(saved);
-            }
-            const savedAlerts = localStorage.getItem('asiri_alerts');
-            if (savedAlerts) {
-                alerts = JSON.parse(savedAlerts);
-            }
-        }
-
-        // Save data to localStorage
-        function saveData() {
-            localStorage.setItem('asiri_stocks', JSON.stringify(STOCKS));
-            localStorage.setItem('asiri_alerts', JSON.stringify(alerts));
-        }
-
-        // Initialize
-        async function init() {
-            loadData();
-            await fetchAllStocks();
-            setInterval(fetchAllStocks, 60000);
-        }
-
-        // Fetch all stocks
-        async function fetchAllStocks() {
-            const portfolioList = document.getElementById('portfolio-list');
-            const errorContainer = document.getElementById('error-container');
-
-            try {
-                let html = '';
-                errorContainer.innerHTML = '';
-
-                for (let i = 0; i < STOCKS.length; i++) {
-                    const stock = STOCKS[i];
-                    
-                    if (i > 0) {
-                        await new Promise(resolve => setTimeout(resolve, 1200));
-                    }
-
-                    try {
-                        const data = await fetchStockData(stock.symbol);
-                        
-                        if (data.error) {
-                            html += `
-                                <div class="stock-item">
-                                    <div class="stock-left">
-                                        <div class="stock-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                                            ${stock.symbol.substring(0, 2)}
-                                        </div>
-                                        <div class="stock-info">
-                                            <div class="stock-symbol">${stock.symbol}</div>
-                                            <div class="stock-name">${stock.name}</div>
-                                        </div>
-                                    </div>
-                                    <div style="color: #ef4444; font-size: 0.9rem;">خطأ في التحميل</div>
-                                </div>
-                            `;
-                            continue;
-                        }
-
-                        const isPositive = data.change >= 0;
-                        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6', '#f97316', '#6366f1', '#d946ef'];
-                        const colorIndex = STOCKS.indexOf(stock) % colors.length;
-                        const bgColor = colors[colorIndex];
-
-                        // Check alerts
-                        const hasAlert = alerts[stock.symbol];
-                        let alertTriggered = false;
-                        if (hasAlert) {
-                            if ((hasAlert.high && data.price >= hasAlert.high) || 
-                                (hasAlert.low && data.price <= hasAlert.low)) {
-                                alertTriggered = true;
-                                triggerAlert(stock.symbol, stock.name, data.price, hasAlert);
-                            }
-                        }
-
-                        html += `
-                            <div class="stock-item ${alertTriggered ? 'alert-active' : ''}">
-                                <div class="stock-left">
-                                    <div class="stock-icon ${alertTriggered ? 'alert' : ''}" style="background: linear-gradient(135deg, ${bgColor} 0%, ${bgColor}dd 100%);">
-                                        ${stock.symbol.substring(0, 2)}
-                                    </div>
-                                    <div class="stock-info">
-                                        <div class="stock-symbol">${stock.symbol}</div>
-                                        <div class="stock-name">${stock.name}</div>
-                                    </div>
-                                </div>
-                                <div class="stock-right">
-                                    <div class="stock-price">
-                                        <div class="price-value">$${data.price.toFixed(2)}</div>
-                                        <div class="price-change ${isPositive ? 'positive' : 'negative'}">
-                                            ${isPositive ? '▲' : '▼'} ${Math.abs(data.change).toFixed(2)}%
-                                        </div>
-                                    </div>
-                                    <div class="stock-details">
-                                        <div class="detail-badge">أعلى: $${data.high.toFixed(2)}</div>
-                                        <div class="detail-badge">أقل: $${data.low.toFixed(2)}</div>
-                                        <button class="alert-btn" onclick="openAlertModal('${stock.symbol}')">🔔 تنبيه</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-
-                        stockData[stock.symbol] = data;
-
-                    } catch (error) {
-                        console.error(`خطأ في جلب ${stock.symbol}:`, error);
-                    }
-                }
-
-                portfolioList.innerHTML = html || '<div class="loading"><p>لا توجد بيانات</p></div>';
-                updateAlertCount();
-
-            } catch (error) {
-                console.error('خطأ:', error);
-            }
-        }
-
-        // Fetch stock data from Alpha Vantage API
-        async function fetchStockData(symbol) {
-            try {
-                const response = await fetch(
-                    `${API_BASE}?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`
-                );
-                
-                const data = await response.json();
-
-                // Check for API errors
-                if (data.Note || data.Information) {
-                    console.log(`API Rate Limit for ${symbol}`);
-                    return { error: 'حد أقصى للطلبات - يرجى المحاولة لاحقاً' };
-                }
-
-                // Check if data exists
-                if (!data['Global Quote'] || !data['Global Quote']['05. price']) {
-                    console.log(`No data for ${symbol}`);
-                    return { error: 'لم يتم العثور على البيانات' };
-                }
-
-                const quote = data['Global Quote'];
-                const price = parseFloat(quote['05. price']);
-                
-                // Validate price
-                if (!price || price === 0) {
-                    return { error: 'سعر غير صحيح' };
-                }
-                
-                return {
-                    price: price,
-                    change: parseFloat(quote['10. change percent']) || 0,
-                    high: parseFloat(quote['03. high']) || price,
-                    low: parseFloat(quote['04. low']) || price,
-                    volume: parseInt(quote['06. volume']) || 0
-                };
-
-            } catch (error) {
-                console.error(`خطأ في جلب ${symbol}:`, error);
-                return { error: 'خطأ في الاتصال' };
-            }
-        }
-
-        // Alert functions
-        function openAlertModal(symbol) {
-            currentAlertSymbol = symbol;
-            document.getElementById('alert-stock-symbol').textContent = symbol;
-            const stock = STOCKS.find(s => s.symbol === symbol);
-            if (stock) {
-                const alert = alerts[symbol];
-                document.getElementById('alertPriceHigh').value = alert?.high || '';
-                document.getElementById('alertPriceLow').value = alert?.low || '';
-            }
-            document.getElementById('addAlertModal').classList.add('active');
-        }
-
-        function closeAlertModal() {
-            document.getElementById('addAlertModal').classList.remove('active');
-            currentAlertSymbol = '';
-        }
-
-        function saveAlert() {
-            const high = parseFloat(document.getElementById('alertPriceHigh').value);
-            const low = parseFloat(document.getElementById('alertPriceLow').value);
-
-            if (!high && !low) {
-                alert('يرجى إدخال سعر واحد على الأقل');
-                return;
-            }
-
-            if (high && low && high <= low) {
-                alert('السعر الأعلى يجب أن يكون أكبر من السعر الأقل');
-                return;
-            }
-
-            alerts[currentAlertSymbol] = {
-                high: high || null,
-                low: low || null
-            };
-
-            saveData();
-            closeAlertModal();
-            fetchAllStocks();
-        }
-
-        function triggerAlert(symbol, name, price, alert) {
-            const message = `السهم ${symbol} وصل إلى $${price.toFixed(2)}`;
-            showNotification(`تنبيه: ${name}`, message);
-            playAlertSound();
-        }
-
-        function showNotification(title, message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerHTML = `
-                <div class="notification-title">${title}</div>
-                <div class="notification-message">${message}</div>
-            `;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
-        }
-
-        function playAlertSound() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
-        }
-
-        function updateAlertCount() {
-            const count = Object.keys(alerts).length;
-            document.getElementById('alert-count').textContent = count;
-        }
-
-        function openAlertsModal() {
-            const alertsList = document.getElementById('alerts-list');
-            if (Object.keys(alerts).length === 0) {
-                alertsList.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">لا توجد تنبيهات نشطة</p>';
+                try { watchlist = JSON.parse(saved); } catch(e) { watchlist = [...INITIAL_STOCKS]; }
             } else {
-                alertsList.innerHTML = Object.entries(alerts).map(([symbol, alert]) => `
-                    <div class="alert-item">
-                        <div class="alert-item-info">
-                            <div class="alert-item-symbol">${symbol}</div>
-                            <div class="alert-item-details">
-                                ${alert.high ? `أعلى: $${alert.high.toFixed(2)}` : ''} 
-                                ${alert.low ? `أقل: $${alert.low.toFixed(2)}` : ''}
-                            </div>
+                watchlist = [...INITIAL_STOCKS];
+                saveWatchlist();
+            }
+
+            watchlist.forEach(sym => {
+                stockMarketData[sym] = {
+                    symbol: sym,
+                    price: null,
+                    time: null,
+                    updated: false,
+                    decision: 'WAIT',
+                    text: 'بانتظار تحديث موثق',
+                    cls: 'badge-wait'
+                };
+            });
+
+            restoreVerifiedQuoteSnapshot();
+            renderTable();
+            document.getElementById('portfolio-count').textContent = watchlist.length;
+            refreshVerifiedQuotes();
+            window.setInterval(refreshVerifiedQuotes, QUOTE_REFRESH_MS);
+        }
+
+        function saveWatchlist() {
+            localStorage.setItem('asiri_ws_portfolio_v27', JSON.stringify(watchlist));
+        }
+
+        function restoreVerifiedQuoteSnapshot() {
+            try {
+                const snapshot = JSON.parse(localStorage.getItem(QUOTE_SNAPSHOT_KEY) || 'null');
+                const storedAtMs = new Date(snapshot?.storedAt || 0).getTime();
+                if (!snapshot?.rows || !Number.isFinite(storedAtMs) || (Date.now() - storedAtMs) > QUOTE_SNAPSHOT_MAX_AGE_MS) return;
+                watchlist.forEach((symbol) => {
+                    const saved = snapshot.rows[symbol];
+                    if (!saved || !Number.isFinite(Number(saved.price))) return;
+                    stockMarketData[symbol] = {
+                        ...stockMarketData[symbol], ...saved, symbol,
+                        isFresh: false,
+                        updated: false,
+                        error: false,
+                        decision: 'WAIT',
+                        text: 'مراقبة • آخر قراءة موثقة',
+                        cls: 'badge-wait'
+                    };
+                });
+            } catch (_) { /* The live refresh remains the source of truth. */ }
+        }
+
+        function saveVerifiedQuoteSnapshot() {
+            const rows = {};
+            watchlist.forEach((symbol) => {
+                const item = stockMarketData[symbol];
+                if (item && Number.isFinite(Number(item.price))) rows[symbol] = {
+                    price: item.price,
+                    time: item.time || null,
+                    source: item.source || 'Asiri Market Engine'
+                };
+            });
+            try { localStorage.setItem(QUOTE_SNAPSHOT_KEY, JSON.stringify({ storedAt: new Date().toISOString(), rows })); } catch (_) {}
+        }
+
+        async function refreshVerifiedQuotes() {
+            if (quoteRefreshInFlight || !watchlist.length) return;
+            quoteRefreshInFlight = true;
+            document.getElementById('sync-status-text').textContent = 'جاري جلب أسعار موثقة…';
+            document.getElementById('ws-dot').style.background = 'var(--warning)';
+
+            try {
+                const symbols = [...new Set(watchlist.map(sym => String(sym).trim().toUpperCase()).filter(Boolean))];
+                const response = await fetch(`${VERIFIED_QUOTES_API}?stocks=${encodeURIComponent(symbols.join(','))}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`QUOTE_API_${response.status}`);
+                const payload = await response.json();
+                const rows = Array.isArray(payload.stocks) ? payload.stocks : [];
+                let verified = 0;
+
+                rows.forEach((row) => {
+                    if (row?.ok && Number.isFinite(Number(row.price))) {
+                        updateVerifiedStockPrice(row);
+                        verified += 1;
+                    }
+                });
+
+                saveVerifiedQuoteSnapshot();
+                renderTable();
+                const observedAt = new Date(payload.observedAt || Date.now()).toLocaleTimeString('ar-SA');
+                document.getElementById('sync-status-text').textContent = `أسعار موثقة ${verified}/${symbols.length} • آخر تحديث ${observedAt}`;
+                document.getElementById('ws-dot').style.background = verified ? 'var(--success)' : 'var(--warning)';
+            } catch (error) {
+                console.error('Verified quote refresh failed:', error);
+                watchlist.forEach((symbol) => {
+                    const item = stockMarketData[symbol] || (stockMarketData[symbol] = { symbol });
+                    if (!Number.isFinite(Number(item.price))) {
+                        item.text = 'تعذر التحديث الموثق';
+                        item.cls = 'badge-wait';
+                        item.error = true;
+                    }
+                });
+                renderTable();
+                document.getElementById('sync-status-text').textContent = 'تعذر تحديث الأسعار الموثقة — ستتم المحاولة تلقائياً';
+                document.getElementById('ws-dot').style.background = 'var(--danger)';
+            } finally {
+                quoteRefreshInFlight = false;
+            }
+        }
+
+        function updateVerifiedStockPrice(row) {
+            const sym = String(row.symbol || '').trim().toUpperCase();
+            // A response that began before a local deletion must never re-add the removed symbol.
+            if (!sym || !watchlist.includes(sym)) return;
+
+            const item = stockMarketData[sym] || (stockMarketData[sym] = { symbol: sym });
+            item.price = Number(row.price);
+            item.time = row.updatedAt || row.observedAt || new Date().toISOString();
+            item.source = row.source || 'Asiri Market Engine';
+            item.isFresh = row.isFresh === true;
+            item.updated = true;
+            item.error = false;
+            item.decision = 'WAIT';
+            item.text = item.isFresh ? 'مراقبة • بيانات موثقة' : 'مراقبة • آخر قراءة موثقة';
+            item.cls = 'badge-wait';
+        }
+
+        function renderTable() {
+            const wrapper = document.getElementById('stocks-list-wrapper');
+            const filtered = watchlist.filter(sym => {
+                if (currentFilter === 'ALL') return true;
+                return stockMarketData[sym] && stockMarketData[sym].decision === currentFilter;
+            });
+
+            if (filtered.length === 0) {
+                wrapper.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">لا توجد أصول مطابقة لهذا الفلتر أو بانتظار تدفق البث.</div>`;
+                return;
+            }
+
+            wrapper.innerHTML = filtered.map(sym => {
+                const item = stockMarketData[sym] || { symbol: sym, price: null };
+                const hasPrice = item.price !== null && !isNaN(item.price);
+                const priceStr = hasPrice ? `$${item.price.toFixed(2)}` : 'بانتظار تحديث موثق…';
+                const colorCls = hasPrice ? 'val-pos' : 'val-neutral';
+                const flashCls = item.updated ? 'tick-flash' : '';
+                const textStatus = hasPrice ? (item.isFresh ? 'موثق الآن' : 'آخر قراءة موثقة') : (item.error ? 'تعذر التحديث' : 'بانتظار تحديث موثق');
+
+                return `
+                    <div class="stock-row ${flashCls}" id="row-${sym}">
+                        <div class="stock-col-name">
+                            <div class="sym">${sym}</div>
+                            <div class="name">بيانات أسعار موثقة</div>
                         </div>
-                        <button class="alert-item-remove" onclick="removeAlert('${symbol}')">✕</button>
+                        <div class="stock-col-price ${colorCls}">${priceStr}</div>
+                        <div class="stock-col-change val-neutral">${textStatus}</div>
+                        <div class="stock-col-action">
+                            <span class="badge-decision ${item.cls || 'badge-wait'}">${item.text || 'انتظار'}</span>
+                            <button class="remove-symbol-btn" type="button" data-symbol="${sym}" onclick="removeStock(this.dataset.symbol)" aria-label="حذف ${sym} من قائمة المراقبة">حذف</button>
+                        </div>
                     </div>
-                `).join('');
-            }
-            document.getElementById('alertsListModal').classList.add('active');
+                `;
+            }).join('');
         }
 
-        function closeAlertsModal() {
-            document.getElementById('alertsListModal').classList.remove('active');
+        function removeStock(symbol) {
+            const sym = String(symbol || '').trim().toUpperCase();
+            if (!sym || !watchlist.includes(sym)) return;
+            const confirmed = window.confirm(`حذف ${sym} من قائمة المراقبة على هذا الجهاز؟ لن يؤثر ذلك على مصدر الأسعار أو أي قرار أو تنفيذ.`);
+            if (!confirmed) return;
+
+            watchlist = watchlist.filter((item) => item !== sym);
+            delete stockMarketData[sym];
+            saveWatchlist();
+            document.getElementById('portfolio-count').textContent = watchlist.length;
+            if (!watchlist.length) {
+                document.getElementById('sync-status-text').textContent = 'لا توجد رموز في قائمة المراقبة. أضف رمزاً يدوياً للمتابعة.';
+                document.getElementById('ws-dot').style.background = 'var(--text-muted)';
+            }
+            renderTable();
         }
 
-        function removeAlert(symbol) {
-            delete alerts[symbol];
-            saveData();
-            openAlertsModal();
-            fetchAllStocks();
+        function filterAction(type, btn) {
+            currentFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderTable();
         }
 
-        // Modal functions
-        function openAddModal() {
-            document.getElementById('addStockModal').classList.add('active');
+        function switchMainTab(tab, btn) {
+            document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+            if (tab === 'tools') document.getElementById('sec-tools').classList.add('active');
+            if (tab === 'command') document.getElementById('sec-command').classList.add('active');
+            if (tab === 'alerts') document.getElementById('sec-alerts').classList.add('active');
+            if (tab === 'portfolio') document.getElementById('sec-portfolio').classList.add('active');
         }
 
-        function closeAddModal() {
-            document.getElementById('addStockModal').classList.remove('active');
-            document.getElementById('newStockSymbol').value = '';
-            document.getElementById('newStockName').value = '';
+        function bottomNavClick(type, btn) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            if (type === 'tools') switchMainTab('tools', document.querySelector('.nav-pill'));
+            if (type === 'alerts') switchMainTab('alerts', document.querySelectorAll('.nav-pill')[2]);
+            if (type === 'opportunities') switchMainTab('command', document.querySelectorAll('.nav-pill')[1]);
+            if (type === 'portfolio') switchMainTab('portfolio', document.querySelectorAll('.nav-pill')[3]);
+            if (type === 'back') window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function addNewStock() {
-            const symbol = document.getElementById('newStockSymbol').value.toUpperCase().trim();
-            const name = document.getElementById('newStockName').value.trim();
+        function openAddStockModal() { document.getElementById('addStockModal').classList.add('active'); }
+        function closeAddStockModal() { document.getElementById('addStockModal').classList.remove('active'); document.getElementById('modalSymbolInput').value = ''; }
 
-            if (!symbol || !name) {
-                alert('يرجى ملء جميع الحقول');
-                return;
+        function confirmAddStock() {
+            const sym = document.getElementById('modalSymbolInput').value.toUpperCase().trim();
+            if (!sym) return;
+            if (!watchlist.includes(sym)) {
+                watchlist.push(sym);
+                saveWatchlist();
+                stockMarketData[sym] = { symbol: sym, price: null, decision: 'WAIT', text: 'بانتظار تحديث موثق', cls: 'badge-wait' };
+                document.getElementById('portfolio-count').textContent = watchlist.length;
             }
-
-            if (STOCKS.find(s => s.symbol === symbol)) {
-                alert('هذا السهم موجود بالفعل');
-                return;
-            }
-
-            STOCKS.push({ symbol, name });
-            saveData();
-            closeAddModal();
-            fetchAllStocks();
+            currentFilter = 'ALL';
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.filter-btn').classList.add('active');
+            renderTable();
+            closeAddStockModal();
         }
 
-        // Close modals on outside click
-        document.addEventListener('click', function(e) {
-            if (e.target.id === 'addStockModal') {
-                closeAddModal();
-            }
-            if (e.target.id === 'addAlertModal') {
-                closeAlertModal();
-            }
-            if (e.target.id === 'alertsListModal') {
-                closeAlertsModal();
-            }
-        });
-
-        // Start
         init();
     </script>
 </body>
