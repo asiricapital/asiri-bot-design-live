@@ -8,6 +8,7 @@
     <link href="./smart-decision-lens-static.css?v=5" rel="stylesheet">
     <link href="./opportunity-journey.css?v=1" rel="stylesheet">
     <link href="./x-sentiment.css?v=1" rel="stylesheet">
+    <link href="./decision-intelligence-panel.css?v=1" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -381,6 +382,14 @@
         </div>
 
         <div id="sec-command" class="app-section">
+            <section class="decision-intelligence-panel" aria-labelledby="decision-intelligence-title">
+                <div class="di-head"><div><div class="di-kicker">DATA QUALITY · DECISION MEMORY</div><h2 id="decision-intelligence-title">مركز جودة البيانات وسجل القرار</h2><p>قراءة شفافة للمصادر وتغيرات الفرصة على هذا الجهاز فقط. لا ينشئ هذا القسم توصية أو أمر تداول.</p></div><span class="di-readonly">قراءة فقط</span></div>
+                <div class="di-quality-grid"><div class="di-quality-item"><span>محرك السوق</span><strong id="quality-market-state">بانتظار القراءة</strong></div><div class="di-quality-item"><span>الأسعار</span><strong id="quality-price-state">بانتظار القراءة</strong></div><div class="di-quality-item"><span>المؤشرات الفنية</span><strong id="quality-technical-state">بانتظار القراءة</strong></div><div class="di-quality-item"><span>X</span><strong id="quality-x-state">بانتظار القراءة</strong></div></div>
+                <div class="di-decision-row"><div class="di-decision-card"><span>المرشح الحالي</span><strong id="decision-current-symbol">—</strong></div><div class="di-decision-card"><span>آخر قراءة قرار سياقي</span><strong id="decision-current-reading">بانتظار بطاقة الفرصة</strong></div></div>
+                <div class="di-decision-row"><div class="di-decision-card"><span>حالة المصدر الخلفي</span><strong id="decision-source-state">—</strong></div><div class="di-decision-card"><span>آخر تحديث للمركز</span><strong id="quality-last-update">—</strong></div></div>
+                <div id="decision-change-banner" class="di-banner" hidden>لا يوجد تغير مهم منذ آخر قراءة.</div>
+                <ul id="decision-journal-list" class="di-journal" aria-label="سجل تغيرات القرار"><li class="empty">لم تُسجل تغيرات بعد</li></ul>
+            </section>
             <!-- Opportunity Card of the Day -->
             <section id="opportunity-day-card" class="opportunity-card" aria-labelledby="opt-title">
                 <div class="opportunity-badge">فرصة اليوم المقترحة</div>
@@ -546,6 +555,7 @@
 
     <script src="./quote-data-health.js?v=1"></script>
     <script src="./opportunity-journey.js?v=1"></script>
+    <script src="./decision-intelligence-panel.js?v=1"></script>
     <script>
         const INITIAL_STOCKS = [
             'SNAP', 'MVIS', 'SG', 'RKLB', 'CHPT',
