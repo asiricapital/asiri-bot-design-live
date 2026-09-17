@@ -180,12 +180,13 @@ app.post('/api/x/disconnect', disconnectX);
 app.get('/health', (_req, res) => res.json({
   ok: true,
   service: 'asiri-deep-intelligence-os',
-  version: '5.2-x-intelligence-ai-connect-fix',
+  version: '5.3-live-intelligence-ui',
   pipeline: ['understand','search','read','claims','x-intelligence','gap-search','cross-check','synthesize','challenge'],
   xIntegration: true,
   xBackendReady: isXBackendReady(),
   serverLLMConfigured: Boolean(SERVER_LLM_BASE_URL && SERVER_LLM_MODEL),
   clientBYOPSupported: true,
+  uiEnhancements: ['live-bar','compact-hero','sticky-search','x-tabs','recent-investigations','trust-panel'],
   trading: false,
   time: new Date().toISOString(),
 }));
@@ -296,13 +297,21 @@ const AI_CONNECT_FIX = `<script>
 app.get(['/', '/deep', '/deep-intelligence.html'], async (_req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
-    const html = await fs.readFile(path.join(root, 'deep-intelligence-x.html'), 'utf8');
-    res.type('html').send(html.replace('</body>', `${AI_CONNECT_FIX}</body>`));
-  } catch {
+    const [html, css, js] = await Promise.all([
+      fs.readFile(path.join(root, 'deep-intelligence-x.html'), 'utf8'),
+      fs.readFile(path.join(root, 'ui-v53.css'), 'utf8'),
+      fs.readFile(path.join(root, 'ui-v53.js'), 'utf8'),
+    ]);
+    const enhanced = html
+      .replace('</head>', `<style id="asiri-v53-css">${css}</style></head>`)
+      .replace('</body>', `${AI_CONNECT_FIX}<script id="asiri-v53-js">${js}</script></body>`);
+    res.type('html').send(enhanced);
+  } catch (error) {
+    console.error('ASIRI UI load error:', error?.message || error);
     res.status(500).send('ASIRI UI unavailable');
   }
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`ASIRI Deep Intelligence OS v5.2 + X Intelligence listening on ${port}`);
+  console.log(`ASIRI Deep Intelligence OS v5.3 + Live Intelligence UI listening on ${port}`);
 });
