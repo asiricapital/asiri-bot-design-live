@@ -14,7 +14,8 @@
     "check:batch5": "node check-research-center.mjs",
     "check:research": "node check-research-center.mjs",
     "check:technicals": "node check-technicals.mjs",
-    "check:journey": "node check-opportunity-journey-v1.mjs"
+    "check:journey": "node check-opportunity-journey-v1.mjs",
+    "check:x-sentiment": "node check-x-sentiment.mjs"
   },
   "engines": {
     "node": "22.x"

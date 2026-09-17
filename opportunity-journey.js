@@ -4,6 +4,7 @@
 
     // Internal cache for technical snapshots to avoid redundant calculations
     const technicalsCache = new Map();
+    const xSentimentCache = new Map();
 
     async function getTechnicals(symbol) {
         if (technicalsCache.has(symbol)) return technicalsCache.get(symbol);
@@ -22,6 +23,32 @@
             console.warn(`Could not fetch real technicals for ${symbol}`, e);
         }
         return null;
+    }
+
+    async function getXSentiment(symbol) {
+        if (xSentimentCache.has(symbol)) return xSentimentCache.get(symbol);
+        try {
+            const response = await fetch(`/api/x-sentiment/${encodeURIComponent(symbol)}`, { cache: 'no-store' });
+            const data = await response.json();
+            xSentimentCache.set(symbol, data);
+            return data;
+        } catch {
+            return { symbol, status: 'unavailable', label: 'غير متاح', posts: 0, score: null, source: 'X public posts' };
+        }
+    }
+
+    function renderXSentiment(data) {
+        const status = document.getElementById('opt-x-status');
+        const label = document.getElementById('opt-x-label');
+        const score = document.getElementById('opt-x-score');
+        const posts = document.getElementById('opt-x-posts');
+        const asof = document.getElementById('opt-x-asof');
+        if (!data) return;
+        if (status) { status.textContent = data.status === 'live' ? 'موثق الآن' : data.status === 'stale' ? 'قديم' : 'غير متاح'; status.className = `x-status ${data.status || 'unavailable'}`; }
+        if (label) label.textContent = data.label || 'غير متاح';
+        if (score) score.textContent = Number.isFinite(Number(data.score)) ? `${data.score}/100` : '—';
+        if (posts) posts.textContent = Number.isFinite(Number(data.posts)) ? data.posts : '—';
+        if (asof) asof.textContent = data.asOf ? `آخر قراءة: ${new Date(data.asOf).toLocaleString('ar-SA')} · المصدر: X public posts` : 'لم يتم توثيق قراءة من X بعد.';
     }
 
     async function updateOpportunityCard() {
@@ -65,6 +92,7 @@
 
         if (symbolEl) symbolEl.textContent = bestSymbol;
         if (priceEl) priceEl.textContent = bestItem.price ? `$${Number(bestItem.price).toFixed(2)}` : 'غير متاح';
+        renderXSentiment(await getXSentiment(bestSymbol));
         
         // Use real technicals if available, fallback to quote volumeRatio or simulation
         const rsi = bestTechnicals?.rsi14 ? Math.round(bestTechnicals.rsi14) : '—';
