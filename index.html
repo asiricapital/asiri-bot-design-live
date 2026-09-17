@@ -883,7 +883,7 @@
         }
 
         function renderDataReadinessSummary() {
-            if (window.asiriOpportunity) window.asiriOpportunity.refresh();
+            if (typeof window !== 'undefined' && window.asiriOpportunity) window.asiriOpportunity.refresh();
             const total = document.getElementById('readiness-total');
             if (!total) return;
             const rows = watchlist.map((symbol) => stockMarketData[symbol] || { symbol });
