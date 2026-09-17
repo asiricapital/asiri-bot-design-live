@@ -10,7 +10,15 @@ const wss = new WebSocketServer({ server });
 app.use(express.static(path.join(__dirname)));
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', time: new Date().toISOString() });
+    res.json({ status: 'ok', time: new Date().toISOString(), executionAllowed: false, automaticTrading: false, xSentiment: Boolean(process.env.X_API_BEARER_TOKEN) });
+});
+
+const xSentimentService = import('./x-sentiment.js').then(({ createXSentimentService }) => createXSentimentService());
+app.get('/api/x-sentiment/:symbol', async (req, res) => {
+    const symbol = String(req.params.symbol || '').trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, '').slice(0, 12);
+    if (!symbol) return res.status(400).json({ symbol, status: 'unavailable', label: 'غير متاح', reason: 'INVALID_SYMBOL', source: 'X public posts' });
+    res.set('Cache-Control', 'no-store');
+    res.json(await (await xSentimentService).getSnapshot(symbol));
 });
 
 // استخدام نقطة نهاية REST موثوقة وجلب دوري آمن للأسعار لتجنب قيود WebSocket المجانية

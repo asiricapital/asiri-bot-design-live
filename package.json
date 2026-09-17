@@ -15,20 +15,15 @@
     "check:research": "node check-research-center.mjs",
     "check:technicals": "node check-technicals.mjs",
     "check:journey": "node check-opportunity-journey-v1.mjs",
-    "check:plan-risk": "node check-plan-risk.mjs",
-    "check:watchlist": "node check-watchlist-evidence.mjs && node check-watchlist-view.mjs"
+    "check:x-sentiment": "node check-x-sentiment.mjs",
+    "check:lens": "node --check live-server.js && node --check smart-decision-lens.js && node check-smart-decision-lens.mjs"
   },
-  "engines": {
-    "node": "22.x"
-  },
+  "engines": { "node": "22.x" },
   "dependencies": {
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "node-fetch": "^2.7.0",
     "ws": "^8.21.3",
     "yahoo-finance2": "^3.15.4"
-  },
-  "devDependencies": {
-    "jsdom": "26.1.0"
   }
 }
