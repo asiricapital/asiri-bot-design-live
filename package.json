@@ -15,11 +15,10 @@
     "check:research": "node check-research-center.mjs",
     "check:technicals": "node check-technicals.mjs",
     "check:journey": "node check-opportunity-journey-v1.mjs",
-    "check:x-sentiment": "node check-x-sentiment.mjs"
+    "check:x-sentiment": "node check-x-sentiment.mjs",
+    "check:lens": "node --check live-server.js && node --check smart-decision-lens.js && node check-smart-decision-lens.mjs"
   },
-  "engines": {
-    "node": "22.x"
-  },
+  "engines": { "node": "22.x" },
   "dependencies": {
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
