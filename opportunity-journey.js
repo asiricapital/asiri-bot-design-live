@@ -28,7 +28,7 @@
     async function getXSentiment(symbol) {
         if (xSentimentCache.has(symbol)) return xSentimentCache.get(symbol);
         try {
-            const response = await fetch(`/api/x-sentiment/${encodeURIComponent(symbol)}`, { cache: 'no-store' });
+            const response = await fetch(`https://asiri-bot.onrender.com/api/x-sentiment/${encodeURIComponent(symbol)}`, { cache: 'no-store' });
             const data = await response.json();
             xSentimentCache.set(symbol, data);
             return data;
