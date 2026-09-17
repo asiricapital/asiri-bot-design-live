@@ -1,1 +1,1 @@
-import './deep-intelligence-x-server.js';
+import './deep-intelligence-v54-server.js';
