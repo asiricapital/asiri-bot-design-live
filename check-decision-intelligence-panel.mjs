@@ -10,6 +10,9 @@ assert.match(html, /quality-completeness-score/);
 assert.match(html, /quality-freshness-state/);
 assert.match(html, /quality-agreement-state/);
 assert.match(html, /quality-readiness-state/);
+assert.match(html, /quality-alert-state/);
+assert.match(html, /quality-notification-permission/);
+assert.match(html, /quality-alert-history/);
 assert.match(html, /decision-intelligence-panel\.js/);
 assert.match(js, /executionAllowed|automaticTrading/); // safety wording must remain visible in the module contract
 assert.match(js, /localStorage/);
@@ -17,4 +20,7 @@ assert.match(js, /setInterval\(refresh, 15000\)/);
 assert.match(js, /X_HTTP_402/);
 assert.match(js, /غير صالح لاتخاذ القرار/);
 assert.match(js, /delta > 0\.01/);
+assert.match(js, /RELIABILITY_ALERT_THRESHOLD = 60/);
+assert.match(js, /Notification\.requestPermission/);
+assert.match(js, /state\.active\[key\]/);
 console.log('Decision intelligence panel contract passed');

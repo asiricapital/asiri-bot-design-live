@@ -3,6 +3,8 @@
   const API = 'https://asiri-bot.onrender.com';
   const SAFETY = Object.freeze({ executionAllowed: false, automaticTrading: false });
   const JOURNAL_KEY = 'asiri_decision_journal_v1';
+  const ALERT_KEY = 'asiri_quality_alerts_v1';
+  const RELIABILITY_ALERT_THRESHOLD = 60;
   const $ = (id) => document.getElementById(id);
   const text = (id, value) => { const node = $(id); if (node) node.textContent = value; };
   const tone = (id, state) => { const node = $(id); if (node) node.dataset.state = state; };
@@ -11,6 +13,8 @@
   const formatTime = (value) => value ? new Date(value).toLocaleString('ar-SA') : '—';
   const finite = (value) => Number.isFinite(Number(value));
   const scoreLabel = (score) => score >= 80 ? 'موثوق نسبيًا' : score >= 60 ? 'يحتاج مراجعة' : 'غير صالح';
+  const readAlerts = () => { try { const value = JSON.parse(localStorage.getItem(ALERT_KEY) || '{}'); return { active: value.active || {}, history: Array.isArray(value.history) ? value.history : [] }; } catch { return { active: {}, history: [] }; } };
+  const saveAlerts = (value) => { try { localStorage.setItem(ALERT_KEY, JSON.stringify(value)); } catch {} };
 
   function renderJournal(rows) {
     const box = $('decision-journal-list');
@@ -21,6 +25,45 @@
   function renderReasons(reasons) {
     const box = $('quality-reasons');
     if (box) box.innerHTML = reasons.map((reason) => `<li>${reason}</li>`).join('');
+  }
+
+  function renderAlertHistory(history) {
+    const box = $('quality-alert-history');
+    if (!box) return;
+    box.innerHTML = history.length ? history.slice().reverse().map((item) => `<li>${item.message}<small>${formatTime(item.at)}</small></li>`).join('') : '<li class="empty">لم تظهر تنبيهات بعد</li>';
+  }
+
+  function notifyQuality({ symbol, quality }) {
+    const low = quality.reliability < RELIABILITY_ALERT_THRESHOLD;
+    const conflict = quality.conflict;
+    const key = `${symbol}|${low ? 'low' : 'ok'}|${conflict ? 'conflict' : 'ok'}`;
+    const state = readAlerts();
+    const active = low || conflict;
+    const message = conflict ? `تعارض سعري في ${symbol}: ${quality.agreementDetail}` : `انخفاض موثوقية ${symbol} إلى ${quality.reliability}/100`;
+    if (active && !state.active[key]) {
+      const item = { key, symbol, message, at: new Date().toISOString() };
+      state.active[key] = item;
+      state.history = [...state.history, item].slice(-8);
+      saveAlerts(state);
+      text('quality-alert-state', `تنبيه: ${message}`); tone('quality-alert-state', 'bad');
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') new Notification('ASIRI · تنبيه جودة البيانات', { body: message, tag: key });
+    } else if (!active) {
+      state.active = {};
+      saveAlerts(state);
+      text('quality-alert-state', 'لا توجد تنبيهات نشطة.'); tone('quality-alert-state', 'good');
+    } else {
+      text('quality-alert-state', `تنبيه نشط: ${message}`); tone('quality-alert-state', 'bad');
+    }
+    renderAlertHistory(state.history);
+  }
+
+  async function enableDeviceNotifications() {
+    if (typeof Notification === 'undefined') { text('quality-alert-state', 'المتصفح لا يدعم تنبيهات الجهاز.'); tone('quality-alert-state', 'warn'); return; }
+    const permission = await Notification.requestPermission();
+    const button = $('quality-notification-permission');
+    if (button) button.textContent = permission === 'granted' ? 'تنبيه الجهاز مفعّل' : 'لم تُمنح الصلاحية';
+    text('quality-alert-state', permission === 'granted' ? 'تنبيه الجهاز مفعّل؛ ستظهر إشعارات عند تغير الحالة.' : 'التنبيه داخل المنصة فعال، لكن لم تُمنح صلاحية الجهاز.');
+    tone('quality-alert-state', permission === 'granted' ? 'good' : 'warn');
   }
 
   function recordChange(snapshot) {
@@ -100,10 +143,11 @@
     text('quality-freshness-state', quality.fresh ? 'حديثة' : 'قديمة/غير مؤكدة'); text('quality-freshness-age', quality.ageLabel); tone('quality-freshness-state', quality.fresh ? 'good' : 'warn');
     text('quality-agreement-state', quality.agreement); text('quality-agreement-detail', quality.agreementDetail); tone('quality-agreement-state', quality.agreement === 'متوافق' ? 'good' : quality.agreement === 'تعارض' ? 'bad' : 'warn');
     text('quality-readiness-state', quality.readiness); tone('quality-readiness-state', quality.readiness === 'جاهز للعرض' ? 'good' : quality.readiness === 'غير صالح لاتخاذ القرار' ? 'bad' : 'warn'); renderReasons(quality.reasons);
+    notifyQuality({ symbol, quality });
     text('quality-last-update', formatTime(now)); text('decision-current-symbol', symbol); text('decision-current-reading', `${price} · RSI ${technical} · ${liquidity}`); text('decision-source-state', health ? 'متصل' : 'غير متاح');
     const reason = quality.readiness === 'غير صالح لاتخاذ القرار' ? quality.reasons[0] : quality.xReady ? `تغيرت قراءة X إلى ${label}` : `تحديث جودة: ${quality.readiness}`;
     recordChange({ symbol, label: quality.readiness, reason, at: now, signature: `${symbol}|${price}|${technical}|${liquidity}|${label}|${quality.readiness}` });
   }
-  window.asiriDecisionIntelligence = { refresh, analyzeQuality };
-  window.addEventListener('load', () => { renderJournal(readJournal()); setTimeout(refresh, 1800); setInterval(refresh, 15000); });
+  window.asiriDecisionIntelligence = { refresh, analyzeQuality, enableDeviceNotifications };
+  window.addEventListener('load', () => { renderJournal(readJournal()); renderAlertHistory(readAlerts().history); $('quality-notification-permission')?.addEventListener('click', enableDeviceNotifications); setTimeout(refresh, 1800); setInterval(refresh, 15000); });
 })();
