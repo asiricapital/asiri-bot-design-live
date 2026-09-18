@@ -320,13 +320,31 @@ function sourceIndependence(results) {
 function buildGapQueries(intent, clusters, independence) {
   const qs = [];
   const strong = clusters.filter((x) => x.independentSources >= 2 && x.confidence >= 70);
-  if (intent.domain === 'politics' && intent.urgency === 'live') qs.push(`${intent.query} Reuters AP official statement`);
-  if (intent.domain === 'government') qs.push(`${intent.query} site:gov.sa OR site:etimad.sa`);
-  if (intent.domain === 'markets') qs.push(`${intent.query} SEC filing company investor relations`);
-  if (intent.domain === 'technology') qs.push(`${intent.query} documentation release security issue`);
-  if (intent.domain === 'science') qs.push(`${intent.query} systematic review guideline`);
-  if (independence.length < 3) qs.push(`${intent.query} official primary source`);
-  if (!strong.length) qs.push(`${intent.query} evidence source confirmation`);
+  const arabic = intent.language === 'ar';
+  const meaningful = tokens(intent.query).length;
+  /* الأسئلة القصيرة/العامة لا نوسّعها بعبارات هجينة حتى لا تنحرف دلاليًا. */
+  if (meaningful < 3) return qs;
+  if (intent.domain === 'politics' && intent.urgency === 'live') qs.push(arabic
+    ? `${intent.query} بيان رسمي وكالة أنباء تأكيد مستقل`
+    : `${intent.query} Reuters AP official statement`);
+  if (intent.domain === 'government') qs.push(arabic
+    ? `${intent.query} الموقع الرسمي الجهة الحكومية اعتماد`
+    : `${intent.query} site:gov.sa OR site:etimad.sa`);
+  if (intent.domain === 'markets') qs.push(arabic
+    ? `${intent.query} إفصاح الشركة ملف رسمي نتائج مالية`
+    : `${intent.query} SEC filing company investor relations`);
+  if (intent.domain === 'technology') qs.push(arabic
+    ? `${intent.query} التوثيق الرسمي إصدار ثغرة أمنية مستودع`
+    : `${intent.query} documentation release security issue`);
+  if (intent.domain === 'science') qs.push(arabic
+    ? `${intent.query} مراجعة منهجية دراسة أصلية إرشادات`
+    : `${intent.query} systematic review guideline`);
+  if (independence.length < 3) qs.push(arabic
+    ? `${intent.query} مصدر أولي رسمي مستقل`
+    : `${intent.query} official primary source`);
+  if (!strong.length) qs.push(arabic
+    ? `${intent.query} دليل مستقل تأكيد المصدر`
+    : `${intent.query} evidence source confirmation`);
   return [...new Set(qs)].slice(0, 2);
 }
 
