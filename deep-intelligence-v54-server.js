@@ -23,6 +23,11 @@ const SERVER_LLM_MODEL = String(process.env.ASIRI_LLM_MODEL || '');
 const POLLINATIONS_BASE_URL = 'https://gen.pollinations.ai/v1';
 const ALLOWED_MODELS = new Set(['openai','openai-fast','gpt-5.6-sol','gpt-5.6-terra','gpt-5.6-luna','claude-fast','claude-sonnet-5','gemini-fast','gemini-search','deepseek','kimi','glm','qwen-large','perplexity-fast']);
 const rateBuckets = new Map();
+const recoveryCache = new Map();
+const RECOVERY_TTL_MS = 10 * 60_000;
+function recoveryKey(question, mode, model=''){ return `${String(question||'').trim().toLowerCase()}|${mode}|${model||''}`; }
+function getRecovered(key){ const row=recoveryCache.get(key); if(!row) return null; if(Date.now()-row.savedAt>RECOVERY_TTL_MS){ recoveryCache.delete(key); return null; } return row.payload; }
+function saveRecovered(key,payload){ recoveryCache.set(key,{savedAt:Date.now(),payload}); if(recoveryCache.size>24){ const oldest=[...recoveryCache.entries()].sort((a,b)=>a[1].savedAt-b[1].savedAt)[0]?.[0]; if(oldest) recoveryCache.delete(oldest); } }
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '768kb' }));
@@ -123,6 +128,8 @@ app.post('/api/deep-research',rateLimit,async(req,res)=>{
   const question=clean(req.body?.question||req.body?.message,3000); if(question.length<2)return res.status(400).json({error:'اكتب ما تريد معرفته.'});
   const mode=normalizeMode(req.body?.researchMode);
   const provider=resolveProvider(req.body); const started=Date.now();
+  const cacheKey=recoveryKey(question,mode,provider?.model||req.body?.providerModel||'');
+  if(req.body?.recover===true){ const cached=getRecovered(cacheKey); if(cached){ res.set('Cache-Control','no-store'); return res.json({...cached,recovered:true,recoveryAgeMs:Date.now()-Number(cached._savedAt||Date.now())}); } }
   const xLimit=mode==='quick'?60:mode==='max'?240:mode==='live'?160:140;
   try{
     const xFeed=await getXFeed(req,res,{query:question,limit:xLimit});
@@ -140,8 +147,10 @@ app.post('/api/deep-research',rateLimit,async(req,res)=>{
     }
     const independentStrong=(inv.claims||[]).filter(c=>Number(c.independentSources||0)>=2&&Number(c.confidence||0)>=70).length;
     const finalConfidence=Math.min(99,Math.round(Number(inv.confidence||0)*0.68+Math.min(8,independentStrong)*2.8+(challenge.passed?8:0)));
+    const payload={id:`asiri-v60-${Date.now().toString(36)}`,question,researchMode:mode,durationMs:Date.now()-started,engine,model,answer,confidence:finalConfidence,challenge,modelError,intent:inv.intent,plan:inv.plan,coverage:inv.coverage,stages:inv.stages,results:refs,sourcesRead:inv.sourcesRead,claims:inv.claims,contradictions:inv.contradictions,gaps:inv.gaps,gapQueries:inv.gapQueries,timeline:inv.timeline,independence:inv.independence,marketContext:inv.marketContext||[],x:{...inv.x,connected:xFeed.connected,user:xFeed.user,totalFetched:xFeed.totalFetched,error:xFeed.error,state:xState.state,stateLabel:xState.label,signals:inv.xSignals||[]},researchPlan:inv.researchPlan||[],followUps:['اعرض أقوى الأدلة المستقلة فقط.','ما الذي أضافته مسارات البحث؟','اعرض إشارات X التي تم تأكيدها خارج X فقط.','ما المعلومات التي لم نجد لها تأكيدًا مستقلًا؟','ما الجديد منذ هذا التحقيق؟'],guardrails:['research-only','planner-executor','query-expansion','full-source-reading','x-discovery-not-single-truth','independence-aware','citations-required','challenge-review'],_savedAt:Date.now()};
+    saveRecovered(cacheKey,payload);
     res.set('Cache-Control','no-store');
-    res.json({id:`asiri-v54-${Date.now().toString(36)}`,question,researchMode:mode,durationMs:Date.now()-started,engine,model,answer,confidence:finalConfidence,challenge,modelError,intent:inv.intent,plan:inv.plan,coverage:inv.coverage,stages:inv.stages,results:refs,sourcesRead:inv.sourcesRead,claims:inv.claims,contradictions:inv.contradictions,gaps:inv.gaps,gapQueries:inv.gapQueries,timeline:inv.timeline,independence:inv.independence,marketContext:inv.marketContext||[],x:{...inv.x,connected:xFeed.connected,user:xFeed.user,totalFetched:xFeed.totalFetched,error:xFeed.error,state:xState.state,stateLabel:xState.label,signals:inv.xSignals||[]},researchPlan:inv.researchPlan||[],followUps:['اعرض أقوى الأدلة المستقلة فقط.','ما الذي أضافته الجولة الثانية والثالثة من البحث؟','اعرض إشارات X التي تم تأكيدها خارج X فقط.','ما المعلومات التي لم نجد لها تأكيدًا مستقلًا؟','ما الجديد منذ هذا التحقيق؟'],guardrails:['research-only','multi-pass','query-expansion','full-source-reading','x-discovery-not-single-truth','independence-aware','citations-required','challenge-review']});
+    res.json(payload);
   }catch(error){res.status(500).json({error:'تعذر إكمال البحث العميق.',detail:clean(error?.message||error,500)});}
 });
 
