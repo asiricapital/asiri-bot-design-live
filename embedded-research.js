@@ -15,12 +15,12 @@ const providerWeights = {
 };
 
 const domainSources = {
-  general: ['web', 'news', 'papers', 'discussions'],
+  general: ['news', 'web', 'papers', 'discussions'],
   markets: ['news', 'web', 'discussions', 'github'],
   government: ['web', 'news'],
   companies: ['web', 'news', 'github', 'discussions'],
   technology: ['github', 'news', 'web', 'papers', 'discussions'],
-  politics: ['news', 'web', 'papers'],
+  politics: ['news', 'web'],
   science: ['papers', 'web', 'news'],
   cyber: ['web', 'news', 'github', 'papers'],
   media: ['news', 'web', 'discussions'],
@@ -311,8 +311,12 @@ function normalizeSources(domainId, requested, query) {
   const allowed = Object.keys(adapters);
   const fromUser = Array.isArray(requested) ? requested.filter((s) => allowed.includes(s)) : [];
   let selected = [...new Set(fromUser.length ? fromUser : (domainSources[domainId] || domainSources.general))];
-  if (domainId === 'politics' && isFreshQuery(query)) selected = selected.filter((s) => s !== 'papers' && s !== 'discussions');
-  return selected;
+  if ((domainId === 'politics' || domainId === 'general') && isFreshQuery(query)) {
+    selected = selected.filter((s) => s !== 'papers' && s !== 'discussions');
+    selected = ['news', ...selected.filter((s) => s !== 'news')];
+  }
+  if (domainId === 'politics') selected = selected.filter((s) => s !== 'papers' && s !== 'discussions');
+  return [...new Set(selected)];
 }
 
 export async function runEmbeddedResearch({ query, domainId = 'general', modeId = 'deep', sources = [] }) {
