@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { runCoverageInvestigation } from './coverage-v54.js';
+import { runResearchOrchestratorV60 } from './research-orchestrator-v60.js';
 import { getQuotes } from './market.js';
 import {
   startXOAuth,
@@ -68,13 +68,15 @@ function numberedEvidence(inv,mode){
 function evidencePack(inv,refs){
   const sources=refs.map(r=>`[${r.id}] ${r.title}\nالمصدر: ${r.source} / ${r.provider}\nالتاريخ: ${r.publishedAt||'غير متاح'}\nEvidence: ${r.evidenceScore??'n/a'}\nقراءة: ${r.readStatus}\n${r.excerpt}\n${r.url}`).join('\n\n');
   const claims=(inv.claims||[]).slice(0,20).map(c=>`C${c.id}: ${c.claim}\nمستقل=${c.independentSources}; ثقة=${c.confidence}/100; تعارض=${c.possibleConflict?'نعم':'لا'}`).join('\n\n');
-  const coverage=inv.coverage?`الوضع=${inv.coverage.mode}; مسارات=${inv.coverage.passes}; أدلة=${inv.coverage.totalEvidence}; مصادر مستقلة=${inv.coverage.independentSources}; مصادر مقروءة=${inv.coverage.sourcesRead}`:'لا توجد بيانات تغطية.';
+  const coverage=inv.coverage?`الوضع=${inv.coverage.mode}; Planner=${inv.coverage.planner||'ASIRI'}; فروع=${inv.coverage.branches||inv.coverage.passes||1}; أدلة=${inv.coverage.totalEvidence}; مصادر مستقلة=${inv.coverage.independentSources}; مصادر مقروءة=${inv.coverage.sourcesRead}; أولية/رسمية=${inv.coverage.primarySources||0}; أخبار قوية=${inv.coverage.trustedNews||0}`:'لا توجد بيانات تغطية.';
+  const plan=(inv.researchPlan||[]).map((t,i)=>`P${i+1}: ${t.label} | ${t.query}`).join('\n')||'- لا توجد خطة.';
+  const xSignals=(inv.xSignals||[]).slice(0,10).map((x,i)=>`X${i+1}: ${x.title||x.snippet||''}\n${x.url||''}`).join('\n\n')||'- لا توجد إشارة X مرتبطة أو لم تتوفر الحصة.';
   const gaps=(inv.gaps||[]).map(x=>`- ${x}`).join('\n')||'- لا توجد فجوة مسجلة.';
-  return `تغطية البحث:\n${coverage}\n\nالمصادر المرقمة:\n${sources}\n\nالادعاءات:\n${claims}\n\nفجوات الدليل:\n${gaps}`;
+  return `خطة البحث:\n${plan}\n\nتغطية البحث:\n${coverage}\n\nالمصادر الأساسية المرقمة (خارج X):\n${sources}\n\nالادعاءات:\n${claims}\n\nفجوات الدليل:\n${gaps}\n\nإشارات X المساعدة فقط (لا ترفع الثقة الأساسية):\n${xSignals}`;
 }
 
 function authorSystem(inv){
-  return `أنت ASIRI Deep Intelligence Analyst. اكتب بالعربية الواضحة والمباشرة. المجال: ${inv.intent?.domainLabel||'بحث عام'}.\nقواعد إلزامية:\n1) استخدم فقط الأدلة المقدمة وضع [n] بجوار كل ادعاء جوهري.\n2) ادمج المصادر ولا تسرد روابط بلا تفسير.\n3) افصل المؤكد عن المرجح وعن غير المؤكد.\n4) لا تعتبر X مصدرًا مستقلًا كافيًا بدون تأكيد خارجي.\n5) إذا تعطلت X أو نفدت حصتها، قل إن X لم يدخل هذا التحقيق ولا تخفض قيمة بقية المصادر.\n6) لا تخترع حقيقة أو رقمًا أو مصدرًا.\n7) عند السياسة اعرض الوقائع والروايات المنسوبة ومواطن الخلاف بشكل محايد، بلا تأييد أو ترتيب سياسي أو توقع انتخابي.\n8) لا تصدر أمر تداول أو إجراء تنفيذي.\n9) اجعل الخلاصة مركزة ثم اعرض التفاصيل المهمة.\nالعناوين: ## الخلاصة الآن ## ما تأكد من مصادر مستقلة ## إشارات X ذات الصلة ## ما يزال غير مؤكد أو مختلفًا عليه ## لماذا هذا مهم؟ ## ما الذي يجب مراقبته ## جودة التغطية.`;
+  return `أنت ASIRI Deep Intelligence Analyst. اكتب بالعربية الواضحة والمباشرة. المجال: ${inv.intent?.domainLabel||'بحث عام'}.\nقواعد إلزامية:\n1) استخدم فقط الأدلة المقدمة وضع [n] بجوار كل ادعاء جوهري.\n2) ادمج المصادر ولا تسرد روابط بلا تفسير.\n3) افصل المؤكد عن المرجح وعن غير المؤكد.\n4) X طبقة اكتشاف مساعدة فقط: لا تستخدم منشور X كدليل مستقل، ولا تجعله أساس الخلاصة، ولا ترفعه فوق مصدر رسمي/أولي أو صحافة مستقلة.\n5) إذا تعطلت X أو نفدت حصتها، قل إن X لم يدخل هذا التحقيق ولا تخفض قيمة بقية المصادر.\n6) لا تخترع حقيقة أو رقمًا أو مصدرًا.\n7) عند السياسة اعرض الوقائع والروايات المنسوبة ومواطن الخلاف بشكل محايد، بلا تأييد أو ترتيب سياسي أو توقع انتخابي.\n8) لا تصدر أمر تداول أو إجراء تنفيذي.\n9) اجعل الخلاصة مركزة ثم اعرض التفاصيل المهمة.\nالعناوين: ## الخلاصة الآن ## ما تأكد من المصادر الأساسية ## ما وجدناه من المصادر الرسمية والأولية ## ما تقوله المصادر المستقلة ## إشارات X المساعدة (إن وجدت) ## ما يزال غير مؤكد أو مختلفًا عليه ## لماذا هذا مهم؟ ## ما الذي يجب مراقبته ## جودة التغطية.`;
 }
 
 async function callModelOnce(provider,messages,temp=0.1,modelOverride=null){
@@ -115,7 +117,7 @@ app.get('/api/x/status',xStatus);
 app.get('/api/x/feed',rateLimit,xFeedEndpoint);
 app.post('/api/x/disconnect',disconnectX);
 
-app.get('/health',(_req,res)=>res.json({ok:true,service:'asiri-deep-intelligence-os',version:'5.4-max-coverage',researchModes:['quick','deep','max','live'],pipeline:['understand','query-expand','multi-pass-search','read','claims','x-intelligence','gap-search','cross-check','synthesize','challenge'],xIntegration:true,xBackendReady:isXBackendReady(),serverLLMConfigured:Boolean(SERVER_LLM_BASE_URL&&SERVER_LLM_MODEL),clientBYOPSupported:true,trading:false,time:new Date().toISOString()}));
+app.get('/health',(_req,res)=>res.json({ok:true,service:'asiri-deep-intelligence-os',version:'6.0-research-orchestrator',researchModes:['quick','deep','max','live'],pipeline:['understand','plan','parallel-executors','primary-source-search','independent-verification','read','rerank','claims','gap-search','cross-check','x-signals','synthesize','challenge','publish'],xIntegration:true,xBackendReady:isXBackendReady(),serverLLMConfigured:Boolean(SERVER_LLM_BASE_URL&&SERVER_LLM_MODEL),clientBYOPSupported:true,trading:false,time:new Date().toISOString()}));
 
 app.post('/api/deep-research',rateLimit,async(req,res)=>{
   const question=clean(req.body?.question||req.body?.message,3000); if(question.length<2)return res.status(400).json({error:'اكتب ما تريد معرفته.'});
@@ -125,7 +127,7 @@ app.post('/api/deep-research',rateLimit,async(req,res)=>{
   try{
     const xFeed=await getXFeed(req,res,{query:question,limit:xLimit});
     const xState=classifyXError(xFeed.error);
-    let inv=await runCoverageInvestigation(question,{mode,xResults:xFeed.results,xConnected:xFeed.connected,xError:xFeed.error});
+    let inv=await runResearchOrchestratorV60(question,{mode,xResults:xFeed.results,xConnected:xFeed.connected,xError:xFeed.error});
     inv=await addMarketContext(inv,question);
     const refs=numberedEvidence(inv,mode);
     let answer=inv.answer,engine='deterministic-max-coverage',model=null,challenge={used:false,passed:null,error:null},modelError=null;
@@ -139,7 +141,7 @@ app.post('/api/deep-research',rateLimit,async(req,res)=>{
     const independentStrong=(inv.claims||[]).filter(c=>Number(c.independentSources||0)>=2&&Number(c.confidence||0)>=70).length;
     const finalConfidence=Math.min(99,Math.round(Number(inv.confidence||0)*0.68+Math.min(8,independentStrong)*2.8+(challenge.passed?8:0)));
     res.set('Cache-Control','no-store');
-    res.json({id:`asiri-v54-${Date.now().toString(36)}`,question,researchMode:mode,durationMs:Date.now()-started,engine,model,answer,confidence:finalConfidence,challenge,modelError,intent:inv.intent,plan:inv.plan,coverage:inv.coverage,stages:inv.stages,results:refs,sourcesRead:inv.sourcesRead,claims:inv.claims,contradictions:inv.contradictions,gaps:inv.gaps,gapQueries:inv.gapQueries,timeline:inv.timeline,independence:inv.independence,marketContext:inv.marketContext||[],x:{...inv.x,connected:xFeed.connected,user:xFeed.user,totalFetched:xFeed.totalFetched,error:xFeed.error,state:xState.state,stateLabel:xState.label},followUps:['اعرض أقوى الأدلة المستقلة فقط.','ما الذي أضافته الجولة الثانية والثالثة من البحث؟','اعرض إشارات X التي تم تأكيدها خارج X فقط.','ما المعلومات التي لم نجد لها تأكيدًا مستقلًا؟','ما الجديد منذ هذا التحقيق؟'],guardrails:['research-only','multi-pass','query-expansion','full-source-reading','x-discovery-not-single-truth','independence-aware','citations-required','challenge-review']});
+    res.json({id:`asiri-v54-${Date.now().toString(36)}`,question,researchMode:mode,durationMs:Date.now()-started,engine,model,answer,confidence:finalConfidence,challenge,modelError,intent:inv.intent,plan:inv.plan,coverage:inv.coverage,stages:inv.stages,results:refs,sourcesRead:inv.sourcesRead,claims:inv.claims,contradictions:inv.contradictions,gaps:inv.gaps,gapQueries:inv.gapQueries,timeline:inv.timeline,independence:inv.independence,marketContext:inv.marketContext||[],x:{...inv.x,connected:xFeed.connected,user:xFeed.user,totalFetched:xFeed.totalFetched,error:xFeed.error,state:xState.state,stateLabel:xState.label,signals:inv.xSignals||[]},researchPlan:inv.researchPlan||[],followUps:['اعرض أقوى الأدلة المستقلة فقط.','ما الذي أضافته الجولة الثانية والثالثة من البحث؟','اعرض إشارات X التي تم تأكيدها خارج X فقط.','ما المعلومات التي لم نجد لها تأكيدًا مستقلًا؟','ما الجديد منذ هذا التحقيق؟'],guardrails:['research-only','multi-pass','query-expansion','full-source-reading','x-discovery-not-single-truth','independence-aware','citations-required','challenge-review']});
   }catch(error){res.status(500).json({error:'تعذر إكمال البحث العميق.',detail:clean(error?.message||error,500)});}
 });
 
@@ -159,4 +161,4 @@ app.get(['/', '/deep', '/deep-intelligence.html'],async(_req,res)=>{
   }catch(error){console.error('ASIRI v5.4 UI load error:',error?.message||error);res.status(500).send('ASIRI UI unavailable');}
 });
 
-app.listen(port,'0.0.0.0',()=>console.log(`ASIRI Deep Intelligence OS v5.4 Max Coverage listening on ${port}`));
+app.listen(port,'0.0.0.0',()=>console.log(`ASIRI Deep Intelligence OS v6 Research Orchestrator listening on ${port}`));
