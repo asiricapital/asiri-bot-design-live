@@ -19,7 +19,8 @@
     "check:lens": "node --check live-server.js && node --check smart-decision-lens.js && node check-smart-decision-lens.mjs",
     "check:decision-intelligence": "node check-decision-intelligence-panel.mjs",
     "check:favorites": "node check-favorites.mjs",
-    "check:favorite-performance": "node check-favorite-performance.mjs"
+    "check:favorite-performance": "node check-favorite-performance.mjs",
+    "check:favorite-scenarios": "node check-favorite-scenarios.mjs"
   },
   "engines": { "node": "22.x" },
   "dependencies": {
