@@ -66,7 +66,22 @@
 
   function sourceFirstLabels(){
     const h=qs('#sources')?.closest('.panel')?.querySelector('h3'); if(h) h.textContent='المصادر الأساسية والأدلة';
+    const ch=qs('#claims')?.closest('.panel')?.querySelector('h3'); if(ch) ch.textContent='سجل الادعاءات والأدلة';
     const domain=qs('#domainLabel'); if(domain) domain.textContent='GLOBAL DEEP RESEARCH';
+  }
+
+  function rewriteHero(){
+    const eye=qs('.hero .eyebrow'); if(eye) eye.textContent='OFFICIAL + NEWS + WEB + RESEARCH + GITHUB · X SIGNALS';
+    const p=qs('.hero p'); if(p) p.textContent='ASIRI يبدأ بالمصادر الرسمية والأولية، ثم الوكالات والمصادر المستقلة والويب والأبحاث. X يبقى طبقة اكتشاف مساعدة ولا يرفع الثقة وحده.';
+    const mode=qs('.ask .mode'); if(mode) mode.textContent='Deep Research تلقائي · المصادر الأساسية أولًا · X مساعد فقط';
+    const buttons=qsa('.quick [data-q]');
+    const defs=[
+      ['ما آخر التطورات المهمة اليوم؟ استخدم المصادر الرسمية والوكالات والمصادر المستقلة وافصل المؤكد عن غير المؤكد.','أهم التطورات'],
+      ['ما آخر التطورات في اليمن؟ ابدأ بالمصادر الرسمية والوكالات والمصادر المستقلة، ثم استخدم X كإشارة مساعدة فقط.','اليمن الآن'],
+      ['ما أهم تطورات التقنية والذكاء الاصطناعي اليوم؟ استخدم المصادر الرسمية والتقنية وGitHub والأبحاث.','تقنية وAI'],
+      ['حلل $NVDA باستخدام إفصاحات الشركة وSEC والأخبار المستقلة وسياق السوق، واستخدم X كإشارة إضافية فقط.','تحليل سهم']
+    ];
+    buttons.slice(0,4).forEach((b,i)=>{if(defs[i]){b.dataset.q=defs[i][0];b.textContent=defs[i][1];}});
   }
 
   function patch(){
@@ -79,6 +94,6 @@
     };
     wrapped.__v60=true; window.render=wrapped; return true;
   }
-  function init(){collapseX();simplifyTechnicalPanels();sourceFirstLabels();patch();setTimeout(patch,250);setTimeout(patch,1100);}
+  function init(){rewriteHero();collapseX();simplifyTechnicalPanels();sourceFirstLabels();patch();setTimeout(patch,250);setTimeout(patch,1100);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

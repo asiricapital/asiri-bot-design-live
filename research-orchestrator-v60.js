@@ -1,5 +1,6 @@
 import { runDeepInvestigationWithX } from './deep-intelligence-engine-x.js';
 import { understandQuestion } from './deep-intelligence-engine.js';
+import ledger from './evidence-ledger-v6.js';
 
 const MODE_CFG = {
   quick: { tasks: 2, maxRead: 5, resultCap: 18 },
@@ -31,18 +32,14 @@ function uniq(items, keyFn, cap=100) {
   return out;
 }
 function tierOf(item) {
-  const hay = normalize(`${item?.source||''} ${item?.provider||''} ${item?.url||''}`);
-  if (item?.official || /gov\.sa|\.gov\/|\.gov\.|sec\.gov|who\.int|un\.org|europa\.eu|official|ministry|وزارة|هيئه|رئاسه|حكومه/.test(hay)) return 1;
-  if (/reuters|apnews|associated press|afp|bbc|bloomberg|financial times|aljazeera|alarabiya|العربيه|الجزيره/.test(hay)) return 2;
-  if (item?.type === 'paper' || item?.type === 'github' || /openalex|crossref|arxiv|github/.test(hay)) return 3;
-  if (item?.fromX || item?.provider === 'X Timeline') return 4;
-  return 3;
+  const t = ledger.tierOf(item || {});
+  return { ...t, rank: t.w };
 }
 function rankScore(item) {
   const tier = tierOf(item);
   const base = Number(item?.evidenceScore || 0);
   const freshness = item?.publishedAt ? Math.max(0, 8 - Math.floor((Date.now()-new Date(item.publishedAt).getTime())/86400000)) : 0;
-  return base + (5-tier)*12 + freshness;
+  return base + Number(tier.rank || 0) * 45 + freshness;
 }
 function englishTopicVariant(question) {
   const q=normalize(question);
@@ -88,7 +85,7 @@ function buildPlan(question, mode, intent) {
   if (en) tasks.push({id:'bilingual',role:'bilingual',label:'مسار إنجليزي موازٍ',query:`${en} Reuters AP official statement`});
   return tasks.slice(0,cfg.tasks);
 }
-function mergeClaims(investigations) {
+function mergeClaims(investigations, intent) {
   const rows=[];
   for (const c of investigations.flatMap(x=>x.claims||[])) {
     const k=normalize(c.claim);
@@ -103,7 +100,12 @@ function mergeClaims(investigations) {
     old.sourceDomains=[...new Set([...(old.sourceDomains||[]),...(c.sourceDomains||[])])];
     old.items=uniq([...(old.items||[]),...(c.items||[])],x=>x.url||x.text,10);
   }
-  return rows.sort((a,b)=>(Number(b.independentSources||0)*25+Number(b.confidence||0))-(Number(a.independentSources||0)*25+Number(a.confidence||0))).slice(0,32).map((x,i)=>({...x,id:i+1}));
+  const windowDays = ledger.windowForQuestion(intent || {});
+  return rows
+    .map((x) => ({ ...x, ...ledger.rescoreClaim(x, { windowDays, today: new Date() }) }))
+    .sort((a,b)=>(Number(b.independentSources||0)*25+Number(b.confidence||0))-(Number(a.independentSources||0)*25+Number(a.confidence||0)))
+    .slice(0,32)
+    .map((x,i)=>({...x,id:i+1}));
 }
 function buildFallbackAnswer(claims, results, gaps, plan) {
   const strong=claims.filter(c=>Number(c.independentSources||0)>=2&&Number(c.confidence||0)>=70).slice(0,6);
@@ -121,27 +123,30 @@ function relevantXSignals(xResults, question) {
     return tokens.length ? tokens.some(k=>t.includes(k)) : false;
   }).sort((a,b)=>Number(b.evidenceScore||0)-Number(a.evidenceScore||0)).slice(0,12).map((x,i)=>({...x,signalId:`X${i+1}`}));
 }
-function mergeInvestigations(investigations, plan, mode, xSignals) {
+function mergeInvestigations(investigations, plan, mode, xSignals, intent) {
   const cfg=MODE_CFG[mode]||MODE_CFG.max;
   const allNonX=investigations.flatMap(x=>x.results||[]).filter(x=>!x.fromX&&x.provider!=='X Timeline');
   const results=uniq(allNonX.sort((a,b)=>rankScore(b)-rankScore(a)),x=>x.url||`${x.provider}|${x.title}`,cfg.resultCap);
   const sourcesRead=uniq(investigations.flatMap(x=>x.sourcesRead||[]).filter(x=>x.provider!=='X Timeline'),x=>x.url,mode==='max'?32:22);
-  const claims=mergeClaims(investigations);
+  const claims=mergeClaims(investigations, intent);
   const contradictions=uniq(investigations.flatMap(x=>x.contradictions||[]),x=>x.claim||x.url,14);
   const gaps=[...new Set(investigations.flatMap(x=>x.gaps||[]))];
   const gapQueries=[...new Set(investigations.flatMap(x=>x.gapQueries||[]))];
   const independenceMap=new Map();
-  for(const row of investigations.flatMap(x=>x.independence||[])){
-    if(!row?.domain||/x\.com|twitter\.com/i.test(row.domain))continue;
-    const old=independenceMap.get(row.domain)||{domain:row.domain,count:0,providers:[]};
-    old.count+=Number(row.count||1); old.providers=[...new Set([...(old.providers||[]),...(row.providers||[])])]; independenceMap.set(row.domain,old);
+  for (const item of results) {
+    const key=ledger.originKey(item);
+    if(!key||/^x:|twitter|x\.com/i.test(key)) continue;
+    const old=independenceMap.get(key)||{domain:key,count:0,providers:[]};
+    old.count+=1;
+    if(item.provider&&!old.providers.includes(item.provider)) old.providers.push(item.provider);
+    independenceMap.set(key,old);
   }
   const independence=[...independenceMap.values()];
   const timeline=uniq(investigations.flatMap(x=>x.timeline||[]).filter(x=>!x.viaX).sort((a,b)=>new Date(a.date||0)-new Date(b.date||0)),x=>`${x.url}|${x.date}`,26);
   const strongClaims=claims.filter(c=>Number(c.independentSources||0)>=2&&Number(c.confidence||0)>=70).length;
   const readCount=sourcesRead.filter(x=>x.readStatus==='read').length;
-  const primaryCount=results.filter(x=>tierOf(x)===1).length;
-  const trustedNewsCount=results.filter(x=>tierOf(x)===2).length;
+  const primaryCount=results.filter(x=>tierOf(x).id==='primary').length;
+  const trustedNewsCount=results.filter(x=>tierOf(x).id==='wire').length;
   const confidence=Math.min(99,Math.round(Math.min(36,independence.length*4)+Math.min(34,strongClaims*5)+Math.min(18,readCount*2)+Math.min(10,(primaryCount+trustedNewsCount))));
   const stages=investigations.flatMap((x,idx)=>(x.stages||[]).map(s=>({...s,branch:plan[idx]?.id||`b${idx+1}`,branchLabel:plan[idx]?.label||''})));
   return {
@@ -176,7 +181,7 @@ export async function runResearchOrchestratorV60(question, options={}) {
   const investigations=settled.filter(x=>x.status==='fulfilled').map(x=>x.value);
   if(!investigations.length) throw settled[0]?.reason||new Error('فشل تنفيذ خطة البحث');
   const xSignals=relevantXSignals(options.xResults||[],question);
-  const merged=mergeInvestigations(investigations,plan,mode,xSignals);
+  const merged=mergeInvestigations(investigations,plan,mode,xSignals,intent);
   merged.intent={...(merged.intent||intent),researchMode:mode};
   merged.x={connected:Boolean(options.xConnected),used:0,signals:xSignals.length,error:options.xError||null,role:'discovery-signal-only'};
   return merged;
