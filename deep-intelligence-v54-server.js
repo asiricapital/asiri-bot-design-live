@@ -149,16 +149,18 @@ const AI_FIX=`<script>(()=>{const b=document.getElementById('aiConnect');if(!b)r
 app.get(['/', '/deep', '/deep-intelligence.html'],async(_req,res)=>{
   res.set('Cache-Control','no-store');
   try{
-    const [html,css53,js53,css54,js54]=await Promise.all([
+    const [html,css53,js53,css54,js54,css60,js60]=await Promise.all([
       fs.readFile(path.join(root,'deep-intelligence-x.html'),'utf8'),
       fs.readFile(path.join(root,'ui-v53.css'),'utf8'),
       fs.readFile(path.join(root,'ui-v53.js'),'utf8'),
       fs.readFile(path.join(root,'ui-v54.css'),'utf8'),
       fs.readFile(path.join(root,'ui-v54.js'),'utf8'),
+      fs.readFile(path.join(root,'ui-v60.css'),'utf8'),
+      fs.readFile(path.join(root,'ui-v60.js'),'utf8'),
     ]);
-    const out=html.replace('</head>',`<style>${css53}</style><style>${css54}</style></head>`).replace('</body>',`${AI_FIX}<script>${js53}</script><script>${js54}</script></body>`);
+    const out=html.replace('</head>',`<style>${css53}</style><style>${css54}</style><style>${css60}</style></head>`).replace('</body>',`${AI_FIX}<script>${js53}</script><script>${js54}</script><script>${js60}</script></body>`);
     res.type('html').send(out);
-  }catch(error){console.error('ASIRI v5.4 UI load error:',error?.message||error);res.status(500).send('ASIRI UI unavailable');}
+  }catch(error){console.error('ASIRI v6 UI load error:',error?.message||error);res.status(500).send('ASIRI UI unavailable');}
 });
 
 app.listen(port,'0.0.0.0',()=>console.log(`ASIRI Deep Intelligence OS v6 Research Orchestrator listening on ${port}`));
