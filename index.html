@@ -316,6 +316,8 @@
                     <button class="filter-btn favorites-filter-btn" type="button" data-filter="FAVORITES" aria-pressed="false" onclick="filterAction('FAVORITES', this)">★ المفضلة <span id="favorites-count">0</span></button>
                 </div>
 
+                <section class="favorite-performance-card" aria-labelledby="favorite-performance-title"><div class="favorite-performance-head"><div><div class="favorite-performance-kicker">FAVORITES · VERIFIED COMPARISON</div><h3 id="favorite-performance-title">مقارنة أداء المفضلة</h3><p>يقارن التغير منذ أول قراءة موثقة محفوظة لهذا الجهاز فقط. لا يعرض عائدًا تاريخيًا كاملًا ولا يمثل توصية.</p></div><span id="favorite-performance-status">بانتظار قراءات المفضلة</span></div><div id="favorite-performance-list" class="favorite-performance-list"><div class="favorite-performance-empty">أضف نجمة إلى سهمين أو أكثر لبدء المقارنة.</div></div></section>
+
                 <div class="table-headers">
                     <div>السهم</div>
                     <div>آخر سعر موثّق</div>
@@ -581,6 +583,7 @@
         const RESEARCH_NOTE_KEY = 'asiri_research_notes_v1';
         const WATCHLIST_KEY = 'asiri_ws_portfolio_v27';
         const FAVORITES_KEY = 'asiri_favorite_symbols_v1';
+        const FAVORITE_PERFORMANCE_KEY = 'asiri_favorite_performance_baseline_v1';
         let favorites = [];
         const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
         let technicalRequestInFlight = false;
@@ -656,6 +659,7 @@
             restoreVerifiedQuoteSnapshot();
             renderTable();
             renderFavoritesCount();
+            renderFavoritePerformance();
             renderResearchHub();
             syncTechnicalSymbolOptions();
             renderTechnicalUnavailable(null, 'اختر رمزاً من قائمة المراقبة لعرض التحليل التقني.');
@@ -688,7 +692,40 @@
             if (!sym || !watchlist.includes(sym)) return;
             favorites = isFavorite(sym) ? favorites.filter((item) => item !== sym) : [...favorites, sym];
             saveFavorites();
+            renderFavoritePerformance();
             renderTable();
+        }
+
+        function readFavoriteBaselines() {
+            try { const value = JSON.parse(localStorage.getItem(FAVORITE_PERFORMANCE_KEY) || '{}'); return value && typeof value === 'object' ? value : {}; } catch (_) { return {}; }
+        }
+
+        function saveFavoriteBaselines(value) {
+            try { localStorage.setItem(FAVORITE_PERFORMANCE_KEY, JSON.stringify(value)); } catch (_) {}
+        }
+
+        function renderFavoritePerformance() {
+            const list = document.getElementById('favorite-performance-list');
+            const status = document.getElementById('favorite-performance-status');
+            if (!list || !status) return;
+            const baselines = readFavoriteBaselines();
+            const rows = favorites.map((symbol) => {
+                const item = stockMarketData[symbol] || { symbol };
+                const view = quoteDataView(item);
+                const price = finiteNumber(item.price);
+                if (price === null || view.state === 'UNAVAILABLE') return { symbol, item, view, price, baseline: baselines[symbol]?.price ?? null, performance: null };
+                if (!baselines[symbol]?.price || baselines[symbol].price <= 0) {
+                    baselines[symbol] = { price, capturedAt: new Date().toISOString(), source: item.source || null };
+                }
+                const baseline = Number(baselines[symbol].price);
+                return { symbol, item, view, price, baseline, performance: baseline > 0 ? ((price - baseline) / baseline) * 100 : null };
+            }).filter(Boolean);
+            saveFavoriteBaselines(baselines);
+            if (favorites.length < 2) { status.textContent = favorites.length ? 'أضف سهمًا آخر للمقارنة' : 'لا توجد مفضلة'; list.innerHTML = '<div class="favorite-performance-empty">أضف نجمة إلى سهمين أو أكثر لبدء المقارنة.</div>'; return; }
+            const comparable = rows.filter((row) => Number.isFinite(row.performance)).sort((a, b) => b.performance - a.performance);
+            status.textContent = `${comparable.length}/${favorites.length} قابلة للمقارنة`;
+            if (!comparable.length) { list.innerHTML = '<div class="favorite-performance-empty">بانتظار قراءات أسعار موثقة للمفضلة.</div>'; return; }
+            list.innerHTML = comparable.map((row, index) => { const cls = row.performance > 0 ? 'positive' : row.performance < 0 ? 'negative' : 'neutral'; return `<div class="favorite-performance-row"><span><strong>#${index + 1} · ${escapeMarkup(row.symbol)}</strong><small>${escapeMarkup(row.view.label)}</small></span><span><small>السعر الحالي</small><strong class="performance-value">$${row.price.toFixed(2)}</strong></span><span><small>خط الأساس</small><strong class="performance-value">$${row.baseline.toFixed(2)}</strong></span><span><small>التغير منذ البداية</small><strong class="performance-value ${cls}">${row.performance >= 0 ? '+' : ''}${row.performance.toFixed(2)}%</strong></span></div>`; }).join('') + (rows.some((row) => !Number.isFinite(row.performance)) ? '<div class="favorite-performance-note">بعض الأسهم مستبعدة مؤقتًا لعدم توفر سعر موثق.</div>' : '');
         }
 
         function setSyncIndicator(color) {
@@ -956,6 +993,7 @@
         function renderTable() {
             renderPortfolioSummary();
             renderDataReadinessSummary();
+            renderFavoritePerformance();
             const wrapper = document.getElementById('stocks-list-wrapper');
             const filtered = watchlist.filter(sym => {
                 if (currentFilter === 'ALL') return true;
