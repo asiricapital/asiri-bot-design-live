@@ -31,6 +31,31 @@ function uniq(items, keyFn, cap=100) {
   }
   return out;
 }
+const ORIGINAL_STOP = new Set(['اهم','أهم','اخر','آخر','اليوم','الان','الآن','حاليا','حاليًا','تطورات','التطورات','اخبار','أخبار','خبر','سياسي','سياسية','السياسية','سياسة','المهمة','مهمه','مهمة','latest','today','current','news','politics','political','update','updates']);
+function originalTokens(intent) {
+  return [...new Set((normalize(intent?.query||'').match(/[\p{L}\p{N}]{3,}/gu)||[]).filter(x=>!ORIGINAL_STOP.has(x)))];
+}
+function originalAliases(intent) {
+  const q=normalize(intent?.query||'');
+  const a=[];
+  if(/اليمن|yemen/.test(q)) a.push('اليمن','يمن','الحوثي','الحوثيين','صنعاء','عدن','المخا','البحر الاحمر','yemen','houthi','sanaa','aden','mokha','red sea');
+  if(/غزه|gaza|فلسطين|palestin/.test(q)) a.push('غزه','فلسطين','حماس','gaza','palestine','hamas');
+  if(/ايران|iran/.test(q)) a.push('ايران','طهران','الحرس الثوري','iran','tehran','irgc');
+  if(/اوكرانيا|ukrain/.test(q)) a.push('اوكرانيا','كييف','روسيا','ukraine','kyiv','russia');
+  if(/هرمز|hormuz/.test(q)) a.push('هرمز','مضيق هرمز','hormuz','strait of hormuz');
+  return [...new Set(a.map(normalize))];
+}
+function relevantToOriginal(item,intent) {
+  const text=normalize(`${item?.title||''} ${item?.snippet||''} ${item?.source||''}`);
+  if(!text) return false;
+  const keys=[...originalTokens(intent),...originalAliases(intent)];
+  if(!keys.length) {
+    if(intent?.urgency==='live'||intent?.questionType==='latest') return item?.type==='news'||item?.official===true||/Google News|Bing News/.test(item?.provider||'');
+    return true;
+  }
+  return keys.some(k=>text.includes(k));
+}
+
 function tierOf(item) {
   const t = ledger.tierOf(item || {});
   return { ...t, rank: t.w };
@@ -126,9 +151,11 @@ function relevantXSignals(xResults, question) {
 function mergeInvestigations(investigations, plan, mode, xSignals, intent) {
   const cfg=MODE_CFG[mode]||MODE_CFG.max;
   const allNonX=investigations.flatMap(x=>x.results||[]).filter(x=>!x.fromX&&x.provider!=='X Timeline');
-  const results=uniq(allNonX.sort((a,b)=>rankScore(b)-rankScore(a)),x=>x.url||`${x.provider}|${x.title}`,cfg.resultCap);
-  const sourcesRead=uniq(investigations.flatMap(x=>x.sourcesRead||[]).filter(x=>x.provider!=='X Timeline'),x=>x.url,mode==='max'?32:22);
-  const claims=mergeClaims(investigations, intent);
+  const results=uniq(allNonX.filter(x=>relevantToOriginal(x,intent)).sort((a,b)=>rankScore(b)-rankScore(a)),x=>x.url||`${x.provider}|${x.title}`,cfg.resultCap);
+  const keptUrls=new Set(results.map(x=>x.url).filter(Boolean));
+  const sourcesRead=uniq(investigations.flatMap(x=>x.sourcesRead||[]).filter(x=>x.provider!=='X Timeline'&&keptUrls.has(x.url)),x=>x.url,mode==='max'?32:22);
+  const filteredInvestigations=investigations.map(inv=>({...inv,claims:(inv.claims||[]).map(cl=>({...cl,items:(cl.items||[]).filter(it=>keptUrls.has(it.url))})).filter(cl=>(cl.items||[]).length)}));
+  const claims=mergeClaims(filteredInvestigations, intent);
   const contradictions=uniq(investigations.flatMap(x=>x.contradictions||[]),x=>x.claim||x.url,14);
   const gaps=[...new Set(investigations.flatMap(x=>x.gaps||[]))];
   const gapQueries=[...new Set(investigations.flatMap(x=>x.gapQueries||[]))];
