@@ -1,4 +1,5 @@
 import { runDeepInvestigation } from './deep-intelligence-engine.js';
+import ledger from './evidence-ledger-v6.js';
 
 const STOPWORDS = new Set([
   'هذا','هذه','ذلك','التي','الذي','على','الى','إلى','عن','من','في','ما','ماذا','هل','ماهي','ماهو','اخر','آخر','أخر','الجديد','اليوم','الآن','الان','حاليا','حاليًا','تطورات','التطورات','اخبار','أخبار','خبر','اهم','أهم','حول','بخصوص','اعطني','أعطني','اريد','أريد',
@@ -89,7 +90,7 @@ function mergeResults(base, extras) {
 
 function xPostsOnly(results) { return (results || []).filter((x) => x?.provider === 'X Timeline' && x?.snippet); }
 
-function mergeClaims(baseClaims, xResults, baseResultCount) {
+function mergeClaims(baseClaims, xResults, baseResultCount, options = {}) {
   const claims = (baseClaims || []).map((c) => ({ ...c, providers: [...(c.providers || [])], sourceDomains: [...(c.sourceDomains || [])], items: [...(c.items || [])] }));
   const conflicts = [];
   const posts = xPostsOnly(xResults);
@@ -111,13 +112,18 @@ function mergeClaims(baseClaims, xResults, baseResultCount) {
       best.items.push(item); best.supportCount = Number(best.supportCount || 0) + 1;
       if (!alreadyIndependent) { best.sourceDomains.push(sourceKey); best.independentSources = Number(best.independentSources || 0) + 1; }
       if (!best.providers.includes('X Timeline')) best.providers.push('X Timeline');
-      best.confidence = Math.min(99, Math.round(Number(best.confidence || 0) + (alreadyIndependent ? 1 : 4)));
       if (possibleConflict(text, best.claim)) { best.possibleConflict = true; conflicts.push({ claim: best.claim, xClaim: text, source: post.source, url: post.url }); }
     } else {
-      claims.push({ id: claims.length + 1, claim: text, supportCount: 1, independentSources: 1, providers: ['X Timeline'], sourceDomains: [sourceKey], confidence: Math.min(78, Math.max(35, Number(post.evidenceScore || 55))), possibleConflict: false, items: [item], xOnly: true, citationId: baseResultCount + idx + 1 });
+      claims.push({ id: claims.length + 1, claim: text, supportCount: 1, independentSources: 1, providers: ['X Timeline'], sourceDomains: [sourceKey], confidence: 0, possibleConflict: false, items: [item], xOnly: true, citationId: baseResultCount + idx + 1 });
     }
   }
-  return { claims: claims.slice(0, 24).map((c, i) => ({ ...c, id: i + 1 })), conflicts };
+  const windowDays = Number(options.windowDays || 365);
+  const today = new Date();
+  const rescored = claims.slice(0, 24).map((c, i) => {
+    const opposing = claims.filter((o) => o !== c && o.possibleConflict && jaccard(o.claim, c.claim) >= 0.30 && hasNegation(o.claim) !== hasNegation(c.claim));
+    return { ...ledger.rescoreClaim(c, { windowDays, today, opposing }), id: i + 1 };
+  });
+  return { claims: rescored, conflicts };
 }
 
 function mergeIndependence(base, extras) {
@@ -157,24 +163,26 @@ export async function runDeepInvestigationWithX(query, options = {}) {
 
   const baseResultCount = base.results?.length || 0;
   const results = mergeResults(base.results, xResults);
-  const mergedClaims = mergeClaims(base.claims, xResults, baseResultCount);
+  const mergedClaims = mergeClaims(base.claims, xResults, baseResultCount, { windowDays: ledger.windowForQuestion(base.intent || {}) });
   const contradictions = [...(base.contradictions || []), ...mergedClaims.conflicts.map((x) => ({ claim: x.claim, xClaim: x.xClaim, source: x.source, url: x.url, possibleConflict: true }))].slice(0, 10);
   const independence = mergeIndependence(base.independence, xResults);
   const timeline = mergeTimeline(base.timeline, xResults);
   const xPosts = xPostsOnly(xResults);
   const accounts = new Set(xPosts.map((x) => x.independenceKey || x.source).filter(Boolean));
   const strongX = xPosts.filter((x) => Number(x.evidenceScore || 0) >= 72).length;
-  const confidence = Math.min(99, Math.round(Number(base.confidence || 0) + Math.min(5, accounts.size) + Math.min(3, strongX)));
+  /* X طبقة اكتشاف لا طبقة تأكيد: لا ترفع التغطية من تلقاء نفسها. */
+  const confidence = Math.round(Number(base.confidence || 0));
   const sourcesRead = [...(base.sourcesRead || []), ...xPosts.slice(0, 12).map((x) => ({ title: x.title, url: x.url, source: x.source, provider: x.provider, publishedAt: x.publishedAt, evidenceScore: x.evidenceScore, readStatus: 'x-api', chars: String(x.snippet || '').length, excerpt: String(x.snippet || '').slice(0, 900) }))];
   const stages = [...(base.stages || []), { id: 'x-intelligence', label: 'مطابقة Home Timeline من X مع السؤال', ms: 0, posts: xPosts.length, accounts: accounts.size, rejected: rawX.length - xResults.length }];
   const gaps = [...(base.gaps || [])];
+  if (xPosts.length) gaps.push('منشورات X دخلت كطبقة اكتشاف؛ وزنها في سجل الأدلة هو وزن منشور اجتماعي غير موثّق حتى يؤكدها مصدر مستقل.');
   if (xPosts.length && accounts.size < 2) gaps.push('إشارات X ذات الصلة جاءت من عدد محدود من الحسابات، لذلك لم تُعامل كتأكيد مستقل كافٍ.');
 
   return {
     ...base,
     answer: `${base.answer}${xSection(xResults, baseResultCount)}`,
     confidence, results, sourcesRead, claims: mergedClaims.claims, contradictions, gaps: [...new Set(gaps)], independence, timeline,
-    x: { connected: true, used: xPosts.length, accounts: accounts.size, rejected: rawX.length - xResults.length, error: options.xError || null },
+    x: { connected: true, used: xPosts.length, accounts: accounts.size, strongSignals: strongX, rejected: rawX.length - xResults.length, error: options.xError || null },
     stages,
   };
 }
