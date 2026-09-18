@@ -588,8 +588,10 @@
         const FAVORITE_SCENARIO_KEY = 'asiri_favorite_scenarios_v1';
         const SCENARIO_ALERT_STATE_KEY = 'asiri_favorite_scenario_alert_state_v1';
         const SCENARIO_SOUND_KEY = 'asiri_favorite_scenario_sound_v1';
+        const AUTO_SCENARIO_CACHE_MS = 5 * 60 * 1000;
         let favorites = [];
         let scenarioSoundEnabled = false;
+        const autoScenarioCache = new Map();
         const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
         let technicalRequestInFlight = false;
         let activeMainTab = 'tools';
@@ -746,6 +748,33 @@
 
         function scenarioNumber(id) { const value = Number(document.getElementById(id)?.value); return Number.isFinite(value) && value > 0 ? value : null; }
 
+        async function ensureAutoFavoriteScenario(symbol) {
+            if (!symbol || !favorites.includes(symbol)) return;
+            const existing = readFavoriteScenarios()[symbol];
+            if (existing && existing.auto !== true) return;
+            const cached = autoScenarioCache.get(symbol);
+            if (cached && Date.now() - cached < AUTO_SCENARIO_CACHE_MS) return;
+            autoScenarioCache.set(symbol, Date.now());
+            try {
+                const response = await fetch(`https://asiri-bot.onrender.com/api/live-terminal/technicals/${encodeURIComponent(symbol)}`, { cache: 'no-store' });
+                if (!response.ok) return;
+                const payload = await response.json(); const tech = payload?.ok && payload?.availability === 'available' ? payload.indicators : null;
+                const item = stockMarketData[symbol] || {}; const price = finiteNumber(item.price);
+                if (!tech || price === null) return;
+                const atr = finiteNumber(tech.atr14); const support = finiteNumber(tech.low20); const resistance = finiteNumber(tech.high20);
+                if (atr === null || support === null || resistance === null || support <= 0 || resistance <= support) return;
+                const watchLow = Math.max(0.01, support - atr * 0.25); const watchHigh = support + atr * 0.25;
+                const confirm = Math.max(price + atr * 0.5, watchHigh + atr * 0.25); const target = resistance > price ? resistance : price + atr;
+                const invalidation = Math.max(0.01, support - atr * 0.5);
+                const trendScore = Number(tech.trendScore || 0); const emaAlignment = Number(tech.emaAlignment || 0); const rsi = finiteNumber(tech.rsi14); const volumeRatio = finiteNumber(tech.historicalVolumeRatio);
+                let confidence = 45 + trendScore * 7 + emaAlignment * 5 + (rsi !== null && rsi >= 40 && rsi <= 68 ? 8 : 0) + (volumeRatio !== null && volumeRatio >= 1 ? 5 : 0);
+                confidence = Math.max(20, Math.min(88, Math.round(confidence)));
+                const all = readFavoriteScenarios();
+                if (!all[symbol] || all[symbol].auto === true) all[symbol] = { watchLow, watchHigh, confirm, target, invalidation, auto: true, confidence, generatedAt: payload.observedAt || new Date().toISOString(), source: payload.source || 'Yahoo Finance • Daily OHLCV', basis: { support, resistance, atr14: atr, rsi14: rsi, trendLabel: tech.trendLabel || null, volumeRatio } };
+                saveFavoriteScenarios(all); loadFavoriteScenario();
+            } catch (_) { /* Missing technical history must not create synthetic levels. */ }
+        }
+
         function syncFavoriteScenarioOptions() {
             const select = document.getElementById('favorite-scenario-symbol');
             if (!select) return;
@@ -753,6 +782,7 @@
             select.innerHTML = favorites.map((symbol) => `<option value="${escapeMarkup(symbol)}">${escapeMarkup(symbol)}</option>`).join('');
             if (prior && favorites.includes(prior)) select.value = prior;
             loadFavoriteScenario();
+            if (select.value) ensureAutoFavoriteScenario(select.value);
         }
 
         function loadFavoriteScenario() {
@@ -819,7 +849,7 @@
             else if (Number.isFinite(scenario.target) && price >= scenario.target) { state = 'target'; label = 'بلوغ هدف المراجعة'; detail = `السعر الحالي $${price.toFixed(2)} عند/فوق الهدف $${scenario.target.toFixed(2)}.`; }
             else if (Number.isFinite(scenario.confirm) && price >= scenario.confirm) { state = 'confirm'; label = 'تأكيد الاتجاه للمراجعة'; detail = `السعر الحالي $${price.toFixed(2)} عند/فوق التأكيد $${scenario.confirm.toFixed(2)}.`; }
             else if (Number.isFinite(scenario.watchLow) && Number.isFinite(scenario.watchHigh) && price >= scenario.watchLow && price <= scenario.watchHigh) { state = 'watch'; label = 'داخل منطقة المراقبة'; detail = `السعر الحالي $${price.toFixed(2)} داخل ${scenario.watchLow.toFixed(2)} – ${scenario.watchHigh.toFixed(2)}.`; }
-            status.textContent = label; box.dataset.state = state; box.innerHTML = `<b>${escapeMarkup(symbol)} · ${escapeMarkup(label)}</b><br>${escapeMarkup(detail)}<br><small>هذه إشارة استشارية مشروطة وتحتاج مراجعة بشرية؛ لا تنشئ شراءً أو بيعًا.</small>`; notifyScenarioTransition(symbol, state, label, detail);
+            status.textContent = label; box.dataset.state = state; const origin = scenario.auto === true ? `اقتراح تلقائي من محرك Asiri · الثقة ${scenario.confidence ?? '—'}/100` : 'مستويات أدخلها المستخدم'; const generated = scenario.generatedAt ? ` · ${new Date(scenario.generatedAt).toLocaleString('ar-SA')}` : ''; box.innerHTML = `<b>${escapeMarkup(symbol)} · ${escapeMarkup(label)}</b><br>${escapeMarkup(detail)}<br><small>${escapeMarkup(origin)}${escapeMarkup(generated)}</small><br><small>هذه إشارة استشارية مشروطة وتحتاج مراجعة بشرية؛ لا تنشئ شراءً أو بيعًا.</small>`; notifyScenarioTransition(symbol, state, label, detail);
         }
 
         function setSyncIndicator(color) {
