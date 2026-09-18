@@ -31,7 +31,7 @@ const maxByMode = { quick: 14, deep: 36, compare: 28, verify: 24, timeline: 30, 
 
 const STOPWORDS = new Set([
   'هذا','هذه','ذلك','التي','الذي','على','الى','إلى','عن','من','في','ما','ماذا','هل','ماهي','ماهيه','ماهو','ماهو','اخر','آخر','أخر','الجديد','اليوم','الآن','الان','حاليا','حاليًا','تطورات','التطورات','اخبار','أخبار','خبر','اهم','أهم','حول','بخصوص','اعطني','أعطني','اريد','أريد',
-  'why','what','the','and','for','with','from','that','this','today','latest','news','current','now','about','update','updates',
+  'سياسي','سياسية','السياسية','سياسه','سياسة','العالميه','العالمية','عالمي','مهم','مهمة','المهمة','why','what','the','and','for','with','from','that','this','today','latest','news','current','now','about','update','updates','politics','political','global','important',
 ]);
 
 const LOW_QUALITY_RX = /(porn|xxx|sex\s?video|casino|betting|viagra|adult\s?video|anal\s|escort)/i;
