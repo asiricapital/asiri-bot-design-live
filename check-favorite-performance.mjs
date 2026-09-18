@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const html = await fs.readFile(new URL('./index.html', import.meta.url), 'utf8');
+const css = await fs.readFile(new URL('./favorite-star.css', import.meta.url), 'utf8');
+assert.match(html, /favorite-performance-card/);
+assert.match(html, /FAVORITE_PERFORMANCE_KEY/);
+assert.match(html, /renderFavoritePerformance/);
+assert.match(html, /performance\.toFixed\(2\)/);
+assert.match(html, /منذ أول قراءة موثقة/);
+assert.match(css, /favorite-performance-row/);
+assert.match(css, /positive/);
+assert.match(css, /negative/);
+console.log('Favorite performance comparison contract passed');
