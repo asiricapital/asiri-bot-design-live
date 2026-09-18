@@ -175,7 +175,8 @@ const tools = html.slice(html.indexOf('<div id="sec-tools"'), html.indexOf('<div
 for (const state of ['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE']) {
   assert.ok(tools.includes(`data-filter="${state}"`), `Missing ${state} data filter`);
 }
-assert.equal((tools.match(/class="filter-btn/g) || []).length, 5);
+assert.ok(tools.includes('data-filter="FAVORITES"'), 'Missing FAVORITES data filter');
+assert.equal((tools.match(/class="filter-btn/g) || []).length, 6);
 for (const id of readinessIds) assert.ok(html.includes(`id="${id}"`), `Readiness summary is missing ${id}`);
 
 assert.ok(html.includes('function quoteHealth(item, nowMs = Date.now())'));
