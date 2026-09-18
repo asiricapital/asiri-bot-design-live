@@ -317,7 +317,7 @@
                 </div>
 
                 <section class="favorite-performance-card" aria-labelledby="favorite-performance-title"><div class="favorite-performance-head"><div><div class="favorite-performance-kicker">FAVORITES · VERIFIED COMPARISON</div><h3 id="favorite-performance-title">مقارنة أداء المفضلة</h3><p>يقارن التغير منذ أول قراءة موثقة محفوظة لهذا الجهاز فقط. لا يعرض عائدًا تاريخيًا كاملًا ولا يمثل توصية.</p></div><span id="favorite-performance-status">بانتظار قراءات المفضلة</span></div><div id="favorite-performance-list" class="favorite-performance-list"><div class="favorite-performance-empty">أضف نجمة إلى سهمين أو أكثر لبدء المقارنة.</div></div></section>
-                <section class="favorite-scenario-card" aria-labelledby="favorite-scenario-title"><div class="favorite-performance-head"><div><div class="favorite-performance-kicker">CONDITIONAL REVIEW · READ ONLY</div><h3 id="favorite-scenario-title">مؤشر الشراء والبيع الاستشاري</h3><p>أدخل مستوياتك الخاصة لكل سهم. سيعرض النظام حالة شرطية عند وصول السعر، ولا ينشئ أمرًا أو توصية تنفيذية.</p></div><span id="favorite-scenario-status">لا يوجد سيناريو محفوظ</span></div><div class="favorite-scenario-form"><label>السهم<select id="favorite-scenario-symbol" onchange="loadFavoriteScenario()"></select></label><label>منطقة المراقبة من<input id="scenario-watch-low" type="number" step="0.0001" min="0" placeholder="مثال 13.00"></label><label>منطقة المراقبة إلى<input id="scenario-watch-high" type="number" step="0.0001" min="0" placeholder="مثال 13.20"></label><label>تأكيد الاتجاه فوق<input id="scenario-confirm" type="number" step="0.0001" min="0" placeholder="مثال 13.70"></label><label>هدف المراجعة<input id="scenario-target" type="number" step="0.0001" min="0" placeholder="مثال 14.20"></label><label>حد إبطال السيناريو<input id="scenario-invalidation" type="number" step="0.0001" min="0" placeholder="مثال 12.80"></label></div><div class="favorite-scenario-actions"><button type="button" onclick="saveFavoriteScenario()">حفظ المستويات</button><button type="button" class="secondary" onclick="clearFavoriteScenario()">مسح السيناريو</button></div><div id="favorite-scenario-reading" class="favorite-scenario-reading">أضف نجمة إلى سهم ثم أدخل مستويات المراجعة الخاصة به.</div><div class="favorite-scenario-legend"><span>منطقة المراقبة = مراجعة السعر</span><span>التأكيد = تحقق إضافي</span><span>الهدف = متابعة فقط</span><span>الإبطال = إعادة تقييم</span></div></section>
+                <section class="favorite-scenario-card" aria-labelledby="favorite-scenario-title"><div class="favorite-performance-head"><div><div class="favorite-performance-kicker">CONDITIONAL REVIEW · READ ONLY</div><h3 id="favorite-scenario-title">مؤشر الشراء والبيع الاستشاري</h3><p>أدخل مستوياتك الخاصة لكل سهم. سيعرض النظام حالة شرطية عند وصول السعر، ولا ينشئ أمرًا أو توصية تنفيذية.</p></div><span id="favorite-scenario-status">لا يوجد سيناريو محفوظ</span></div><div class="favorite-scenario-alert-controls"><button type="button" id="scenario-sound-toggle" onclick="toggleScenarioSound()">تفعيل التنبيه الصوتي</button><span>التنبيه البصري يعمل تلقائيًا داخل الصفحة</span></div><div class="favorite-scenario-form"><label>السهم<select id="favorite-scenario-symbol" onchange="loadFavoriteScenario()"></select></label><label>منطقة المراقبة من<input id="scenario-watch-low" type="number" step="0.0001" min="0" placeholder="مثال 13.00"></label><label>منطقة المراقبة إلى<input id="scenario-watch-high" type="number" step="0.0001" min="0" placeholder="مثال 13.20"></label><label>تأكيد الاتجاه فوق<input id="scenario-confirm" type="number" step="0.0001" min="0" placeholder="مثال 13.70"></label><label>هدف المراجعة<input id="scenario-target" type="number" step="0.0001" min="0" placeholder="مثال 14.20"></label><label>حد إبطال السيناريو<input id="scenario-invalidation" type="number" step="0.0001" min="0" placeholder="مثال 12.80"></label></div><div class="favorite-scenario-actions"><button type="button" onclick="saveFavoriteScenario()">حفظ المستويات</button><button type="button" class="secondary" onclick="clearFavoriteScenario()">مسح السيناريو</button></div><div id="favorite-scenario-reading" class="favorite-scenario-reading">أضف نجمة إلى سهم ثم أدخل مستويات المراجعة الخاصة به.</div><div class="favorite-scenario-legend"><span>منطقة المراقبة = مراجعة السعر</span><span>التأكيد = تحقق إضافي</span><span>الهدف = متابعة فقط</span><span>الإبطال = إعادة تقييم</span></div></section>
 
                 <div class="table-headers">
                     <div>السهم</div>
@@ -586,7 +586,10 @@
         const FAVORITES_KEY = 'asiri_favorite_symbols_v1';
         const FAVORITE_PERFORMANCE_KEY = 'asiri_favorite_performance_baseline_v1';
         const FAVORITE_SCENARIO_KEY = 'asiri_favorite_scenarios_v1';
+        const SCENARIO_ALERT_STATE_KEY = 'asiri_favorite_scenario_alert_state_v1';
+        const SCENARIO_SOUND_KEY = 'asiri_favorite_scenario_sound_v1';
         let favorites = [];
+        let scenarioSoundEnabled = false;
         const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
         let technicalRequestInFlight = false;
         let activeMainTab = 'tools';
@@ -632,6 +635,7 @@
 
         function init() {
             try { favorites = normalizeWatchlist(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]')) || []; } catch (_) { favorites = []; }
+            scenarioSoundEnabled = localStorage.getItem(SCENARIO_SOUND_KEY) === 'true';
             const saved = localStorage.getItem(WATCHLIST_KEY);
             if (saved !== null) {
                 try {
@@ -772,9 +776,40 @@
             if (symbol) delete all[symbol]; saveFavoriteScenarios(all); loadFavoriteScenario();
         }
 
+        function toggleScenarioSound() {
+            scenarioSoundEnabled = !scenarioSoundEnabled;
+            try { localStorage.setItem(SCENARIO_SOUND_KEY, String(scenarioSoundEnabled)); } catch (_) {}
+            const button = document.getElementById('scenario-sound-toggle');
+            if (button) { button.textContent = scenarioSoundEnabled ? 'الصوت مفعّل' : 'تفعيل التنبيه الصوتي'; button.classList.toggle('enabled', scenarioSoundEnabled); }
+            if (scenarioSoundEnabled) playScenarioTone('confirm');
+        }
+
+        function playScenarioTone(state) {
+            if (!scenarioSoundEnabled || !window.AudioContext) return;
+            try {
+                const context = new AudioContext(); const oscillator = context.createOscillator(); const gain = context.createGain();
+                oscillator.type = 'sine'; oscillator.frequency.value = state === 'target' ? 880 : state === 'invalidation' ? 240 : 620;
+                gain.gain.setValueAtTime(0.0001, context.currentTime); gain.gain.exponentialRampToValueAtTime(0.08, context.currentTime + 0.02); gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.32);
+                oscillator.connect(gain); gain.connect(context.destination); oscillator.start(); oscillator.stop(context.currentTime + 0.34); oscillator.addEventListener('ended', () => context.close());
+            } catch (_) {}
+        }
+
+        function notifyScenarioTransition(symbol, state, label, detail) {
+            const states = ['watch', 'confirm', 'target', 'invalidation'];
+            let history = {};
+            try { history = JSON.parse(localStorage.getItem(SCENARIO_ALERT_STATE_KEY) || '{}') || {}; } catch (_) {}
+            const previous = history[symbol]; history[symbol] = state;
+            try { localStorage.setItem(SCENARIO_ALERT_STATE_KEY, JSON.stringify(history)); } catch (_) {}
+            if (!states.includes(state) || previous === undefined || previous === state) return;
+            const toast = document.createElement('div'); toast.className = 'scenario-alert-toast'; toast.setAttribute('role', 'status'); toast.innerHTML = `<strong>${escapeMarkup(symbol)} · ${escapeMarkup(label)}</strong><span>${escapeMarkup(detail)}</span>`;
+            document.body.appendChild(toast); window.setTimeout(() => toast.remove(), 6000); playScenarioTone(state);
+        }
+
         function renderFavoriteScenario() {
             const select = document.getElementById('favorite-scenario-symbol'); const box = document.getElementById('favorite-scenario-reading'); const status = document.getElementById('favorite-scenario-status');
             if (!select || !box || !status) return;
+            const soundButton = document.getElementById('scenario-sound-toggle');
+            if (soundButton) { soundButton.textContent = scenarioSoundEnabled ? 'الصوت مفعّل' : 'تفعيل التنبيه الصوتي'; soundButton.classList.toggle('enabled', scenarioSoundEnabled); }
             if (!favorites.length) { status.textContent = 'لا توجد مفضلة'; box.textContent = 'أضف نجمة إلى سهم ثم أدخل مستويات المراجعة الخاصة به.'; box.removeAttribute('data-state'); return; }
             const symbol = select.value || favorites[0]; const scenario = readFavoriteScenarios()[symbol]; const price = finiteNumber(stockMarketData[symbol]?.price);
             if (!scenario || !Object.values(scenario).some((value) => Number.isFinite(Number(value)))) { status.textContent = 'لا يوجد سيناريو محفوظ'; box.textContent = `لم تُحفظ مستويات لـ ${symbol} بعد.`; box.removeAttribute('data-state'); return; }
@@ -784,7 +819,7 @@
             else if (Number.isFinite(scenario.target) && price >= scenario.target) { state = 'target'; label = 'بلوغ هدف المراجعة'; detail = `السعر الحالي $${price.toFixed(2)} عند/فوق الهدف $${scenario.target.toFixed(2)}.`; }
             else if (Number.isFinite(scenario.confirm) && price >= scenario.confirm) { state = 'confirm'; label = 'تأكيد الاتجاه للمراجعة'; detail = `السعر الحالي $${price.toFixed(2)} عند/فوق التأكيد $${scenario.confirm.toFixed(2)}.`; }
             else if (Number.isFinite(scenario.watchLow) && Number.isFinite(scenario.watchHigh) && price >= scenario.watchLow && price <= scenario.watchHigh) { state = 'watch'; label = 'داخل منطقة المراقبة'; detail = `السعر الحالي $${price.toFixed(2)} داخل ${scenario.watchLow.toFixed(2)} – ${scenario.watchHigh.toFixed(2)}.`; }
-            status.textContent = label; box.dataset.state = state; box.innerHTML = `<b>${escapeMarkup(symbol)} · ${escapeMarkup(label)}</b><br>${escapeMarkup(detail)}<br><small>هذه إشارة استشارية مشروطة وتحتاج مراجعة بشرية؛ لا تنشئ شراءً أو بيعًا.</small>`;
+            status.textContent = label; box.dataset.state = state; box.innerHTML = `<b>${escapeMarkup(symbol)} · ${escapeMarkup(label)}</b><br>${escapeMarkup(detail)}<br><small>هذه إشارة استشارية مشروطة وتحتاج مراجعة بشرية؛ لا تنشئ شراءً أو بيعًا.</small>`; notifyScenarioTransition(symbol, state, label, detail);
         }
 
         function setSyncIndicator(color) {
