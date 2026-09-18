@@ -12,7 +12,43 @@ const providerWeights = {
   arXiv: 89,
   'Hacker News': 50,
   GitHub: 70,
+  'SABA RSS': 86,
 };
+
+const NEWS_LOCALES = [
+  { rx: /(اليمن|yemen)/i, gl: 'YE', ceid: 'YE:ar' },
+  { rx: /(السعوديه|السعودية|saudi)/i, gl: 'SA', ceid: 'SA:ar' },
+  { rx: /(الامارات|الإمارات|uae|emirates)/i, gl: 'AE', ceid: 'AE:ar' },
+  { rx: /(الكويت|kuwait)/i, gl: 'KW', ceid: 'KW:ar' },
+  { rx: /(قطر|qatar)/i, gl: 'QA', ceid: 'QA:ar' },
+  { rx: /(البحرين|bahrain)/i, gl: 'BH', ceid: 'BH:ar' },
+  { rx: /(عمان|عُمان|oman)/i, gl: 'OM', ceid: 'OM:ar' },
+  { rx: /(مصر|egypt)/i, gl: 'EG', ceid: 'EG:ar' },
+  { rx: /(الاردن|الأردن|jordan)/i, gl: 'JO', ceid: 'JO:ar' },
+  { rx: /(لبنان|lebanon)/i, gl: 'LB', ceid: 'LB:ar' },
+  { rx: /(العراق|iraq)/i, gl: 'IQ', ceid: 'IQ:ar' },
+  { rx: /(سوريا|syria)/i, gl: 'SY', ceid: 'SY:ar' },
+  { rx: /(فلسطين|غزه|غزة|palestin|gaza)/i, gl: 'PS', ceid: 'PS:ar' },
+];
+
+function newsLocale(query) {
+  const hit = NEWS_LOCALES.find((x) => x.rx.test(String(query || '')));
+  return hit || { gl: 'SA', ceid: 'SA:ar' };
+}
+
+function providerWeight(item, query, domainId) {
+  let w = providerWeights[item.provider] || 55;
+  const fresh = isFreshQuery(query);
+  if (fresh || domainId === 'politics') {
+    if (item.type === 'news') w += 12;
+    if (['Google News','Bing News','SABA RSS'].includes(item.provider)) w += 8;
+    if (item.type === 'paper') w -= 45;
+    if (item.provider === 'DuckDuckGo' || item.provider === 'Wikipedia') w -= 18;
+  }
+  if (domainId === 'science' && item.type === 'paper') w += 8;
+  if (domainId === 'technology' && item.type === 'github') w += 6;
+  return Math.max(10, Math.min(100, w));
+}
 
 const domainSources = {
   general: ['news', 'web', 'papers', 'discussions'],
@@ -108,10 +144,11 @@ function relevance(item, query, domainId) {
     return { keep: item.type === 'news' || item.provider === 'Google News' || item.provider === 'Bing News', overlap: 0, reason: 'generic' };
   }
 
-  let keep = overlap >= 1;
+  const threshold = core.length >= 4 ? 2 : 1;
+  let keep = overlap >= threshold;
   if (domainId === 'markets' && /\$?[a-z]{1,6}\b/i.test(query)) keep = keep || titleOverlap >= 1;
-  if (item.type === 'paper' && overlap < 1) keep = false;
-  if (item.provider === 'DuckDuckGo' && overlap < 1) keep = false;
+  if (item.type === 'paper' && overlap < Math.max(1, threshold)) keep = false;
+  if (item.provider === 'DuckDuckGo' && overlap < threshold) keep = false;
   return { keep, overlap, titleOverlap, reason: keep ? 'matched' : 'no-topic-overlap' };
 }
 
@@ -129,8 +166,8 @@ function canonicalKey(item) {
   return raw || normalize(item.title || '').replace(/\s+/g, ' ').trim();
 }
 
-function evidenceScore(item, query, rel) {
-  let score = providerWeights[item.provider] || 55;
+function evidenceScore(item, query, rel, domainId) {
+  let score = providerWeight(item, query, domainId);
   score += Math.min(20, Number(rel?.overlap || 0) * 5);
   score += Math.min(8, Number(rel?.titleOverlap || 0) * 4);
   if (item.publishedAt) {
@@ -204,7 +241,8 @@ function expandQueries(query, domainId) {
 async function searchGoogleNews(query) {
   const arabic = /[\u0600-\u06ff]/.test(query);
   const q = isFreshQuery(query) ? `${query} when:7d` : query;
-  const params = new URLSearchParams({ q, hl: arabic ? 'ar' : 'en', gl: arabic ? 'SA' : 'US', ceid: arabic ? 'SA:ar' : 'US:en' });
+  const locale = arabic ? newsLocale(query) : { gl: 'US', ceid: 'US:en' };
+  const params = new URLSearchParams({ q, hl: arabic ? 'ar' : 'en', gl: locale.gl, ceid: locale.ceid });
   return rssItems(await fetchText(`https://news.google.com/rss/search?${params}`), 'Google News', 'news', 'Google News');
 }
 
@@ -213,8 +251,24 @@ async function searchBingNews(query) {
   return rssItems(await fetchText(`https://www.bing.com/news/search?${params}`), 'Bing News', 'news', 'Bing News');
 }
 
-async function searchNews(query) {
-  const settled = await Promise.allSettled([searchGoogleNews(query), searchBingNews(query)]);
+async function searchSabaRss(query, domainId) {
+  const q = String(query || '');
+  const arabic = /[\u0600-\u06ff]/.test(q);
+  if (!arabic) return [];
+  if (domainId !== 'politics' && !/(اليمن|يمن|الحوث|صنعاء|عدن|المخا|البحر الأحمر)/i.test(q)) return [];
+  const feeds = [
+    ['https://www.saba.ye/ar/rsscatfeed2.htm', 'عربي دولي'],
+    ['https://www.saba.ye/ar/rsscatfeed1.htm', 'محلي'],
+  ];
+  const settled = await Promise.allSettled(feeds.map(async ([url, section]) =>
+    rssItems(await fetchText(url), 'SABA RSS', 'news', `سبأ - ${section}`)
+  ));
+  const rows = settled.flatMap((row) => row.status === 'fulfilled' ? row.value : []);
+  return rows.filter((item) => relevance(item, q, domainId).keep).slice(0, 18);
+}
+
+async function searchNews(query, domainId) {
+  const settled = await Promise.allSettled([searchGoogleNews(query), searchBingNews(query), searchSabaRss(query, domainId)]);
   return settled.flatMap((row) => row.status === 'fulfilled' ? row.value : []);
 }
 
@@ -304,7 +358,7 @@ async function searchGitHub(query) {
 }
 
 const adapters = {
-  news: (q) => searchNews(q), web: (q, d) => searchWeb(q, d), papers: (q) => searchPapers(q), discussions: (q) => searchDiscussions(q), github: (q) => searchGitHub(q),
+  news: (q, d) => searchNews(q, d), web: (q, d) => searchWeb(q, d), papers: (q) => searchPapers(q), discussions: (q) => searchDiscussions(q), github: (q) => searchGitHub(q),
 };
 
 function normalizeSources(domainId, requested, query) {
@@ -354,7 +408,7 @@ export async function runEmbeddedResearch({ query, domainId = 'general', modeId 
       const rel = relevance(item, cleanQuery, domainId);
       if (!rel.keep) { p.rejected += 1; rejectedByRelevance += 1; continue; }
       p.accepted += 1;
-      results.push({ ...item, relevanceOverlap: rel.overlap, evidenceScore: evidenceScore(item, cleanQuery, rel) });
+      results.push({ ...item, relevanceOverlap: rel.overlap, evidenceScore: evidenceScore(item, cleanQuery, rel, domainId) });
     }
   }
 
