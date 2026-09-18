@@ -9,6 +9,7 @@
     <link href="./opportunity-journey.css?v=1" rel="stylesheet">
     <link href="./x-sentiment.css?v=1" rel="stylesheet">
     <link href="./decision-intelligence-panel.css?v=1" rel="stylesheet">
+    <link href="./favorite-star.css?v=1" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -312,6 +313,7 @@
                     <button class="filter-btn" type="button" data-filter="DELAYED" aria-pressed="false" onclick="filterAction('DELAYED', this)">متأخرة</button>
                     <button class="filter-btn" type="button" data-filter="STALE" aria-pressed="false" onclick="filterAction('STALE', this)">قديمة</button>
                     <button class="filter-btn" type="button" data-filter="UNAVAILABLE" aria-pressed="false" onclick="filterAction('UNAVAILABLE', this)">ناقصة</button>
+                    <button class="filter-btn favorites-filter-btn" type="button" data-filter="FAVORITES" aria-pressed="false" onclick="filterAction('FAVORITES', this)">★ المفضلة <span id="favorites-count">0</span></button>
                 </div>
 
                 <div class="table-headers">
@@ -570,7 +572,7 @@
         let watchlist = [];
         let stockMarketData = {};
         let currentFilter = 'ALL';
-        const DATA_FILTERS = new Set(['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE']);
+        const DATA_FILTERS = new Set(['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE', 'FAVORITES']);
         let quoteRefreshInFlight = false;
         const VERIFIED_QUOTES_API = 'https://asiri-bot.onrender.com/api/unified-market/quotes';
         const QUOTE_REFRESH_MS = 10000; // 10 seconds; quoteRefreshInFlight prevents overlapping requests.
@@ -578,6 +580,8 @@
         const QUOTE_SNAPSHOT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
         const RESEARCH_NOTE_KEY = 'asiri_research_notes_v1';
         const WATCHLIST_KEY = 'asiri_ws_portfolio_v27';
+        const FAVORITES_KEY = 'asiri_favorite_symbols_v1';
+        let favorites = [];
         const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
         let technicalRequestInFlight = false;
         let activeMainTab = 'tools';
@@ -622,6 +626,7 @@
         }
 
         function init() {
+            try { favorites = normalizeWatchlist(JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]')) || []; } catch (_) { favorites = []; }
             const saved = localStorage.getItem(WATCHLIST_KEY);
             if (saved !== null) {
                 try {
@@ -650,6 +655,7 @@
 
             restoreVerifiedQuoteSnapshot();
             renderTable();
+            renderFavoritesCount();
             renderResearchHub();
             syncTechnicalSymbolOptions();
             renderTechnicalUnavailable(null, 'اختر رمزاً من قائمة المراقبة لعرض التحليل التقني.');
@@ -660,6 +666,29 @@
 
         function saveWatchlist() {
             try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist)); } catch (_) {}
+        }
+
+        function saveFavorites() {
+            favorites = favorites.filter((symbol) => watchlist.includes(symbol));
+            try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites)); } catch (_) {}
+            renderFavoritesCount();
+        }
+
+        function renderFavoritesCount() {
+            const count = document.getElementById('favorites-count');
+            if (count) count.textContent = String(favorites.length);
+        }
+
+        function isFavorite(symbol) {
+            return favorites.includes(normalizeSymbol(symbol));
+        }
+
+        function toggleFavorite(symbol) {
+            const sym = normalizeSymbol(symbol);
+            if (!sym || !watchlist.includes(sym)) return;
+            favorites = isFavorite(sym) ? favorites.filter((item) => item !== sym) : [...favorites, sym];
+            saveFavorites();
+            renderTable();
         }
 
         function setSyncIndicator(color) {
@@ -930,6 +959,7 @@
             const wrapper = document.getElementById('stocks-list-wrapper');
             const filtered = watchlist.filter(sym => {
                 if (currentFilter === 'ALL') return true;
+                if (currentFilter === 'FAVORITES') return isFavorite(sym);
                 return quoteDataState(stockMarketData[sym] || { symbol: sym }) === currentFilter;
             });
 
@@ -949,7 +979,7 @@
                 return `
                     <div class="stock-row ${flashCls}" id="row-${sym}">
                         <div class="stock-col-name">
-                            <div class="sym">${sym}</div>
+                            <div class="sym"><button class="favorite-star-btn ${isFavorite(sym) ? 'is-favorite' : ''}" type="button" data-symbol="${sym}" onclick="toggleFavorite(this.dataset.symbol)" aria-label="${isFavorite(sym) ? 'إزالة' : 'إضافة'} ${sym} ${isFavorite(sym) ? 'من' : 'إلى'} المفضلة" aria-pressed="${isFavorite(sym)}">${isFavorite(sym) ? '★' : '☆'}</button>${sym}</div>
                             <div class="name">بيانات أسعار موثقة</div>
                         </div>
                         <div class="stock-col-price ${colorCls}">${priceStr}</div>
@@ -971,8 +1001,10 @@
             if (!confirmed) return;
 
             watchlist = watchlist.filter((item) => item !== sym);
+            favorites = favorites.filter((item) => item !== sym);
             delete stockMarketData[sym];
             saveWatchlist();
+            saveFavorites();
             if (!watchlist.length) {
                 document.getElementById('sync-status-text').textContent = 'لا توجد رموز في قائمة المراقبة. أضف رمزاً يدوياً للمتابعة.';
                 setSyncIndicator('var(--text-muted)');
