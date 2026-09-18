@@ -97,7 +97,7 @@ for (const marker of [
   'quote-data-health.js?v=1',
   'smart-decision-lens-static.css?v=5',
   'smart-decision-lens-static.js?v=5',
-  "new Set(['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE'])",
+  "new Set(['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE', 'FAVORITES'])",
   'data-filter="DELAYED"',
   'data-filter="STALE"',
   'id="readiness-delayed"',

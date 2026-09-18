@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const html = await fs.readFile(new URL('./index.html', import.meta.url), 'utf8');
+const css = await fs.readFile(new URL('./favorite-star.css', import.meta.url), 'utf8');
+assert.match(html, /FAVORITES/);
+assert.match(html, /favorites-count/);
+assert.match(html, /favorite-star-btn/);
+assert.match(html, /toggleFavorite\(this\.dataset\.symbol\)/);
+assert.match(html, /FAVORITES_KEY/);
+assert.match(html, /saveFavorites\(\)/);
+assert.match(css, /\.favorite-star-btn\.is-favorite/);
+console.log('Favorite star contract passed');
