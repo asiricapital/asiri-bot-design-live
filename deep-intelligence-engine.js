@@ -1,5 +1,6 @@
 import net from 'node:net';
 import { runEmbeddedResearch } from './embedded-research.js';
+import ledger from './evidence-ledger-v6.js';
 
 const READ_TIMEOUT_MS = 8500;
 const MAX_READ_BYTES = 700_000;
@@ -218,7 +219,16 @@ function sentenceScore(sentence, queryTokens, source) {
 function claimsFromSource(source, query) {
   const base = source.fullText || source.snippet || source.title || '';
   const q = tokens(query);
+  /* نسبة الخبر إلى وكالة تظهر عادة في الترويسة لا داخل الجملة، فتُحسب مرة على مستوى المصدر. */
+  const independenceKey = ledger.originKey({
+    url: source.resolvedUrl || source.url,
+    rootDomain: rootDomain(source.resolvedUrl || source.url),
+    text: base.slice(0, 600),
+    title: source.title,
+    snippet: source.snippet,
+  });
   return sentenceSplit(base)
+    .filter((text) => ledger.looksLikeClaim(text))
     .map((text) => ({ text, score: sentenceScore(text, q, source) }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 5)
@@ -228,6 +238,7 @@ function claimsFromSource(source, query) {
       source: source.source,
       provider: source.provider,
       rootDomain: rootDomain(source.resolvedUrl || source.url),
+      independenceKey,
       publishedAt: source.publishedAt,
       evidenceScore: source.evidenceScore,
     }));
@@ -250,7 +261,7 @@ function hasNegation(text) {
   return /(ليس|لم |لن |لا |غير |not\b|no\b|denied|false|غير صحيح|نفى|نفت)/i.test(text);
 }
 
-function clusterClaims(claims) {
+function clusterClaims(claims, intent = {}) {
   const clusters = [];
   for (const claim of claims.sort((a, b) => b.score - a.score)) {
     let best = null;
@@ -262,25 +273,37 @@ function clusterClaims(claims) {
     if (best && bestSim >= 0.36) best.items.push(claim);
     else clusters.push({ canonical: claim.text, items: [claim] });
   }
-  return clusters.slice(0, 18).map((cluster, idx) => {
-    const domains = [...new Set(cluster.items.map((x) => x.rootDomain).filter(Boolean))];
-    const providers = [...new Set(cluster.items.map((x) => x.provider).filter(Boolean))];
-    const scores = cluster.items.map((x) => Number(x.evidenceScore || 0));
-    const numberVariants = [...new Set(cluster.items.flatMap((x) => [...numberSet(x.text)]))];
-    const negVariants = new Set(cluster.items.map((x) => hasNegation(x.text)));
-    const possibleConflict = cluster.items.length > 1 && (numberVariants.length > 2 || negVariants.size > 1);
+  const base = clusters.slice(0, 18).map((cluster, idx) => ({
+    id: idx + 1,
+    claim: cluster.canonical,
+    providers: [...new Set(cluster.items.map((x) => x.provider).filter(Boolean))],
+    sourceDomains: [...new Set(cluster.items.map((x) => x.rootDomain).filter(Boolean))],
+    items: cluster.items.slice(0, 6),
+  }));
+
+  const windowDays = ledger.windowForQuestion(intent);
+  const today = new Date();
+
+  return base.map((cluster) => {
+    const opposing = base.filter((other) => other.id !== cluster.id
+      && jaccard(other.claim, cluster.claim) >= 0.30
+      && (hasNegation(other.claim) !== hasNegation(cluster.claim) || numbersDiverge(other.claim, cluster.claim)));
+    const scored = ledger.scoreClaim(cluster, { windowDays, today, opposing });
     return {
-      id: idx + 1,
-      claim: cluster.canonical,
-      supportCount: cluster.items.length,
-      independentSources: domains.length,
-      providers,
-      sourceDomains: domains,
-      confidence: Math.min(99, Math.round((scores.reduce((a, b) => a + b, 0) / Math.max(1, scores.length)) * 0.72 + Math.min(22, domains.length * 6))),
-      possibleConflict,
-      items: cluster.items.slice(0, 6),
+      ...cluster,
+      ...scored,
+      possibleConflict: opposing.length > 0,
+      opposingClaims: opposing.slice(0, 2).map((x) => x.claim),
+      windowDays,
     };
   });
+}
+
+function numbersDiverge(a, b) {
+  const A = numberSet(a);
+  const B = numberSet(b);
+  if (!A.size || !B.size) return false;
+  return ![...A].some((x) => B.has(x));
 }
 
 function sourceIndependence(results) {
@@ -336,19 +359,25 @@ function timelineFrom(results) {
 }
 
 function deterministicAnswer(intent, clusters, results, gaps) {
-  const strong = clusters.filter((c) => c.independentSources >= 2 || c.confidence >= 78).slice(0, 6);
-  const uncertain = clusters.filter((c) => c.independentSources < 2 || c.possibleConflict).slice(0, 5);
+  const live = clusters.filter((c) => !c.stale);
+  const archived = clusters.filter((c) => c.stale).slice(0, 3);
+  const strong = live.filter((c) => c.independentSources >= 2 && c.confidence >= 60).slice(0, 6);
+  const uncertain = live.filter((c) => c.independentSources < 2 || c.possibleConflict).slice(0, 5);
   const citations = results.slice(0, 14).map((r, i) => ({ id: i + 1, ...r }));
   const citeFor = (claim) => {
     const hit = citations.find((c) => claim.items?.some((x) => x.url === c.url));
     return hit ? `[${hit.id}]` : '';
   };
   const nowLines = strong.length
-    ? strong.slice(0, 3).map((c) => `- ${c.claim} ${citeFor(c)}`).join('\n')
+    ? strong.slice(0, 3).map((c) => `- ${c.claim} (${c.stateLabel} · ${c.band?.low ?? 0}–${c.band?.high ?? 0}) ${citeFor(c)}`).join('\n')
     : '- لم تتجمع أدلة مستقلة كافية لبناء خلاصة عالية الثقة بعد.';
+  const band = (c) => `${c.band?.low ?? 0}–${c.band?.high ?? 0}`;
   const known = strong.length
-    ? strong.map((c) => `- ${c.claim} — دعم مستقل: ${c.independentSources}، ثقة: ${c.confidence}/100 ${citeFor(c)}`).join('\n')
+    ? strong.map((c) => `- ${c.claim} — ${c.stateLabel} · نطاق الثقة ${band(c)} · مصادر مستقلة ${c.independentSources} ${citeFor(c)}`).join('\n')
     : '- لا توجد ادعاءات وصلت بعد إلى عتبة الدعم المستقل المطلوبة.';
+  const archivedText = archived.length
+    ? `\n\n## محتوى أقدم من نطاق السؤال\n${archived.map((c) => `- ${c.claim} — ${c.ledger?.find((l) => l.delta === '×0')?.note || 'خارج النافذة الزمنية'} ${citeFor(c)}`).join('\n')}`
+    : '';
   const unknown = uncertain.length
     ? uncertain.map((c) => `- ${c.claim} — ${c.possibleConflict ? 'يوجد تعارض محتمل بين الأدلة' : 'يحتاج مصدرًا مستقلًا إضافيًا'} ${citeFor(c)}`).join('\n')
     : '- لم يكتشف المحرك تعارضًا واضحًا في أقوى الأدلة، مع بقاء احتمال وجود معلومات غير مفهرسة.';
@@ -360,7 +389,7 @@ function deterministicAnswer(intent, clusters, results, gaps) {
         ? 'الأهمية تُقاس بالنضج، الاستخدام العملي، النشاط، الأمان، الترخيص، وإمكانية الاعتماد.'
         : 'الأهمية تُقاس بمدى ثبات الأدلة، حداثتها، واستقلال مصادرها عن بعضها.';
   const gapText = gaps.length ? gaps.map((x) => `- ${x}`).join('\n') : '- لا توجد فجوة بحثية بارزة اكتشفها المسار الآلي.';
-  return `## الخلاصة الآن\n${nowLines}\n\n## ما نعرفه بدرجة أعلى\n${known}\n\n## ما يزال غير مؤكد أو مختلفًا عليه\n${unknown}\n\n## لماذا هذا مهم؟\n${why}\n\n## ما الذي ما زال يحتاج بحثًا؟\n${gapText}`;
+  return `## الخلاصة الآن\n${nowLines}${archivedText}\n\n## ما نعرفه بدرجة أعلى\n${known}\n\n## ما يزال غير مؤكد أو مختلفًا عليه\n${unknown}\n\n## لماذا هذا مهم؟\n${why}\n\n## ما الذي ما زال يحتاج بحثًا؟\n${gapText}`;
 }
 
 export async function runDeepInvestigation(query, options = {}) {
@@ -383,7 +412,7 @@ export async function runDeepInvestigation(query, options = {}) {
 
   t = Date.now();
   const qClaims = readRows.flatMap((x) => claimsFromSource(x, intent.query));
-  const initialClusters = clusterClaims(qClaims);
+  const initialClusters = clusterClaims(qClaims, intent);
   const initialIndependence = sourceIndependence(first.results || []);
   mark('claims', 'استخراج الادعاءات وتجميعها', t, { claims: qClaims.length, clusters: initialClusters.length, independentDomains: initialIndependence.length });
 
@@ -403,7 +432,7 @@ export async function runDeepInvestigation(query, options = {}) {
   const extraRead = await Promise.all(extraToRead.map(fetchReadableSource));
   const allRead = [...readRows, ...extraRead];
   const allClaims = allRead.flatMap((x) => claimsFromSource(x, intent.query));
-  const clusters = clusterClaims(allClaims);
+  const clusters = clusterClaims(allClaims, intent);
   const contradictions = clusters.filter((x) => x.possibleConflict).slice(0, 8);
   const independence = sourceIndependence(merged.results || []);
   const weakClusters = clusters.filter((x) => x.independentSources < 2).slice(0, 6);
@@ -411,12 +440,14 @@ export async function runDeepInvestigation(query, options = {}) {
   if (independence.length < 3) gaps.push('عدد المصادر المستقلة ما زال محدودًا.');
   if (contradictions.length) gaps.push(`هناك ${contradictions.length} مجموعات ادعاءات تحمل تعارضًا محتملًا وتحتاج مراجعة المصدر الأولي.`);
   if (weakClusters.length) gaps.push(`${weakClusters.length} ادعاءات مهمة ما زالت مدعومة بمصدر مستقل واحد فقط.`);
+  const staleCount = clusters.filter((x) => x.stale).length;
+  if (staleCount) gaps.push(`${staleCount} ادعاءات مستخرجة من محتوى أقدم من نطاق السؤال، وعُرضت كسياق لا كدليل على الوضع الحالي.`);
   if (intent.urgency === 'live' && !(merged.results || []).some((x) => x.publishedAt && Date.now() - new Date(x.publishedAt).getTime() < 48 * 3600_000)) gaps.push('لم يظهر عدد كافٍ من المصادر الحديثة جدًا خلال آخر 48 ساعة.');
   mark('cross-check', 'التحقق المتقاطع وكشف التعارضات', t, { clusters: clusters.length, contradictions: contradictions.length, independentDomains: independence.length });
 
   const results = (merged.results || []).slice(0, 36);
   const answer = deterministicAnswer(intent, clusters, results, gaps);
-  const coverage = Math.min(100, Math.round((Math.min(8, clusters.filter((x) => x.independentSources >= 2).length) / 8) * 55 + Math.min(6, independence.length) / 6 * 30 + Math.min(10, allRead.filter((x) => x.readStatus === 'read').length) / 10 * 15));
+  const coverage = Math.min(100, Math.round((Math.min(8, clusters.filter((x) => x.independentSources >= 2 && !x.stale).length) / 8) * 55 + Math.min(6, independence.length) / 6 * 30 + Math.min(10, allRead.filter((x) => x.readStatus === 'read').length) / 10 * 15));
 
   return {
     intent,
