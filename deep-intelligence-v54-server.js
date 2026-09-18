@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { runResearchOrchestratorV60 } from './research-orchestrator-v60.js';
+import { runEmbeddedResearch } from './embedded-research.js';
 import { getQuotes } from './market.js';
 import {
   startXOAuth,
@@ -121,6 +122,24 @@ app.get('/auth/x/callback',finishXOAuth);
 app.get('/api/x/status',xStatus);
 app.get('/api/x/feed',rateLimit,xFeedEndpoint);
 app.post('/api/x/disconnect',disconnectX);
+
+app.get('/api/politics/latest',rateLimit,async(req,res)=>{
+  try{
+    const topic=clean(req.query?.q||'',220);
+    const queries=topic
+      ? [topic]
+      : ['أهم الأخبار السياسية العالمية اليوم','أهم أخبار الشرق الأوسط والخليج السياسية اليوم'];
+    const settled=await Promise.allSettled(queries.map(q=>runEmbeddedResearch({query:q,domainId:'politics',modeId:'deep',sources:['news']})));
+    const all=settled.filter(x=>x.status==='fulfilled').flatMap(x=>x.value?.results||[]).filter(x=>x.type==='news');
+    const seen=new Set(); const results=[];
+    for(const item of all.sort((a,b)=>new Date(b.publishedAt||0)-new Date(a.publishedAt||0)||Number(b.evidenceScore||0)-Number(a.evidenceScore||0))){
+      const key=String(item.url||item.title||'').replace(/[?#].*$/,'').toLowerCase();
+      if(!key||seen.has(key))continue;seen.add(key);results.push(item);if(results.length>=14)break;
+    }
+    res.set('Cache-Control','no-store');
+    res.json({ok:true,results,fetchedAt:new Date().toISOString(),sources:['Google News','Bing News']});
+  }catch(error){res.status(502).json({ok:false,error:'تعذر تحديث الأخبار السياسية الآن.',detail:clean(error?.message||error,240)});}
+});
 
 app.get('/health',(_req,res)=>res.json({ok:true,service:'asiri-deep-intelligence-os',version:'6.0-research-orchestrator',researchModes:['quick','deep','max','live'],pipeline:['understand','plan','parallel-executors','primary-source-search','independent-verification','read','rerank','claims','gap-search','cross-check','x-signals','synthesize','challenge','publish'],xIntegration:true,xBackendReady:isXBackendReady(),serverLLMConfigured:Boolean(SERVER_LLM_BASE_URL&&SERVER_LLM_MODEL),clientBYOPSupported:true,trading:false,time:new Date().toISOString()}));
 
