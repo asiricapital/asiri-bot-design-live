@@ -699,9 +699,10 @@
         function toggleFavorite(symbol) {
             const sym = normalizeSymbol(symbol);
             if (!sym || !watchlist.includes(sym)) return;
-            favorites = isFavorite(sym) ? favorites.filter((item) => item !== sym) : [...favorites, sym];
+            const adding = !isFavorite(sym);
+            favorites = adding ? [...favorites, sym] : favorites.filter((item) => item !== sym);
             saveFavorites();
-            syncFavoriteScenarioOptions();
+            syncFavoriteScenarioOptions(adding ? sym : '');
             renderFavoritePerformance();
             renderTable();
         }
@@ -756,7 +757,6 @@
             if (existing && existing.auto !== true) return;
             const cached = autoScenarioCache.get(symbol);
             if (cached && Date.now() - cached < AUTO_SCENARIO_CACHE_MS) return;
-            autoScenarioCache.set(symbol, Date.now());
             try {
                 const response = await fetch(`https://asiri-bot.onrender.com/api/live-terminal/technicals/${encodeURIComponent(symbol)}`, { cache: 'no-store' });
                 if (!response.ok) return;
@@ -773,16 +773,17 @@
                 confidence = Math.max(20, Math.min(88, Math.round(confidence)));
                 const all = readFavoriteScenarios();
                 if (!all[symbol] || all[symbol].auto === true) all[symbol] = { watchLow, watchHigh, confirm, target, invalidation, auto: true, confidence, generatedAt: payload.observedAt || new Date().toISOString(), source: payload.source || 'Yahoo Finance • Daily OHLCV', basis: { support, resistance, atr14: atr, rsi14: rsi, trendLabel: tech.trendLabel || null, volumeRatio } };
-                saveFavoriteScenarios(all); loadFavoriteScenario();
+                saveFavoriteScenarios(all); autoScenarioCache.set(symbol, Date.now()); loadFavoriteScenario();
             } catch (_) { /* Missing technical history must not create synthetic levels. */ }
         }
 
-        function syncFavoriteScenarioOptions() {
+        function syncFavoriteScenarioOptions(preferredSymbol = '') {
             const select = document.getElementById('favorite-scenario-symbol');
             if (!select) return;
             const prior = select.value;
             select.innerHTML = favorites.map((symbol) => `<option value="${escapeMarkup(symbol)}">${escapeMarkup(symbol)}</option>`).join('');
-            if (prior && favorites.includes(prior)) select.value = prior;
+            if (preferredSymbol && favorites.includes(preferredSymbol)) select.value = preferredSymbol;
+            else if (prior && favorites.includes(prior)) select.value = prior;
             loadFavoriteScenario();
             if (select.value) ensureAutoFavoriteScenario(select.value);
         }
@@ -967,6 +968,8 @@
 
                 saveVerifiedQuoteSnapshot();
                 renderTable();
+                const activeFavorite = document.getElementById('favorite-scenario-symbol')?.value;
+                if (activeFavorite) ensureAutoFavoriteScenario(activeFavorite);
                 renderResearchHub();
                 const states = symbols.map((symbol) => quoteDataState(stockMarketData[symbol]));
                 const freshCount = states.filter((state) => state === 'FRESH').length;
