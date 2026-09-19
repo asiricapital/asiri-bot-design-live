@@ -20,7 +20,8 @@
     "check:decision-intelligence": "node check-decision-intelligence-panel.mjs",
     "check:favorites": "node check-favorites.mjs",
     "check:favorite-performance": "node check-favorite-performance.mjs",
-    "check:favorite-scenarios": "node check-favorite-scenarios.mjs"
+    "check:favorite-scenarios": "node check-favorite-scenarios.mjs",
+    "check:paper-lab-ui": "node check-paper-lab-ui.mjs"
   },
   "engines": { "node": "22.x" },
   "dependencies": {
