@@ -4,6 +4,7 @@ const html = await fs.readFile(new URL('./index.html', import.meta.url), 'utf8')
 const js = await fs.readFile(new URL('./paper-lab-ui.js', import.meta.url), 'utf8');
 const css = await fs.readFile(new URL('./paper-lab.css', import.meta.url), 'utf8');
 for (const marker of ['paper-lab-card','paper-lab-equity','paper-lab-pnl','paper-lab-start','paper-lab-run','paper-lab-ui.js','محاكاة فقط · لا تنفيذ']) assert.ok(html.includes(marker), `Missing UI marker: ${marker}`);
-for (const marker of ['/status','/start','/run','paperOnly','favorites']) assert.ok(js.includes(marker), `Missing API marker: ${marker}`);
+for (const marker of ['/status','/start','/run','paperOnly','favorites','defaultUniverse','SNAP','LASE','فحص ${count} سهمًا']) assert.ok(js.includes(marker), `Missing API marker: ${marker}`);
+assert.equal((js.match(/'[^']+'/g) || []).filter((value) => value === "'SNAP'").length > 0, true);
 assert.match(css, /@media\(max-width:520px\)/);
 console.log('Paper lab UI contract passed');
