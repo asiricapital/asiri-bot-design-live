@@ -1,4 +1,5 @@
 /* Asiri Opportunity Journey & Card of the Day Logic · Design Environment v3 */
+// paperOnly=true · executionAllowed=false · execution disabled · no broker order path
 (() => {
     'use strict';
 
@@ -86,12 +87,15 @@
         const symbolEl = document.getElementById('opt-symbol');
         const priceEl = document.getElementById('opt-price');
         const reasonEl = document.getElementById('opt-reason');
+        const badgeEl = document.getElementById('opt-badge');
+        const eligibilityEl = document.getElementById('opt-eligibility');
         const momentumEl = document.getElementById('opt-momentum');
         const liquidityEl = document.getElementById('opt-liquidity');
         const tgPreview = document.getElementById('telegram-alert-preview');
 
         if (symbolEl) symbolEl.textContent = bestSymbol;
         if (priceEl) priceEl.textContent = bestItem.price ? `$${Number(bestItem.price).toFixed(2)}` : 'غير متاح';
+        if (badgeEl) badgeEl.textContent = 'مرشح اليوم — قيد التحقق';
         renderXSentiment(await getXSentiment(bestSymbol));
         
         // Use real technicals if available, fallback to quote volumeRatio or simulation
@@ -109,10 +113,18 @@
                 const trendText = bestTechnicals.trendLabel || 'اتجاه غير محدد';
                 
                 reasonEl.textContent = `سهم ${bestSymbol} في مسار ${trendText} مع ${momentumText} و ${liquidityText}. البيانات الموثقة تدعم المراجعة البشرية.`;
+                if (eligibilityEl) {
+                    eligibilityEl.className = 'opportunity-eligibility review';
+                    eligibilityEl.textContent = 'بيانات المرشح مكتملة للفحص الفني؛ هذه ليست إشارة شراء ولا أمر تنفيذ. لا يفتح مختبر ASIRI صفقة إلا بعد اكتمال البوابات الموحدة.';
+                }
                 updateJourneyPath('review');
                 showTelegramPreview(bestSymbol, bestItem.price, rsi, volRatio, trendText);
             } else {
                 reasonEl.textContent = `سهم ${bestSymbol} قيد الرصد؛ بانتظار اكتمال القراءة الموثقة وتوفر البيانات التاريخية لتفعيل مسار التحليل الفني.`;
+                if (eligibilityEl) {
+                    eligibilityEl.className = 'opportunity-eligibility blocked';
+                    eligibilityEl.textContent = 'الشراء غير مؤهل: بيانات فنية أو تاريخية ناقصة. سيبقى السهم تحت المراقبة فقط.';
+                }
                 updateJourneyPath('analyze');
                 if (tgPreview) tgPreview.hidden = true;
             }
@@ -140,14 +152,14 @@
         if (!tgPreview || !tgContent) return;
 
         const time = new Date().toLocaleTimeString('ar-SA');
-        const message = `🚨 تنبيه ASIRI: فرصة حقيقية مكتملة\n` +
+        const message = `تنبيه ASIRI: مرشح للمراجعة — ليس أمر شراء\n` +
                         `--------------------------\n` +
                         `الرمز: ${symbol}\n` +
                         `السعر: $${Number(price).toFixed(2)}\n` +
                         `الاتجاه: ${trend || '—'}\n` +
                         `الزخم (RSI): ${rsi}\n` +
                         `السيولة (Vol): x${volRatio}\n` +
-                        `الحالة: جاهز للمراجعة البشرية\n` +
+                        `الحالة: مراجعة بشرية، دون تنفيذ\n` +
                         `الوقت: ${time}\n` +
                         `المصدر: محرك Asiri (بيانات حقيقية)\n` +
                         `--------------------------\n` +
