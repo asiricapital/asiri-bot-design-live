@@ -45,10 +45,10 @@
         const posts = document.getElementById('opt-x-posts');
         const asof = document.getElementById('opt-x-asof');
         if (!data) return;
-        if (status) { status.textContent = data.status === 'live' ? 'موثق الآن' : data.status === 'stale' ? 'قديم' : 'غير متاح'; status.className = `x-status ${data.status || 'unavailable'}`; }
+        if (status) { status.textContent = data.status === 'live' ? 'موثق الآن' : data.status === 'stale' ? 'قديم' : data.status === 'pending' ? 'جارٍ القراءة…' : 'غير متاح'; status.className = `x-status ${data.status || 'unavailable'}`; }
         if (label) label.textContent = data.label || 'غير متاح';
         if (score) score.textContent = Number.isFinite(Number(data.score)) ? `${data.score}/100` : '—';
-        if (posts) posts.textContent = Number.isFinite(Number(data.posts)) ? data.posts : '—';
+        if (posts) { const postCount = data.posts ?? data.postCount; posts.textContent = Number.isFinite(Number(postCount)) ? postCount : '—'; }
         if (asof) asof.textContent = data.asOf ? `آخر قراءة: ${new Date(data.asOf).toLocaleString('ar-SA')} · المصدر: X public posts` : 'لم يتم توثيق قراءة من X بعد.';
     }
 
