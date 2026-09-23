@@ -17,6 +17,7 @@
     "check:journey": "node check-opportunity-journey-v1.mjs",
     "check:opportunity-candidate": "node check-opportunity-candidate.mjs",
     "check:x-sentiment": "node check-x-sentiment.mjs",
+    "check:x-live-ui": "node check-x-live-ui.mjs",
     "check:lens": "node --check live-server.js && node --check smart-decision-lens.js && node check-smart-decision-lens.mjs",
     "check:decision-intelligence": "node check-decision-intelligence-panel.mjs",
     "check:favorites": "node check-favorites.mjs",
