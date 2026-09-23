@@ -1,3 +1,4 @@
+// paperOnly=true · executionAllowed=false · tradingEnabled=false
 (() => {
   const API = 'https://asiri-bot.onrender.com/api/paper-lab';
   const key = 'asiri_favorite_symbols_v1';
@@ -5,7 +6,9 @@
   const $ = (id) => document.getElementById(id);
   const money = (value) => Number.isFinite(Number(value)) ? `$${Number(value).toFixed(2)}` : '—';
   const pct = (value) => Number.isFinite(Number(value)) ? `${Number(value).toFixed(2)}%` : '—';
-  function favorites() { try { const v = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(v) && v.length ? v : defaultUniverse; } catch (_) { return defaultUniverse; } }
+  // The paper experiment must remain reproducible: browser favorites may contain
+  // an older universe, so the approved 14-symbol experiment is authoritative.
+  function favorites() { return defaultUniverse; }
   function render(data) {
     if (!data) return;
     $('paper-lab-mode').textContent = data.paperOnly ? 'محاكاة فقط · لا تنفيذ' : 'غير متاح';

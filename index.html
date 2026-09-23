@@ -1,3 +1,4 @@
+<!-- paperOnly=true · executionAllowed=false · tradingEnabled=false -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -403,7 +404,7 @@
             </section>
             <!-- Opportunity Card of the Day -->
             <section id="opportunity-day-card" class="opportunity-card" aria-labelledby="opt-title">
-                <div class="opportunity-badge">فرصة اليوم المقترحة</div>
+                <div class="opportunity-badge" id="opt-badge">مرشح اليوم — قيد التحقق</div>
                 <div class="opportunity-symbol-row">
                     <div class="opportunity-symbol" id="opt-symbol">—</div>
                     <div class="opportunity-price">
@@ -413,8 +414,9 @@
                 </div>
                 
                 <div class="opportunity-reason">
-                    <p id="opt-reason">بانتظار تحليل محرك السوق لاختيار أفضل فرصة بناءً على جودة البيانات الموثقة والسياق الفني.</p>
+                    <p id="opt-reason">بانتظار تحليل محرك السوق لاختيار أفضل مرشح بناءً على جودة البيانات الموثقة والسياق الفني.</p>
                 </div>
+                <div id="opt-eligibility" class="opportunity-eligibility pending" role="status">لا توجد صفقة مؤهلة حاليًا — لن يتم فتح شراء حتى تكتمل بوابات ASIRI.</div>
 
                 <!-- Analysis Indicators -->
                 <div class="opportunity-analysis-grid">
