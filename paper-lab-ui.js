@@ -6,6 +6,7 @@
   const $ = (id) => document.getElementById(id);
   const money = (value) => Number.isFinite(Number(value)) ? `$${Number(value).toFixed(2)}` : '—';
   const pct = (value) => Number.isFinite(Number(value)) ? `${Number(value).toFixed(2)}%` : '—';
+  const price = (value) => Number.isFinite(Number(value)) ? `$${Number(value).toFixed(3)}` : '—';
   // The paper experiment must remain reproducible: browser favorites may contain
   // an older universe, so the approved 14-symbol experiment is authoritative.
   function favorites() { return defaultUniverse; }
@@ -19,6 +20,11 @@
     const count = Array.isArray(data.symbols) ? data.symbols.length : 0;
     $('paper-lab-status').textContent = data.lastRunAt ? `آخر فحص: ${new Date(data.lastRunAt).toLocaleString('ar-SA')} · فحص ${count} سهمًا` : `المحفظة جاهزة للبدء · نطاق المراقبة ${count || defaultUniverse.length} سهمًا`;
     $('paper-lab-start').textContent = data.startedAt ? 'استمرار التجربة' : 'بدء تجربة 1,000 دولار';
+    const decisions = $('paper-lab-decisions');
+    if (decisions) {
+      const rows = Array.isArray(data.decisionAudit) ? data.decisionAudit : [];
+      decisions.innerHTML = rows.length ? rows.map((row) => `<article class="paper-lab-decision" data-state="${row.eligible ? 'ready' : 'wait'}"><div><strong>${row.symbol}</strong><span>${row.eligible ? 'مؤهل للمراجعة' : 'انتظار'}</span></div><small>السعر: ${price(row.price)} · الدخول: ${price(row.entry)} · وقف: ${price(row.stop)} · الهدف: ${price(row.target)}</small><p>${row.reason || 'لم يصل تفسير القرار بعد.'}</p></article>`).join('') : '<div class="paper-lab-empty">لم يكتمل فحص بعد. اضغط «تحديث المحاكاة» لبدء دورة القراءة.</div>';
+    }
   }
   async function call(path, options = {}) { const response = await fetch(`${API}${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, cache: 'no-store' }); const data = await response.json(); if (!response.ok) throw new Error(data.message || data.error || 'تعذر الاتصال بمختبر المحاكاة'); return data; }
   async function refresh() { try { render(await call('/status')); } catch (error) { $('paper-lab-status').textContent = `تعذر التحديث: ${error.message}`; } }
