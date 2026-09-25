@@ -1,0 +1,503 @@
+/* Compact price watchlist. Load after the existing page and feature styles. */
+:root {
+    --watchlist-border: rgba(100, 139, 177, .22);
+    --watchlist-muted: #a1b3c7;
+}
+
+.account-bar {
+    gap: 12px;
+    min-height: 64px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 18px 8px;
+}
+.account-bar .account-status {
+    min-width: 0;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    font-size: .71rem;
+    line-height: 1.6;
+}
+#sync-status-text {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.account-status .live-dot { flex: 0 0 6px; width: 6px; height: 6px; }
+.account-bar .btn-account {
+    min-height: 44px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: .75rem;
+    white-space: nowrap;
+}
+.nav-pills-container {
+    top: var(--account-bar-height, 68px);
+    gap: 6px;
+    padding: 7px 16px;
+    scroll-padding-inline: 16px;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+.nav-pills-container .nav-pill {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 7px 13px;
+    border-radius: 11px;
+    font-size: .76rem;
+    line-height: 1.5;
+}
+.nav-pills-container .nav-pill.active {
+    border-color: rgba(0, 229, 255, .55);
+    background: rgba(0, 229, 255, .12);
+    color: #c5faff;
+}
+.main-container { padding-top: 12px; }
+.notice-banner { padding: 10px 12px; margin-bottom: 12px; }
+.notice-banner h3 { font-size: .82rem; }
+.notice-banner p { font-size: .68rem; line-height: 1.65; overflow-wrap: anywhere; }
+
+#sec-tools .card-section {
+    min-height: 0;
+    padding: 18px;
+    background: linear-gradient(160deg, #0d1e32, #0a1727 65%);
+}
+#sec-tools .section-header-meta { font-size: .6rem; color: #7dd8e7; letter-spacing: .07em; }
+#sec-tools .section-title-main { margin-bottom: 4px; font-size: 1.17rem; line-height: 1.6; }
+#sec-tools .section-desc { max-width: 740px; margin-bottom: 14px; font-size: .74rem; line-height: 1.75; }
+#sec-tools .table-headers { display: none; }
+
+#watchlist-toolbar {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(155px, .45fr) auto;
+    align-items: end;
+    gap: 8px;
+    margin: 12px 0 8px;
+}
+#watchlist-toolbar > * { min-width: 0; }
+#watchlist-toolbar > label:not(.watchlist-search) {
+    display: grid;
+    gap: 3px;
+    color: var(--watchlist-muted);
+    font-size: .66rem;
+    line-height: 1.5;
+}
+.watchlist-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0 12px;
+    border: 1px solid var(--watchlist-border);
+    border-radius: 11px;
+    background: #071421;
+    color: var(--watchlist-muted);
+    font-size: .76rem;
+    white-space: nowrap;
+}
+.watchlist-search:focus-within { border-color: var(--accent-cyan); }
+#watchlist-search {
+    min-width: 0;
+    width: 0;
+    flex: 1 1 auto;
+    min-height: 44px;
+    border: 0;
+    outline: none;
+    padding: 6px 0;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 16px;
+}
+#watchlist-search::placeholder { color: #8ba0b7; opacity: 1; }
+#watchlist-sort,
+#watchlist-favorites {
+    min-height: 46px;
+    max-width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--watchlist-border);
+    border-radius: 11px;
+    background: #0a192a;
+    color: #d8e5f2;
+    font: inherit;
+    cursor: pointer;
+}
+#watchlist-sort { width: 100%; font-size: 16px; }
+#watchlist-favorites { font-size: .73rem; font-weight: 700; white-space: nowrap; }
+#watchlist-favorites[aria-pressed="true"] {
+    border-color: rgba(226, 188, 83, .65);
+    background: rgba(226, 188, 83, .11);
+    color: #ffe5a0;
+}
+#watchlist-result-count {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--watchlist-muted);
+    font-size: .68rem;
+    line-height: 1.6;
+}
+#watchlist-session-summary {
+    margin: 6px 0 12px;
+    border-inline-start: 2px solid rgba(0, 229, 255, .5);
+    padding: 3px 9px;
+    color: #a9c3d5;
+    font-size: .67rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+#watchlist-preference-note,
+#watchlist-sort-note {
+    color: #e1cf9d;
+    font-size: .66rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+#watchlist-preference-note:empty { display: none; }
+#sec-tools .filter-grid {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0 12px;
+    padding-bottom: 3px;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #29465d transparent;
+}
+#sec-tools .filter-grid .filter-btn {
+    flex: 1 0 62px;
+    width: auto;
+    min-height: 44px;
+    padding: 7px 12px;
+    border-color: var(--watchlist-border);
+    border-radius: 9px;
+    font-size: .73rem;
+    line-height: 1.45;
+    white-space: nowrap;
+}
+#sec-tools .filter-grid .filter-btn.active {
+    border-color: rgba(0, 229, 255, .5);
+    background: rgba(0, 229, 255, .1);
+}
+
+#stocks-list-wrapper { min-width: 0; }
+#stocks-list-wrapper .stock-row.watchlist-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "main pin" "state toggle" "details details";
+    gap: 0 12px;
+    align-items: center;
+    min-height: 0;
+    margin-bottom: 8px;
+    padding: 9px 13px;
+    border: 1px solid var(--watchlist-border);
+    border-radius: 13px;
+    background: #091624;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+    scroll-margin-top: calc(var(--account-bar-height, 68px) + 72px);
+}
+#stocks-list-wrapper .watchlist-row.tick-flash {
+    border-color: rgba(0, 229, 255, .55);
+    background: #102a37;
+}
+.watchlist-main {
+    grid-area: main;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 10px;
+    min-width: 0;
+}
+.watchlist-main > div { min-width: 0; }
+.watchlist-main .sym {
+    color: #f5faff;
+    font-size: 1.08rem;
+    font-weight: 900;
+    letter-spacing: .025em;
+    direction: ltr;
+    overflow-wrap: anywhere;
+}
+.watchlist-main .name,
+.watchlist-main small { display: block; color: var(--watchlist-muted); font-size: .65rem; line-height: 1.5; }
+.watchlist-main .watchlist-daily {
+    flex: 0 0 100%;
+    min-width: 0;
+    margin-top: 3px;
+    font-size: .62rem;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+.watchlist-main .watchlist-daily.val-pos { color: #62dfb2; }
+.watchlist-main .watchlist-daily.val-neg { color: #ffa6b4; }
+.watchlist-main .watchlist-daily.val-neutral { color: #97abc0; }
+.watchlist-main .watchlist-price {
+    flex: 0 0 auto;
+    color: #edfaff;
+    direction: ltr;
+    font-size: 1.16rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.025em;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+.watchlist-main .watchlist-price.val-neutral { color: #9baec2; font-size: .87rem; letter-spacing: 0; }
+.watchlist-pin,
+.watchlist-toggle {
+    min-height: 44px;
+    min-width: 44px;
+    border: 0;
+    background: transparent;
+    color: #a2b7cc;
+    font: inherit;
+    cursor: pointer;
+    border-radius: 9px;
+}
+.watchlist-pin { grid-area: pin; justify-self: end; padding: 5px; font-size: 1.3rem; line-height: 1; }
+.watchlist-pin[aria-pressed="true"] { color: #f5cd6a; background: rgba(226, 188, 83, .07); }
+.watchlist-toggle {
+    grid-area: toggle;
+    justify-self: end;
+    padding: 5px 4px;
+    font-size: .68rem;
+    font-weight: 700;
+    color: #9fe7ee;
+    white-space: nowrap;
+}
+.watchlist-toggle[aria-expanded="true"] { color: #e0fcff; }
+.watchlist-state-line {
+    grid-area: state;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px 8px;
+    min-width: 0;
+    padding: 3px 0;
+    color: var(--watchlist-muted);
+    font-size: .65rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.watchlist-state-line .badge-data-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 24px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-size: .62rem;
+    line-height: 1.5;
+}
+.watchlist-details {
+    grid-area: details;
+    min-width: 0;
+    margin-top: 5px;
+    padding-top: 12px;
+    padding-bottom: 4px;
+    border-top: 1px solid var(--watchlist-border);
+}
+.watchlist-details[hidden],
+#watchlist-undo[hidden] { display: none; }
+.watchlist-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 5px 14px;
+    margin: 0 0 10px;
+    color: #afc0d2;
+    font-size: .69rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+.watchlist-meta > * { min-width: 0; max-width: 100%; }
+.watchlist-meta b,
+.watchlist-meta strong { color: #dceaf6; font-weight: 700; }
+.watchlist-movement { margin: 5px 0 9px; color: #a9c1d3; font-size: .7rem; line-height: 1.7; }
+.watchlist-chart {
+    min-width: 0;
+    margin: 8px 0 12px;
+    border: 1px solid rgba(60, 109, 144, .25);
+    border-radius: 10px;
+    padding: 10px;
+    background: rgba(0, 229, 255, .025);
+    color: var(--watchlist-muted);
+    font-size: .66rem;
+    line-height: 1.65;
+}
+.watchlist-chart svg { display: block; width: 100%; max-width: 100%; height: 74px; overflow: hidden; }
+.watchlist-chart p,
+.watchlist-chart figcaption { margin-top: 5px; }
+.watchlist-history-button {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin: 0 0 10px;
+    padding: 7px 10px;
+    border: 1px solid rgba(0, 229, 255, .3);
+    border-radius: 9px;
+    background: rgba(0, 229, 255, .05);
+    color: #a9edf5;
+    font: inherit;
+    font-size: .69rem;
+    font-weight: 700;
+    line-height: 1.6;
+    cursor: pointer;
+}
+.watchlist-history-button:disabled { color: #9eb2c5; border-color: var(--watchlist-border); background: #0b1b2b; cursor: wait; }
+.watchlist-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+}
+.watchlist-actions > button,
+.watchlist-actions .smart-summary-btn {
+    flex: 1 1 100px;
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    margin: 0;
+    padding: 7px 9px;
+    border: 1px solid var(--watchlist-border);
+    border-radius: 9px;
+    background: #102337;
+    color: #d1e5f1;
+    font: inherit;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1.6;
+    cursor: pointer;
+}
+.watchlist-actions .smart-summary-btn { border-color: rgba(0, 229, 255, .34); color: #a9f0f8; background: rgba(0, 229, 255, .07); }
+.watchlist-menu { position: relative; flex: 0 0 44px; min-width: 44px; margin-inline-start: auto; }
+.watchlist-menu summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--watchlist-border);
+    border-radius: 9px;
+    background: #102337;
+    color: #b8cde0;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.watchlist-menu summary::-webkit-details-marker { display: none; }
+.watchlist-menu[open] summary { border-color: #7299b5; }
+.watchlist-menu .remove-symbol-btn {
+    position: absolute;
+    z-index: 5;
+    inset-inline-end: 0;
+    top: calc(100% + 5px);
+    width: max-content;
+    min-width: 132px;
+    max-width: 220px;
+    min-height: 44px;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 9px;
+    background: #2d1824;
+    color: #ffc1c5;
+    font-size: .71rem;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .3);
+}
+.watchlist-empty {
+    padding: 28px 12px;
+    border: 1px dashed var(--watchlist-border);
+    border-radius: 12px;
+    color: var(--watchlist-muted);
+    text-align: center;
+    font-size: .78rem;
+    line-height: 1.8;
+}
+.watchlist-empty strong { display: block; margin-bottom: 5px; color: #dbe9f3; }
+#watchlist-undo {
+    position: fixed;
+    inset-inline: 16px;
+    max-width: 1168px;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 auto;
+    padding: 8px 10px;
+    border: 1px solid rgba(0, 229, 255, .44);
+    border-radius: 12px;
+    background: #133144;
+    color: #e1f5fa;
+    font-size: .73rem;
+    line-height: 1.6;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+}
+#watchlist-undo > span { min-width: 0; overflow-wrap: anywhere; }
+#watchlist-undo button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 6px 13px;
+    border: 1px solid rgba(130, 235, 245, .4);
+    border-radius: 9px;
+    background: #194558;
+    color: #d4fbff;
+    font: inherit;
+    font-size: .73rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+#sec-tools button:focus-visible,
+#sec-tools select:focus-visible,
+.watchlist-menu summary:focus-visible,
+.account-bar button:focus-visible,
+.nav-pills-container button:focus-visible {
+    outline: 2px solid #66e4f1;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .account-bar { padding-inline: 12px; gap: 10px; }
+    .account-bar .account-status { font-size: .65rem; line-height: 1.55; }
+    .account-bar .btn-account { padding-inline: 10px; font-size: .7rem; }
+    .nav-pills-container { padding-inline: 12px; scroll-padding-inline: 12px; }
+    .nav-pills-container .nav-pill { padding-inline: 12px; font-size: .72rem; }
+    .main-container { padding: 10px 12px 40px; }
+    .notice-banner { margin-bottom: 10px; border-radius: 10px; }
+    #sec-tools .card-section { padding: 12px; border-radius: 14px; }
+    #sec-tools .section-title-main { font-size: 1.04rem; }
+    #sec-tools .section-desc { margin-bottom: 10px; font-size: .7rem; line-height: 1.7; }
+    #watchlist-toolbar { grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }
+    #watchlist-toolbar .watchlist-search { grid-column: 1 / -1; }
+    #watchlist-sort { padding-inline: 8px; }
+    #watchlist-favorites { padding-inline: 9px; font-size: .69rem; }
+    #sec-tools .filter-grid .filter-btn { flex: 1 0 58px; padding-inline: 10px; font-size: .69rem; }
+    #stocks-list-wrapper .stock-row.watchlist-row { padding: 7px 10px; gap: 0 7px; border-radius: 11px; }
+    .watchlist-main { gap: 0 7px; }
+    .watchlist-main .sym { font-size: 1rem; }
+    .watchlist-main .watchlist-price { font-size: 1.05rem; }
+    .watchlist-state-line { gap: 4px 6px; }
+    .watchlist-actions > button,
+    .watchlist-actions .smart-summary-btn { flex-basis: 90px; padding-inline: 6px; }
+    #watchlist-undo { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+}
+
+@media (max-width: 360px) {
+    .main-container { padding-inline: 9px; }
+    #sec-tools .card-section { padding: 10px; }
+    .watchlist-main .sym { font-size: .92rem; }
+    .watchlist-main .watchlist-price { font-size: 1rem; }
+    .watchlist-toggle { font-size: .63rem; padding-inline: 0; }
+    .watchlist-state-line { font-size: .61rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #stocks-list-wrapper .watchlist-row { transition: none; }
+    .account-status .live-dot { animation: none; }
+}
