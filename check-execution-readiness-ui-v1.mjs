@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+const html = await fs.readFile(new URL('./index.html', import.meta.url), 'utf8');
+const js = await fs.readFile(new URL('./execution-readiness-ui.js', import.meta.url), 'utf8');
+assert.ok(html.includes('execution-readiness-card'));
+assert.ok(html.includes('execution-lock-toggle'));
+assert.ok(html.includes('execution-readiness-ui.js'));
+assert.ok(js.includes('/api/execution-readiness'));
+assert.ok(js.includes('executionAllowed'));
+assert.ok(js.includes('brokerSubmission'));
+assert.ok(!/fetch\([^)]*method:\s*[\x27\"]POST/i.test(js));
+console.log('Execution readiness UI contract passed: visible lock, GET-only status, no activation request.');
