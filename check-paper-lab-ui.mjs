@@ -7,4 +7,8 @@ for (const marker of ['paper-lab-card','paper-lab-equity','paper-lab-pnl','paper
 for (const marker of ['/status','/start','/run','paperOnly','favorites','defaultUniverse','selectedSymbols','paper-lab-symbol-picker','paper-lab-indicators','RSI(14)','MACD','CRDL','SNAP','LASE','فحص ${count} سهمًا']) assert.ok(js.includes(marker), `Missing API marker: ${marker}`);
 assert.equal((js.match(/'[^']+'/g) || []).filter((value) => value === "'SNAP'").length > 0, true);
 assert.match(css, /@media\(max-width:520px\)/);
+for (const marker of ['paper-lab-quality','paper-lab-sample-fill','paper-lab-winrate','paper-lab-max-dd','paper-lab-sharpe','paper-lab-spread-cost','paper-lab-trade-log','paper-lab-rule-grid','paper-lab-rules-note']) assert.ok(html.includes(marker), `Missing quality marker: ${marker}`);
+for (const marker of ['renderQuality','renderRules','renderTradeLog','sharpeRatio','totalSpreadCost','maxDrawdownPct','winRatePct']) assert.ok(js.includes(marker), `Missing quality logic: ${marker}`);
+assert.ok(!html.includes('حد المركز 20% · احتياطي نقدي 20%'), 'Stale hard-coded rules must not contradict the engine');
+assert.match(css, /\.paper-lab-quality-grid/);
 console.log('Paper lab UI contract passed');
