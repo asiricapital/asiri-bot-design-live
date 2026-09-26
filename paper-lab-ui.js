@@ -43,6 +43,36 @@
     }));
     card.hidden = false; card.innerHTML = `<div class="paper-lab-positions-title">المراكز الورقية المفتوحة · ${positions.length}</div>${cards.join('')}`;
   }
+  const setText = (id, text) => { const node = $(id); if (node) node.textContent = text; };
+  const num = (value) => (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) ? null : Number(value);
+  function renderQuality(data) {
+    const sample = data.sample || {}; const closed = num(sample.closedTrades) ?? num(data.closedTrades) ?? 0; const required = num(sample.required) ?? 100; const progress = Math.min(100, closed / required * 100);
+    setText('paper-lab-sample-count', `${closed} / ${required} صفقة مغلقة`);
+    const fill = $('paper-lab-sample-fill'); if (fill) fill.style.width = `${progress.toFixed(1)}%`; fill?.parentElement?.setAttribute('aria-valuenow', progress.toFixed(0));
+    setText('paper-lab-sample-label', sample.label || (closed >= required ? 'العينة كافية للتقييم الأولي' : 'عينة غير كافية — لا يُبنى عليها قرار مالي'));
+    $('paper-lab-quality')?.setAttribute('data-sample', closed >= required ? 'ready' : 'insufficient');
+    const win = num(data.winRatePct); setText('paper-lab-winrate', win === null ? '—' : `${win.toFixed(1)}%`);
+    const pf = num(data.profitFactor); setText('paper-lab-profit-factor', pf === null ? (closed ? 'لا خسائر بعد' : '—') : pf.toFixed(2));
+    const dd = num(data.maxDrawdownPct); setText('paper-lab-max-dd', dd === null ? '—' : `${dd.toFixed(2)}%`);
+    const sharpe = num(data.sharpeRatio); const minDays = num(data.sharpeMinDays) ?? 20; const days = num(data.tradingDays);
+    setText('paper-lab-sharpe', sharpe !== null ? sharpe.toFixed(2) : (data.sharpeMinDays === undefined ? 'غير متاح' : `بعد ${minDays} يومًا${days !== null ? ` (${days})` : ''}`));
+    setText('paper-lab-fees', data.totalFees === undefined ? '—' : money(data.totalFees));
+    setText('paper-lab-spread-cost', data.totalSpreadCost === undefined ? 'غير متاح' : money(data.totalSpreadCost));
+  }
+  function renderRules(rules) {
+    if (!rules || typeof rules !== 'object') return;
+    const p = (v) => num(v) === null ? '—' : `${(Number(v) * 100).toFixed(Number(v) * 100 % 1 ? 1 : 0)}%`; const bps = (v) => num(v) === null ? '—' : `${(Number(v) / 100).toFixed(2)}%`;
+    const items = [['الوضع', rules.mode === 'balanced' ? 'متوازن' : (rules.mode || '—')], ['الثقة', num(rules.entryConfidenceMin) === null ? '—' : `${rules.entryConfidenceMin}/100+`], ['حجم المركز', p(rules.maxPositionPct)], ['الاحتياطي', p(rules.minCashPct)], ['العائد الأدنى', p(rules.minRewardPct)], ['المخاطرة القصوى', p(rules.maxRiskPct)], ['العائد/المخاطرة', num(rules.minRewardRisk) === null ? '—' : `${rules.minRewardRisk}+`], ['حد الخسارة اليومي', p(rules.dailyLossLimitPct)]];
+    const grid = $('paper-lab-rule-grid'); if (grid) grid.innerHTML = items.map(([k, v]) => `<span>${escapeHtml(k)}: ${escapeHtml(v)}</span>`).join('');
+    const costs = [`عمولة ${bps(rules.feeBps)}`, `انزلاق ${bps(rules.slippageBps)}`, num(rules.defaultHalfSpreadBps) === null ? 'فرق العرض/الطلب غير محسوب بعد' : `نصف فرق العرض/الطلب الحقيقي (افتراضي ${bps(rules.defaultHalfSpreadBps)})`];
+    setText('paper-lab-rules-note', `القواعد من محرك المحاكاة مباشرة: حد المركز ${p(rules.maxPositionPct)} · احتياطي نقدي ${p(rules.minCashPct)} · ${costs.join(' · ')} · حد خسارة يومي ${p(rules.dailyLossLimitPct)} · Long-only.`);
+  }
+  function renderTradeLog(trades) {
+    const node = $('paper-lab-trade-log'); if (!node) return;
+    const closed = (Array.isArray(trades) ? trades : []).filter((trade) => trade.side === 'SELL').slice(-10).reverse();
+    const reasons = { target_exit: 'بلغ الهدف', risk_exit: 'وقف الخسارة' };
+    node.innerHTML = closed.length ? closed.map((trade) => { const pnl = num(trade.netPnl); return `<article class="paper-lab-trade" data-state="${pnl !== null && pnl < 0 ? 'loss' : 'gain'}"><div><strong>${escapeHtml(trade.symbol)}</strong><span>${escapeHtml(reasons[trade.reason] || trade.reason || '—')}</span><b>${money(pnl)}</b></div><small>دخول ${price(trade.entryPrice)} ← خروج ${price(trade.exitPrice)} · الرسوم ${money(trade.fees)}${trade.spreadCost !== undefined ? ` · فرق السعر ${money(trade.spreadCost)}` : ''} · ${observed(trade.closedAt)}</small></article>`; }).join('') : '<div class="paper-lab-empty">لا توجد صفقات مغلقة بعد.</div>';
+  }
   function render(data) {
     if (!data) return;
     $('paper-lab-mode').textContent = data.paperOnly ? 'محاكاة فقط · لا تنفيذ' : 'غير متاح';
@@ -53,6 +83,7 @@
     const count = Array.isArray(data.symbols) ? data.symbols.length : 0;
     $('paper-lab-status').textContent = data.lastRunAt ? `آخر فحص: ${new Date(data.lastRunAt).toLocaleString('ar-SA')} · فحص ${count} سهمًا` : `المحفظة جاهزة للبدء · نطاق المراقبة ${count || defaultUniverse.length} سهمًا`;
     renderSourceHealth();
+    renderQuality(data); renderRules(data.rules); renderTradeLog(data.trades);
     $('paper-lab-start').textContent = data.startedAt ? 'استمرار التجربة' : 'بدء تجربة 1,000 دولار';
     const decisions = $('paper-lab-decisions');
     if (decisions) {
@@ -63,7 +94,7 @@
   async function callMarket(path) { const response = await fetch(`${MARKET_API}${path}`, { cache: 'no-store' }); const data = await response.json(); if (!response.ok) throw new Error(data.message || data.error || 'تعذر تحديث السعر الحالي'); return data; }
   function finiteSeries(values) { return (Array.isArray(values) ? values : []).map((x) => Number(x)).filter(Number.isFinite); }
   function linePath(values, width = 160, height = 48, minOverride = null, maxOverride = null) { const nums = finiteSeries(values); if (nums.length < 2) return ''; const min = minOverride ?? Math.min(...nums); const max = maxOverride ?? Math.max(...nums); const span = max - min || 1; return nums.map((value, index) => `${(index / (nums.length - 1) * width).toFixed(1)},${(height - ((value - min) / span * (height - 4)) - 2).toFixed(1)}`).join(' '); }
-  function rsiSeries(closes, period = 14) { const out = []; let gains = 0; let losses = 0; for (let i = 1; i < closes.length; i += 1) { const delta = closes[i] - closes[i - 1]; gains += Math.max(0, delta); losses += Math.max(0, -delta); if (i > period) { const oldDelta = closes[i - period] - closes[i - period - 1]; gains -= Math.max(0, oldDelta); losses -= Math.max(0, -oldDelta); } if (i >= period) out.push(losses === 0 ? 100 : 100 - (100 / (1 + gains / losses))); } return out; }
+  function rsiSeries(closes, period = 14) { const out = []; if (closes.length <= period) return out; let gain = 0; let loss = 0; for (let i = 1; i <= period; i += 1) { const d = closes[i] - closes[i - 1]; gain += Math.max(0, d); loss += Math.max(0, -d); } gain /= period; loss /= period; out.push(loss === 0 ? 100 : 100 - 100 / (1 + gain / loss)); for (let i = period + 1; i < closes.length; i += 1) { const d = closes[i] - closes[i - 1]; gain = (gain * (period - 1) + Math.max(0, d)) / period; loss = (loss * (period - 1) + Math.max(0, -d)) / period; out.push(loss === 0 ? 100 : 100 - 100 / (1 + gain / loss)); } return out; }
   function emaSeries(values, period) { const nums = finiteSeries(values); if (!nums.length) return []; const alpha = 2 / (period + 1); let previous = nums[0]; return nums.map((value, index) => { if (index === 0) return previous; previous = value * alpha + previous * (1 - alpha); return previous; }); }
   function macdSeries(closes) { const fast = emaSeries(closes, 12); const slow = emaSeries(closes, 26); const macd = fast.map((value, index) => value - (slow[index] || value)); const signal = emaSeries(macd, 9); return { macd: macd.slice(25), signal: signal.slice(25), histogram: macd.slice(25).map((value, index) => value - (signal[index] || 0)) }; }
   function indicatorCard(row) { const t = row.technicals || {}; const closes = (Array.isArray(t.sparkline) ? t.sparkline : []).map((point) => Number(point?.close)).filter(Number.isFinite); const rsi = Number(t.rsi14); const macd = Number(t.macd); const signal = Number(t.signal); const histogram = Number(t.histogram); const rsiPath = linePath(rsiSeries(closes), 160, 48, 0, 100); const macdData = macdSeries(closes); const macdPath = linePath(macdData.macd, 160, 48); const signalPath = linePath(macdData.signal, 160, 48); return `<article class="paper-lab-indicator-card"><div class="paper-lab-indicator-title"><b>${escapeHtml(row.symbol)}</b><span>${price(row.price)}</span></div><div class="paper-lab-indicator-values"><span>RSI(14) <b>${Number.isFinite(rsi) ? rsi.toFixed(2) : 'غير متاح'}</b></span><span>MACD <b>${Number.isFinite(macd) ? macd.toFixed(4) : 'غير متاح'}</b></span><span>Signal <b>${Number.isFinite(signal) ? signal.toFixed(4) : 'غير متاح'}</b></span><span>Histogram <b>${Number.isFinite(histogram) ? histogram.toFixed(4) : 'غير متاح'}</b></span></div><div class="paper-lab-chart-row"><div><small>RSI · نطاق 0–100</small>${rsiPath ? `<svg viewBox="0 0 160 48" role="img" aria-label="RSI ${escapeHtml(row.symbol)}"><line x1="0" y1="12" x2="160" y2="12" class="rsi-overbought"/><line x1="0" y1="38" x2="160" y2="38" class="rsi-oversold"/><polyline points="${rsiPath}" class="rsi-line"/></svg>` : '<em>لا توجد سلسلة كافية</em>'}</div><div><small>MACD · خط MACD/Signal</small>${macdPath && signalPath ? `<svg viewBox="0 0 160 48" role="img" aria-label="MACD ${escapeHtml(row.symbol)}"><polyline points="${macdPath}" class="macd-line"/><polyline points="${signalPath}" class="signal-line"/></svg>` : '<em>لا توجد سلسلة كافية</em>'}</div></div><div class="paper-lab-indicator-source">المصدر: ${escapeHtml(row.source || row.provider || 'غير متاح')} · ${observed(row.observedAt || row.updatedAt)}</div></article>`; }
