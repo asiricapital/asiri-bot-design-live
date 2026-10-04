@@ -70,7 +70,7 @@
   function renderTradeLog(trades) {
     const node = $('paper-lab-trade-log'); if (!node) return;
     const closed = (Array.isArray(trades) ? trades : []).filter((trade) => trade.side === 'SELL').slice(-10).reverse();
-    const reasons = { target_exit: 'بلغ الهدف', risk_exit: 'وقف الخسارة' };
+    const reasons = { target_exit: 'بلغ الهدف', risk_exit: 'وقف الخسارة', session_close_exit: 'خروج قبل إغلاق السوق' };
     node.innerHTML = closed.length ? closed.map((trade) => { const pnl = num(trade.netPnl); return `<article class="paper-lab-trade" data-state="${pnl !== null && pnl < 0 ? 'loss' : 'gain'}"><div><strong>${escapeHtml(trade.symbol)}</strong><span>${escapeHtml(reasons[trade.reason] || trade.reason || '—')}</span><b>${money(pnl)}</b></div><small>دخول ${price(trade.entryPrice)} ← خروج ${price(trade.exitPrice)} · الرسوم ${money(trade.fees)}${trade.spreadCost !== undefined ? ` · فرق السعر ${money(trade.spreadCost)}` : ''} · ${observed(trade.closedAt)}</small></article>`; }).join('') : '<div class="paper-lab-empty">لا توجد صفقات مغلقة بعد.</div>';
   }
   function render(data) {
