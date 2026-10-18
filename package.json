@@ -23,9 +23,12 @@
     "check:favorites": "node check-favorites.mjs",
     "check:favorite-performance": "node check-favorite-performance.mjs",
     "check:favorite-scenarios": "node check-favorite-scenarios.mjs",
-    "check:paper-lab-ui": "node check-paper-lab-ui.mjs"
+    "check:paper-lab-ui": "node check-paper-lab-ui.mjs",
+    "check:command-center": "node check-command-center-v1.mjs"
   },
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
