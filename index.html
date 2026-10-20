@@ -241,6 +241,10 @@
         .modal-btn { flex: 1; padding: 0.7rem; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; border: none; }
         .btn-confirm { background: var(--accent-cyan); color: #000; }
         .btn-cancel { background: var(--bg-base); color: var(--text-muted); border: 1px solid var(--border-color); }
+        .add-symbol-help { margin:-.35rem 0 .75rem; color:var(--text-muted); font-size:.7rem; line-height:1.65; }
+        .add-symbol-status { min-height:1.35rem; margin:-.2rem 0 .75rem; color:var(--text-muted); font-size:.72rem; line-height:1.55; }
+        .add-symbol-status.loading { color:#ffe4a3; }.add-symbol-status.success { color:#b9f7df; }.add-symbol-status.error { color:#fecdd3; }
+        .btn-confirm:disabled { opacity:.55; cursor:wait; }
 
         .nav-pill.journey-pill { border-color: rgba(226, 188, 83, 0.46); color: #fde8a1; }
         .nav-pill.journey-pill:hover { border-color: var(--accent-gold); background: rgba(226, 188, 83, 0.1); }
@@ -583,9 +587,11 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
     <div class="modal-overlay" id="addStockModal">
         <div class="modal-card">
             <div class="modal-title">إضافة أصل جديد للمحفظة</div>
-            <input type="text" id="modalSymbolInput" class="modal-input" placeholder="مثال: AAPL" maxlength="10" pattern="[A-Za-z][A-Za-z0-9.-]{0,9}" autocapitalize="characters" autocomplete="off" spellcheck="false">
+            <input type="text" id="modalSymbolInput" class="modal-input" placeholder="مثال: AAPL" maxlength="10" pattern="[A-Za-z][A-Za-z0-9.-]{0,9}" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-describedby="addSymbolHelp addSymbolStatus">
+            <div id="addSymbolHelp" class="add-symbol-help">سيتم التحقق من الرمز عبر مصدر الأسعار أولاً، ثم حفظه وجلب قراءته فوراً في قائمة المتابعة.</div>
+            <div id="addSymbolStatus" class="add-symbol-status" role="status" aria-live="polite"></div>
             <div class="modal-actions">
-                <button class="modal-btn btn-confirm" onclick="confirmAddStock()">إضافة</button>
+                <button id="confirmAddStockButton" class="modal-btn btn-confirm" onclick="confirmAddStock()">تحقق وإضافة</button>
                 <button class="modal-btn btn-cancel" onclick="closeAddStockModal()">إلغاء</button>
             </div>
         </div>
@@ -1430,22 +1436,51 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             try { const response = await fetch(`${TECHNICALS_API}/${encodeURIComponent(symbol)}?_=${Date.now()}`, { cache: 'no-store' }); const payload = await response.json(); renderTechnicalAnalysis(payload); } catch (_) { renderTechnicalUnavailable({ symbol, reason: 'SOURCE_UNAVAILABLE' }, 'تعذر الاتصال بخدمة التحليل؛ لم تُعرض أي قيم بديلة.'); } finally { technicalRequestInFlight = false; }
         }
 
-        function openAddStockModal() { const input = document.getElementById('modalSymbolInput'); input.setCustomValidity(''); document.getElementById('addStockModal').classList.add('active'); window.requestAnimationFrame(() => input.focus()); }
-        function closeAddStockModal() { const input = document.getElementById('modalSymbolInput'); document.getElementById('addStockModal').classList.remove('active'); input.value = ''; input.setCustomValidity(''); }
+        function setAddSymbolStatus(message = '', tone = '') { const status = document.getElementById('addSymbolStatus'); if (!status) return; status.textContent = message; status.className = `add-symbol-status${tone ? ` ${tone}` : ''}`; }
+        function setAddSymbolBusy(busy) { const button = document.getElementById('confirmAddStockButton'); if (!button) return; button.disabled = busy; button.textContent = busy ? 'جاري التحقق…' : 'تحقق وإضافة'; }
+        function openAddStockModal() { const input = document.getElementById('modalSymbolInput'); input.setCustomValidity(''); setAddSymbolStatus(''); setAddSymbolBusy(false); document.getElementById('addStockModal').classList.add('active'); window.requestAnimationFrame(() => input.focus()); }
+        function closeAddStockModal() { const input = document.getElementById('modalSymbolInput'); document.getElementById('addStockModal').classList.remove('active'); input.value = ''; input.setCustomValidity(''); setAddSymbolStatus(''); setAddSymbolBusy(false); }
 
-        function confirmAddStock() {
+        async function confirmAddStock() {
             const input = document.getElementById('modalSymbolInput');
             const sym = normalizeSymbol(input.value);
             input.setCustomValidity(sym ? '' : 'أدخل رمزًا صحيحًا من 1 إلى 10 أحرف مثل AAPL.');
             if (!sym) { input.reportValidity(); return; }
-            if (!watchlist.includes(sym)) {
+            if (watchlist.includes(sym)) { setAddSymbolStatus(`${sym} موجود بالفعل في قائمة المتابعة.`, 'error'); return; }
+            if (watchlist.length >= 80) { setAddSymbolStatus('تم بلوغ الحد الأقصى وهو 80 رمزًا.', 'error'); return; }
+            setAddSymbolBusy(true);
+            setAddSymbolStatus(`جاري التحقق من ${sym} عبر مصدر الأسعار…`, 'loading');
+            const controller = new AbortController();
+            const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+            try {
+                const response = await fetch(`${VERIFIED_QUOTES_API}?stocks=${encodeURIComponent(sym)}`, { cache: 'no-store', signal: controller.signal });
+                if (!response.ok) throw new Error(`QUOTE_API_${response.status}`);
+                const payload = await response.json();
+                const row = Array.isArray(payload.stocks) ? payload.stocks.find((item) => normalizeSymbol(item?.symbol) === sym) : null;
+                if (!row?.ok || finiteNumber(row.price) === null) {
+                    setAddSymbolStatus(`تعذر العثور على قراءة موثقة للرمز ${sym}. لم تتم إضافته.`, 'error');
+                    return;
+                }
                 watchlist.push(sym);
                 saveWatchlist();
                 stockMarketData[sym] = { symbol: sym, price: null, time: null, updated: false, isFresh: false, error: false };
+                updateVerifiedStockPrice(row, payload?.observedAt);
+                saveVerifiedQuoteSnapshot();
                 syncTechnicalSymbolOptions();
+                syncFavoriteScenarioOptions();
+                renderTable();
+                renderResearchHub();
+                filterAction('ALL', document.querySelector('.filter-btn[data-filter="ALL"]'));
+                document.getElementById('sync-status-text').textContent = `تمت إضافة ${sym} وجلب قراءته الموثقة`;
+                setAddSymbolStatus(`تمت إضافة ${sym} وظهرت بطاقته بالقراءة الحالية.`, 'success');
+                window.setTimeout(() => { closeAddStockModal(); document.getElementById(`row-${sym}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 450);
+            } catch (error) {
+                console.error('Add symbol verification failed:', error);
+                setAddSymbolStatus('تعذر الاتصال بمصدر الأسعار. لم تتم إضافة الرمز؛ حاول مرة أخرى.', 'error');
+            } finally {
+                window.clearTimeout(timeoutId);
+                setAddSymbolBusy(false);
             }
-            filterAction('ALL', document.querySelector('.filter-btn[data-filter="ALL"]'));
-            closeAddStockModal();
         }
 
         init();
