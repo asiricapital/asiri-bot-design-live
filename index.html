@@ -1174,6 +1174,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             const fresh = states.filter((state) => state === 'FRESH').length;
             const review = states.filter((state) => ['DELAYED', 'STALE', 'UNAVAILABLE'].includes(state)).length;
             const reviewSymbols = rows.filter((item) => ['DELAYED', 'STALE', 'UNAVAILABLE'].includes(quoteDataState(item))).slice(0, 5).map((item) => normalizeSymbol(item.symbol));
+            const hasFirstReadings = rows.some((item) => item.price !== null && item.price !== undefined || item.updatedAt || item.time);
             const summary = document.getElementById('practical-summary-text');
             const nextTitle = document.getElementById('practical-next-title');
             const nextText = document.getElementById('practical-next-text');
@@ -1181,8 +1182,8 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             const watchList = document.getElementById('practical-watch-list');
             const setText = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value; };
             setText('practical-total', total);
-            setText('practical-fresh', `${fresh} / ${total}`);
-            setText('practical-review', review);
+            setText('practical-fresh', hasFirstReadings ? `${fresh} / ${total}` : 'جارٍ التحقق');
+            setText('practical-review', hasFirstReadings ? review : '—');
             const freshNode = document.getElementById('practical-fresh');
             const reviewNode = document.getElementById('practical-review');
             if (freshNode) freshNode.className = fresh === total && total > 0 ? 'good' : 'warn';
@@ -1191,6 +1192,10 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                 summary.textContent = 'لم تتم إضافة رموز بعد. أضف رمزًا لبدء قراءة الأسعار الموثقة.';
                 nextTitle.textContent = 'الخطوة التالية: أضف رمزًا';
                 nextText.textContent = 'استخدم زر «إضافة أصل» ثم تحقق من الرمز قبل حفظه في قائمة المراقبة.';
+            } else if (!hasFirstReadings) {
+                summary.textContent = `جارٍ جلب أول قراءة موثقة لـ ${total} رمزًا. لن نعرض حالة مراجعة قبل وصول البيانات.`;
+                nextTitle.textContent = 'الخطوة التالية: انتظر التحقق';
+                nextText.textContent = 'تُحدّث الأسعار تلقائيًا، وستظهر حالة كل رمز بعد وصول المصدر والوقت.';
             } else if (review > 0) {
                 summary.textContent = `${fresh} قراءة حديثة من أصل ${total}. توجد ${review} قراءة تحتاج مراجعة قبل الاعتماد عليها.`;
                 nextTitle.textContent = 'الخطوة التالية: راجع البيانات';
@@ -1200,7 +1205,10 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                 nextTitle.textContent = 'الخطوة التالية: افحص ثم حاكِ';
                 nextText.textContent = 'اختر سهمًا لعرض سعره ومصدره، ثم استخدم المحاكاة الورقية لاختبار الفكرة دون أموال حقيقية.';
             }
-            if (!reviewSymbols.length) {
+            if (!hasFirstReadings) {
+                watchText.textContent = total ? 'جارٍ التحقق من المصادر والوقت قبل تصنيف الرموز.' : 'أضف رموزًا لتظهر حالة بياناتها هنا.';
+                watchList.innerHTML = '';
+            } else if (!reviewSymbols.length) {
                 watchText.textContent = total ? 'لا توجد رموز متأخرة أو ناقصة الآن.' : 'أضف رموزًا لتظهر حالة بياناتها هنا.';
                 watchList.innerHTML = '';
             } else {
