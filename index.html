@@ -297,11 +297,27 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
  @media(max-width:520px){.stock-row{grid-template-columns:minmax(0,1fr) auto;gap:.65rem;padding:.85rem .75rem;border-radius:12px;background:linear-gradient(145deg,rgba(13,39,56,.96),rgba(6,20,33,.96));box-shadow:0 6px 18px rgba(0,0,0,.16)}.stock-col-name{min-width:0}.stock-col-name .sym{font-size:1.05rem;line-height:1.25}.stock-col-name .name{font-size:.65rem;margin-top:3px}.stock-col-price{font-size:1.05rem;font-weight:800;align-self:start;padding-top:.1rem}.stock-col-change{grid-column:1/-1;margin-top:.05rem;padding:.55rem .65rem;border-top:1px solid rgba(86,224,210,.16);border-bottom:1px solid rgba(86,224,210,.11);text-align:right;font-size:.7rem;line-height:1.55;color:#a9c1c7}.stock-col-action{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:.5rem;align-items:stretch}.stock-col-action .badge-data-state{grid-column:1/-1;width:100%;min-height:32px;padding:.35rem .5rem}.smart-summary-btn,.remove-symbol-btn{width:100%;min-height:44px;margin-top:0;padding:.45rem .6rem;font-size:.7rem;font-weight:800}.smart-summary-btn{border-color:rgba(86,224,210,.6);background:rgba(86,224,210,.12);color:#c9fffa}.remove-symbol-btn{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.1);color:#fecaca}.smart-summary-btn:focus-visible,.remove-symbol-btn:focus-visible,.favorite-star-btn:focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}.favorite-star-btn{min-width:36px;min-height:36px;display:inline-grid;place-items:center}.stock-row:active{border-color:rgba(86,224,210,.65)}}
  @media(max-width:360px){.stock-row{padding:.75rem .65rem}.stock-col-change{font-size:.66rem}.smart-summary-btn,.remove-symbol-btn{font-size:.66rem;padding-inline:.4rem}}
  @media(max-width:390px){.command-center-strip{padding-top:6px}.cc-status{min-height:40px;padding:6px 8px}.cc-kicker{font-size:8px}.cc-title{font-size:11px;margin-top:3px}.command-ticker{font-size:7px;padding-top:3px}.command-kpi{padding:7px 8px}.command-kpi small{font-size:7px}.command-kpi strong{font-size:12px;margin-top:4px}.cc-topology-stage{height:145px}.cc-topology-head{padding:8px 10px;gap:5px}.cc-topology-kicker{font-size:8px}.cc-topology-title{font-size:11px;margin-top:3px}.cc-topology-badge{font-size:8px;padding:4px 7px}.cc-topology-label{font-size:7px}.cc-topology-note{font-size:7px;bottom:5px}.nav-pills-container{direction:ltr;padding-top:.4rem;padding-bottom:.4rem;scroll-padding-inline-start:.7rem}.nav-pill{direction:rtl;min-height:40px;padding:.35rem .62rem;font-size:.68rem}}
+
+ /* PRACTICAL DASHBOARD V1 — decision-first presentation over existing read-only data */
+ .practical-dashboard{margin:14px 0 18px;padding:16px;border:1px solid rgba(86,224,210,.28);border-radius:18px;background:linear-gradient(145deg,rgba(12,35,54,.98),rgba(7,18,31,.98));box-shadow:0 14px 34px rgba(0,0,0,.18)}
+ .practical-dashboard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.practical-kicker{color:#77e8dc;font-size:.68rem;letter-spacing:.14em;font-weight:900}.practical-dashboard h2{margin:.3rem 0 .4rem;color:#f4fbff;font-size:1.2rem}.practical-dashboard p{margin:0;color:#aec2cc;font-size:.76rem;line-height:1.7}.practical-dashboard-badge{padding:7px 10px;border:1px solid rgba(183,255,90,.36);border-radius:10px;color:#d6ff9f;background:rgba(183,255,90,.08);font-size:.65rem;font-weight:900;white-space:nowrap}
+ .practical-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.practical-kpi{padding:11px;border:1px solid rgba(125,211,252,.14);border-radius:12px;background:rgba(2,12,23,.42)}.practical-kpi small{display:block;color:#8fa9b6;font-size:.66rem}.practical-kpi strong{display:block;margin-top:5px;color:#f4fbff;font-size:1.05rem}.practical-kpi strong.good{color:#b7ff5a}.practical-kpi strong.warn{color:#f4c95d}.practical-kpi strong.bad{color:#ff9baa}
+ .practical-next{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px;margin-top:10px}.practical-action,.practical-watch{padding:12px;border-radius:12px;background:rgba(2,12,23,.38);border:1px solid rgba(125,211,252,.12)}.practical-action b,.practical-watch b{display:block;color:#dff8f5;font-size:.82rem;margin-bottom:5px}.practical-action span,.practical-watch span{display:block;color:#a8bdc6;font-size:.72rem;line-height:1.7}.practical-watch-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.practical-symbol{padding:5px 8px;border-radius:8px;background:rgba(86,224,210,.1);color:#c9fffa;font-size:.68rem;font-weight:800}
+ .practical-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.practical-actions button{min-height:42px;padding:9px 13px;border-radius:10px;border:1px solid rgba(86,224,210,.5);background:rgba(86,224,210,.13);color:#d9fffb;font:inherit;font-size:.72rem;font-weight:900;cursor:pointer}.practical-actions button.secondary{border-color:rgba(125,211,252,.2);background:rgba(125,211,252,.06);color:#b9cbd5}.practical-note{margin-top:10px;color:#8199a6;font-size:.65rem;line-height:1.65}
+ .cc-topology{margin-top:8px;opacity:.68}.cc-topology-head{cursor:default}
+ @media(max-width:620px){.practical-dashboard{margin:10px 0 14px;padding:13px}.practical-dashboard-head{display:block}.practical-dashboard-badge{display:inline-block;margin-top:9px}.practical-kpis{grid-template-columns:1fr 1fr}.practical-next{grid-template-columns:1fr}.practical-actions{display:grid;grid-template-columns:1fr 1fr}.practical-actions button{width:100%}}
 </style>
 </head>
 <body>
 <section class="command-center-strip" aria-label="حالة غرفة القيادة"><div class="cc-identity"><span class="cc-kicker">ASIRI COMMAND CENTER V1</span><span class="cc-title">غرفة قيادة الاستخبارات السوقية</span></div><div class="cc-status"><span class="cc-kicker">MODE</span><b class="safe">PAPER ONLY</b></div><div class="cc-status"><span class="cc-kicker">ACCESS</span><b class="safe">READ-ONLY</b></div><div class="cc-status"><span class="cc-kicker">EXECUTION</span><b class="locked">LOCKED</b></div><div class="cc-status"><span class="cc-kicker">DATA QUALITY</span><b class="wait">WAITING</b></div></section>
 <div class="command-ticker" aria-label="شريط حالة النظام"><span>● RESEARCH SHELL</span> &nbsp; / &nbsp; MARKET DATA &nbsp; / &nbsp; PAPER RESEARCH &nbsp; / &nbsp; NO BROKER SUBMISSION &nbsp; / &nbsp; ASIRI CAPITAL INTELLIGENCE OS</div>
+<section id="practical-dashboard" class="practical-dashboard" aria-labelledby="practical-dashboard-title">
+    <div class="practical-dashboard-head"><div><div class="practical-kicker">ابدأ من هنا · ملخص عملي</div><h2 id="practical-dashboard-title">ماذا يحدث الآن؟</h2><p id="practical-summary-text">جارٍ قراءة حالة السوق والرموز المضافة...</p></div><span class="practical-dashboard-badge">قراءة فقط · بدون تنفيذ</span></div>
+    <div class="practical-kpis" aria-label="ملخص عملي للبيانات"><div class="practical-kpi"><small>الرموز المراقبة</small><strong id="practical-total">—</strong></div><div class="practical-kpi"><small>بيانات حديثة</small><strong id="practical-fresh">—</strong></div><div class="practical-kpi"><small>تحتاج مراجعة</small><strong id="practical-review">—</strong></div><div class="practical-kpi"><small>المحاكاة الورقية</small><strong id="practical-paper">جاهزة</strong></div></div>
+    <div class="practical-next"><div class="practical-action"><b id="practical-next-title">الخطوة التالية</b><span id="practical-next-text">سيظهر هنا الإجراء العملي بعد اكتمال تحديث الأسعار.</span></div><div class="practical-watch"><b>رموز تحتاج انتباهًا</b><span id="practical-watch-text">لا توجد قراءة بعد.</span><div id="practical-watch-list" class="practical-watch-list"></div></div></div>
+    <div class="practical-actions"><button type="button" onclick="focusPracticalPrices()">عرض الأسعار</button><button type="button" class="secondary" onclick="focusPracticalPaper()">فتح المحاكاة الورقية</button><button type="button" class="secondary" onclick="focusPracticalAlerts()">عرض التنبيهات</button></div>
+    <div class="practical-note">هذه الصفحة تشرح حالة البيانات وتفتح أدوات المراجعة فقط. لا تقدم توصية شراء أو بيع ولا ترسل أوامر إلى وسيط.</div>
+</section>
 <section class="command-kpi-deck" aria-label="مؤشرات غرفة القيادة"><div class="command-kpi"><small>PORTFOLIO PNL</small><strong>—</strong></div><div class="command-kpi"><small>SHARPE RATIO</small><strong class="pending">PENDING</strong></div><div class="command-kpi"><small>MAX DRAWDOWN</small><strong class="pending">PENDING</strong></div><div class="command-kpi"><small>ACTIVE RESEARCH</small><strong>READ-ONLY</strong></div></section>
 <section class="cc-topology" aria-labelledby="cc-topology-title"><div class="cc-topology-head"><div><span class="cc-topology-kicker">MARKET TOPOLOGY · VISUAL LAYER</span><div id="cc-topology-title" class="cc-topology-title">خريطة تدفق السوق ومراقبة العلاقات</div></div><span class="cc-topology-badge">NON-EXECUTIVE</span></div><div class="cc-topology-stage"><canvas id="cc-topology-canvas" aria-label="تصور بصري غير تنفيذي لعلاقات السوق"></canvas><span class="cc-topology-label l1">LIQUIDITY</span><span class="cc-topology-label l2">MOMENTUM</span><span class="cc-topology-label l3">RISK</span><span class="cc-topology-label l4">FUNDING</span><div class="cc-topology-note">تصور بصري تجريبي فقط — لا يمثل سعراً أو إشارة شراء أو بيع ولا يرسل أوامر.</div></div></section>
 
@@ -1151,6 +1167,63 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             document.getElementById('readiness-sources').textContent = sources.length ? sources.join('، ') : 'غير متاح';
         }
 
+        function renderPracticalDashboard() {
+            const total = watchlist.length;
+            const rows = watchlist.map((symbol) => stockMarketData[symbol] || { symbol });
+            const states = rows.map((item) => quoteDataState(item));
+            const fresh = states.filter((state) => state === 'FRESH').length;
+            const review = states.filter((state) => ['DELAYED', 'STALE', 'UNAVAILABLE'].includes(state)).length;
+            const reviewSymbols = rows.filter((item) => ['DELAYED', 'STALE', 'UNAVAILABLE'].includes(quoteDataState(item))).slice(0, 5).map((item) => normalizeSymbol(item.symbol));
+            const summary = document.getElementById('practical-summary-text');
+            const nextTitle = document.getElementById('practical-next-title');
+            const nextText = document.getElementById('practical-next-text');
+            const watchText = document.getElementById('practical-watch-text');
+            const watchList = document.getElementById('practical-watch-list');
+            const setText = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value; };
+            setText('practical-total', total);
+            setText('practical-fresh', `${fresh} / ${total}`);
+            setText('practical-review', review);
+            const freshNode = document.getElementById('practical-fresh');
+            const reviewNode = document.getElementById('practical-review');
+            if (freshNode) freshNode.className = fresh === total && total > 0 ? 'good' : 'warn';
+            if (reviewNode) reviewNode.className = review > 0 ? 'warn' : 'good';
+            if (!total) {
+                summary.textContent = 'لم تتم إضافة رموز بعد. أضف رمزًا لبدء قراءة الأسعار الموثقة.';
+                nextTitle.textContent = 'الخطوة التالية: أضف رمزًا';
+                nextText.textContent = 'استخدم زر «إضافة أصل» ثم تحقق من الرمز قبل حفظه في قائمة المراقبة.';
+            } else if (review > 0) {
+                summary.textContent = `${fresh} قراءة حديثة من أصل ${total}. توجد ${review} قراءة تحتاج مراجعة قبل الاعتماد عليها.`;
+                nextTitle.textContent = 'الخطوة التالية: راجع البيانات';
+                nextText.textContent = 'افتح تفاصيل الرموز ذات البيانات المتأخرة أو الناقصة، ولا تبنِ قرارًا على قراءة غير حديثة.';
+            } else {
+                summary.textContent = `كل القراءات الحالية حديثة (${fresh} من ${total}). يمكنك فتح تفاصيل أي سهم أو تشغيل تجربة ورقية.`;
+                nextTitle.textContent = 'الخطوة التالية: افحص ثم حاكِ';
+                nextText.textContent = 'اختر سهمًا لعرض سعره ومصدره، ثم استخدم المحاكاة الورقية لاختبار الفكرة دون أموال حقيقية.';
+            }
+            if (!reviewSymbols.length) {
+                watchText.textContent = total ? 'لا توجد رموز متأخرة أو ناقصة الآن.' : 'أضف رموزًا لتظهر حالة بياناتها هنا.';
+                watchList.innerHTML = '';
+            } else {
+                watchText.textContent = 'هذه الرموز لا تزال تحتاج فحصًا قبل الاعتماد على قراءتها:';
+                watchList.innerHTML = reviewSymbols.map((symbol) => `<span class="practical-symbol">${escapeMarkup(symbol)}</span>`).join('');
+            }
+        }
+
+        function focusPracticalPrices() {
+            switchMainTab('tools', document.querySelector('[data-tab="tools"].nav-pill'));
+            document.querySelector('#sec-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function focusPracticalPaper() {
+            switchMainTab('tools', document.querySelector('[data-tab="tools"].nav-pill'));
+            document.querySelector('#paper-lab-title')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function focusPracticalAlerts() {
+            switchMainTab('alerts', document.querySelector('[data-tab="alerts"].nav-pill'));
+            document.querySelector('#sec-alerts')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         function openPortfolioSymbol(symbol) {
             const normalized = normalizeSymbol(symbol);
             if (!normalized || !watchlist.includes(normalized)) return;
@@ -1162,6 +1235,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
         function renderTable() {
             renderPortfolioSummary();
             renderDataReadinessSummary();
+            renderPracticalDashboard();
             renderFavoritePerformance();
             renderFavoriteScenario();
             const wrapper = document.getElementById('stocks-list-wrapper');
