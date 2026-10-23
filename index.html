@@ -12,6 +12,7 @@
     <link href="./decision-intelligence-panel.css?v=1" rel="stylesheet">
     <link href="./favorite-star.css?v=1" rel="stylesheet">
     <link href="./paper-lab.css?v=4" rel="stylesheet">
+    <link href="./operational-trust-panel-v1.css?v=1" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -317,6 +318,18 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
     <div class="practical-next"><div class="practical-action"><b id="practical-next-title">الخطوة التالية</b><span id="practical-next-text">سيظهر هنا الإجراء العملي بعد اكتمال تحديث الأسعار.</span></div><div class="practical-watch"><b>رموز تحتاج انتباهًا</b><span id="practical-watch-text">لا توجد قراءة بعد.</span><div id="practical-watch-list" class="practical-watch-list"></div></div></div>
     <div class="practical-actions"><button type="button" onclick="focusPracticalPrices()">عرض الأسعار</button><button type="button" class="secondary" onclick="focusPracticalPaper()">فتح المحاكاة الورقية</button><button type="button" class="secondary" onclick="focusPracticalAlerts()">عرض التنبيهات</button></div>
     <div class="practical-note">هذه الصفحة تشرح حالة البيانات وتفتح أدوات المراجعة فقط. لا تقدم توصية شراء أو بيع ولا ترسل أوامر إلى وسيط.</div>
+</section>
+<section id="operational-trust-panel" class="operational-trust-panel" aria-labelledby="operational-trust-title">
+    <div class="operational-trust-head"><div><div class="operational-trust-kicker">مصدر البيانات · حالة موثقة</div><h2 id="operational-trust-title" class="operational-trust-title">هل الأسعار حية أم مجرد آخر إغلاق؟</h2><p class="operational-trust-desc">هذه اللوحة تشرح مصدر كل حالة قبل أن تعتمد على الرقم. لا نسمّي السعر «حيًا» إلا إذا دعمه المصدر والوقت.</p></div><button id="operational-trust-refresh" class="operational-trust-refresh" type="button">تحديث الحالة</button></div>
+    <div class="operational-trust-grid" aria-live="polite">
+        <article id="trust-card-service" class="operational-trust-card" data-state="unknown"><div class="operational-trust-card-head"><small>الخدمة</small><i class="operational-trust-dot" aria-hidden="true"></i></div><strong data-trust-status class="operational-trust-status">جارٍ التحقق</strong><span data-trust-evidence class="operational-trust-evidence">نقرأ حالة الخدمة والإصدار.</span></article>
+        <article id="trust-card-market" class="operational-trust-card" data-state="unknown"><div class="operational-trust-card-head"><small>مصدر الأسعار</small><i class="operational-trust-dot" aria-hidden="true"></i></div><strong data-trust-status class="operational-trust-status">جارٍ التحقق</strong><span data-trust-evidence class="operational-trust-evidence">نقرأ المصدر وعمر آخر سعر.</span></article>
+        <article id="trust-card-stream" class="operational-trust-card" data-state="unknown"><div class="operational-trust-card-head"><small>البث المباشر</small><i class="operational-trust-dot" aria-hidden="true"></i></div><strong data-trust-status class="operational-trust-status">جارٍ التحقق</strong><span data-trust-evidence class="operational-trust-evidence">نقرأ حالة الاتصال الاختياري.</span></article>
+        <article id="trust-card-notifications" class="operational-trust-card" data-state="unknown"><div class="operational-trust-card-head"><small>التنبيهات</small><i class="operational-trust-dot" aria-hidden="true"></i></div><strong data-trust-status class="operational-trust-status">جارٍ التحقق</strong><span data-trust-evidence class="operational-trust-evidence">نقرأ العامل والفترة الزمنية.</span></article>
+        <article id="trust-card-safety" class="operational-trust-card" data-state="unknown"><div class="operational-trust-card-head"><small>حماية التنفيذ</small><i class="operational-trust-dot" aria-hidden="true"></i></div><strong data-trust-status class="operational-trust-status">جارٍ التحقق</strong><span data-trust-evidence class="operational-trust-evidence">نقرأ أقفال التنفيذ الحالية.</span></article>
+    </div>
+    <div class="operational-trust-footer"><span id="operational-trust-source" class="operational-trust-source">مصادر القراءة: جارٍ التحقق</span><span id="operational-trust-updated">لم يتم التحقق بعد</span></div>
+    <div class="operational-trust-legend"><b>أخضر:</b> دليل متاح · <b>أصفر:</b> متأخر أو معطل بوضوح · <b>أزرق:</b> غير معروف أو تعذر الاتصال</div>
 </section>
 <section class="command-kpi-deck" aria-label="مؤشرات غرفة القيادة"><div class="command-kpi"><small>PORTFOLIO PNL</small><strong>—</strong></div><div class="command-kpi"><small>SHARPE RATIO</small><strong class="pending">PENDING</strong></div><div class="command-kpi"><small>MAX DRAWDOWN</small><strong class="pending">PENDING</strong></div><div class="command-kpi"><small>ACTIVE RESEARCH</small><strong>READ-ONLY</strong></div></section>
 <section class="cc-topology" aria-labelledby="cc-topology-title"><div class="cc-topology-head"><div><span class="cc-topology-kicker">MARKET TOPOLOGY · VISUAL LAYER</span><div id="cc-topology-title" class="cc-topology-title">خريطة تدفق السوق ومراقبة العلاقات</div></div><span class="cc-topology-badge">NON-EXECUTIVE</span></div><div class="cc-topology-stage"><canvas id="cc-topology-canvas" aria-label="تصور بصري غير تنفيذي لعلاقات السوق"></canvas><span class="cc-topology-label l1">LIQUIDITY</span><span class="cc-topology-label l2">MOMENTUM</span><span class="cc-topology-label l3">RISK</span><span class="cc-topology-label l4">FUNDING</span><div class="cc-topology-note">تصور بصري تجريبي فقط — لا يمثل سعراً أو إشارة شراء أو بيع ولا يرسل أوامر.</div></div></section>
@@ -1571,6 +1584,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
     <script src="./paper-lab-ui.js?v=4g"></script>
     <script src="./paper-experiment-panel.js?v=1"></script>
 <script src="./execution-readiness-ui.js?v=2"></script>
+<script src="./operational-trust-panel-v1.js?v=1"></script>
 <script>
 (() => { const canvas=document.getElementById('cc-topology-canvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; const palette=['#56e0d2','#b7ff5a','#f4c95d','#ff667d','#76a8ff']; let w=0,h=0,dpr=1,t=0; let topologyState={total:0,fresh:0,stale:0,unavailable:0};
 function readTopologyState(){const n=id=>Number(document.getElementById(id)?.textContent?.replace(/[^0-9.-]/g,''))||0; topologyState={total:n('readiness-total'),fresh:n('readiness-fresh'),stale:n('readiness-stale'),unavailable:n('readiness-unavailable')}; const labels=[['l1',`LIQUIDITY · FRESH ${topologyState.fresh}`],['l2',`MOMENTUM · WATCH ${topologyState.total}`],['l3',`RISK · STALE ${topologyState.stale}`],['l4',`FUNDING · N/A ${topologyState.unavailable}`]]; labels.forEach(([cls,text])=>{const el=document.querySelector(`.cc-topology-label.${cls}`);if(el)el.textContent=text})}
