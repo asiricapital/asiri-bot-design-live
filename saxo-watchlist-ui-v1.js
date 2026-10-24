@@ -25,7 +25,7 @@
 
   async function session() {
     if (state.client && state.session) return state.session;
-    const config = await fetch('/api/config?saxo-watchlist-ui=1', { cache: 'no-store' }).then((r) => r.json());
+    const config = await fetch(`${API_BASE}/api/config?saxo-watchlist-ui=1`, { cache: 'no-store' }).then((r) => r.json());
     if (!config?.supabase?.enabled || !window.supabase?.createClient) throw new Error('جلسة Supabase غير متاحة.');
     state.client = window.supabase.createClient(config.supabase.url, config.supabase.publishableKey, { auth: { persistSession: true, autoRefreshToken: true } });
     state.session = (await state.client.auth.getSession()).data.session;
