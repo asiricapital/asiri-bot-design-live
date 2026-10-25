@@ -3,7 +3,11 @@
   'use strict';
   const API_BASE = 'https://asiri-bot.onrender.com';
   const POLL_MS = 30_000;
-  const state = { client: null, session: null, timer: null, busy: false, quotes: new Map(), lastSync: null };
+  const params = new URLSearchParams(location.search);
+  const ticketFromUrl = params.get('saxo_ticket');
+  if (ticketFromUrl) { try { sessionStorage.setItem('asiri_saxo_bridge_ticket', ticketFromUrl); } catch {} params.delete('saxo_ticket'); history.replaceState({}, document.title, `${location.pathname}?${params.toString()}${location.hash}`); }
+  const bridgeTicket = (() => { try { return sessionStorage.getItem('asiri_saxo_bridge_ticket') || ''; } catch { return ''; } })();
+  const state = { client: null, session: null, timer: null, busy: false, quotes: new Map(), lastSync: null, bridgeTicket };
   const $ = (id) => document.getElementById(id);
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   const money = (value) => Number.isFinite(Number(value)) ? `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}` : '—';
@@ -38,11 +42,19 @@
   }
 
   async function fetchQuotes() {
-    const current = await session();
-    state.session = (await state.client.auth.getSession()).data.session || current;
-    const response = await fetch(`${API_BASE}/api/broker/saxo/watchlist/quotes`, {
+    const headers = { accept: 'application/json' };
+    if (state.bridgeTicket) headers['X-ASIRI-SAXO-TICKET'] = state.bridgeTicket;
+    else {
+      const current = await session();
+      state.session = (await state.client.auth.getSession()).data.session || current;
+      headers.authorization = `Bearer ${state.session.access_token}`;
+    }
+    const symbols = [...document.querySelectorAll('#stocks-list-wrapper [data-symbol], #stocks-list-wrapper .stock-row[id^="row-"]')]
+      .map((row) => String(row.dataset.symbol || row.id.replace(/^row-/, '')).trim().toUpperCase()).filter(Boolean);
+    const query = symbols.length ? `?symbols=${encodeURIComponent([...new Set(symbols)].slice(0, 30).join(','))}` : '';
+    const response = await fetch(`${API_BASE}/api/broker/saxo/watchlist/quotes${query}`, {
       cache: 'no-store',
-      headers: { authorization: `Bearer ${state.session.access_token}`, accept: 'application/json' }
+      headers
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error || `تعذر جلب أسعار Saxo (${response.status})`);
@@ -98,7 +110,7 @@
       state.lastSync = payload.observedAt || new Date().toISOString();
       const live = [...state.quotes.values()].filter((q) => String(q.status).toUpperCase() === 'LIVE').length;
       const total = state.quotes.size;
-      renderPanel(total ? `تم ربط ${total} رمزًا؛ ${live} قراءة LIVE من Saxo.` : 'لم تصل أسعار من Saxo؛ راجع ربط الحساب أو قائمة المراقبة.', total ? 'good' : 'warn');
+      renderPanel(total ? `تم ربط ${total} رمزًا؛ ${live} قراءة LIVE من Saxo.` : 'لم تصل أسعار من Saxo؛ افتح اللوحة من Broker Gateway لإعادة الربط.', total ? 'good' : 'warn');
       decorateRows();
       window.dispatchEvent(new CustomEvent('asiri:saxo-watchlist-quotes', { detail: { readOnly: true, quotes: [...state.quotes.values()], observedAt: state.lastSync, provider: payload.provider || 'Saxo OpenAPI' } }));
     } catch (error) {
