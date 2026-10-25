@@ -13,7 +13,10 @@ test('loads the Saxo read-only watchlist UI assets', () => {
 
 test('uses the authenticated GET bridge and exposes source state', () => {
   assert.match(js, /\/api\/broker\/saxo\/watchlist\/quotes/);
-  assert.match(js, /authorization:\s*`Bearer/);
+  assert.match(js, /authorization\s*=\s*`Bearer/);
+  assert.match(js, /X-ASIRI-SAXO-TICKET/);
+  assert.match(js, /symbols=\$\{encodeURIComponent/);
+  assert.match(js, /asiri_saxo_bridge_ticket/);
   assert.match(js, /Saxo LIVE/);
   assert.match(js, /observedAt/);
   assert.match(js, /readOnly:\s*true/);
