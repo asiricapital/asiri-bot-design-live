@@ -16,6 +16,7 @@
     <link href="./unified-control-dashboard-v1.css?v=1" rel="stylesheet">
     <link href="./saxo-watchlist-ui-v1.css?v=1" rel="stylesheet">
     <link href="./order-readiness-desk-v1.css?v=1" rel="stylesheet">
+    <link href="./decision-mission-control-v1.css?v=1" rel="stylesheet">
     <style>
         /* Asiri technical analysis: evidence-first dark terminal, cyan data clarity, gold review cues, no execution CTA. */
         :root {
@@ -1602,6 +1603,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 <script src="./unified-control-dashboard-v1.js?v=1"></script>
 <script src="./saxo-watchlist-ui-v1.js?v=1"></script>
 <script src="./order-readiness-desk-v1.js?v=1"></script>
+<script src="./decision-mission-control-v1.js?v=1"></script>
 <script>
 (() => { const canvas=document.getElementById('cc-topology-canvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; const palette=['#56e0d2','#b7ff5a','#f4c95d','#ff667d','#76a8ff']; let w=0,h=0,dpr=1,t=0; let topologyState={total:0,fresh:0,stale:0,unavailable:0};
 function readTopologyState(){const n=id=>Number(document.getElementById(id)?.textContent?.replace(/[^0-9.-]/g,''))||0; topologyState={total:n('readiness-total'),fresh:n('readiness-fresh'),stale:n('readiness-stale'),unavailable:n('readiness-unavailable')}; const labels=[['l1',`LIQUIDITY · FRESH ${topologyState.fresh}`],['l2',`MOMENTUM · WATCH ${topologyState.total}`],['l3',`RISK · STALE ${topologyState.stale}`],['l4',`FUNDING · N/A ${topologyState.unavailable}`]]; labels.forEach(([cls,text])=>{const el=document.querySelector(`.cc-topology-label.${cls}`);if(el)el.textContent=text})}
