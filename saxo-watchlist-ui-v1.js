@@ -14,6 +14,7 @@
   const time = (value) => { const d = new Date(value || ''); return Number.isFinite(d.getTime()) ? d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'غير متاح'; };
   const statusLabel = (status) => ({ LIVE: 'Saxo LIVE', DELAYED: 'Saxo متأخر', STALE: 'Saxo قديم', UNAVAILABLE: 'Saxo غير متاح' }[String(status || '').toUpperCase()] || 'Saxo غير متاح');
   const statusClass = (status) => String(status || '').toLowerCase().replace(/[^a-z]/g, '') || 'unavailable';
+  const brokerGatewayUrl = `${API_BASE}/?saxo-return=${encodeURIComponent(location.href)}`;
 
   function ensurePanel() {
     if ($('saxo-watchlist-bridge-v1')) return;
@@ -22,7 +23,7 @@
     const panel = document.createElement('section');
     panel.id = 'saxo-watchlist-bridge-v1';
     panel.className = 'saxo-watchlist-bridge';
-    panel.innerHTML = `<div class="saxo-watchlist-bridge-head"><div><span class="eyebrow">SAXO LIVE WATCHLIST</span><h3>أسعار قائمة المراقبة من Saxo</h3><p id="saxo-watchlist-bridge-message">جارٍ تجهيز القراءة الآمنة…</p></div><button id="saxo-watchlist-refresh" type="button" class="secondary">تحديث الآن</button></div><div class="saxo-watchlist-bridge-meta"><span>المصدر: Saxo OpenAPI</span><span id="saxo-watchlist-sync">آخر مزامنة: —</span><b>قراءة فقط · لا تنفيذ</b></div>`;
+    panel.innerHTML = `<div class="saxo-watchlist-bridge-head"><div><span class="eyebrow">SAXO LIVE WATCHLIST</span><h3>أسعار قائمة المراقبة من Saxo</h3><p id="saxo-watchlist-bridge-message">جارٍ تجهيز القراءة الآمنة…</p></div><button id="saxo-watchlist-refresh" type="button" class="secondary">تحديث الآن</button></div><a id="saxo-watchlist-reconnect" class="saxo-watchlist-reconnect" href="${brokerGatewayUrl}" target="_blank" rel="noopener" hidden>فتح بوابة Saxo وإعادة فتح اللوحة</a><div class="saxo-watchlist-bridge-meta"><span>المصدر: Saxo OpenAPI</span><span id="saxo-watchlist-sync">آخر مزامنة: —</span><b>قراءة فقط · لا تنفيذ</b></div>`;
     wrapper.parentNode.insertBefore(panel, wrapper);
     $('saxo-watchlist-refresh')?.addEventListener('click', () => refresh(true));
   }
@@ -57,7 +58,14 @@
       headers
     });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.error || `تعذر جلب أسعار Saxo (${response.status})`);
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        try { sessionStorage.removeItem('asiri_saxo_bridge_ticket'); } catch {}
+        state.bridgeTicket = '';
+        throw new Error('انتهت جلسة Saxo؛ أعد فتح اللوحة من بوابة Saxo.');
+      }
+      throw new Error(payload.error || `تعذر جلب أسعار Saxo (${response.status})`);
+    }
     return payload;
   }
 
@@ -65,6 +73,8 @@
     ensurePanel();
     const node = $('saxo-watchlist-bridge-message');
     if (node) { node.textContent = message; node.className = tone; }
+    const reconnect = $('saxo-watchlist-reconnect');
+    if (reconnect) reconnect.hidden = !(tone === 'bad' && (!state.bridgeTicket || message.includes('أعد فتح اللوحة')));
     if ($('saxo-watchlist-sync') && state.lastSync) $('saxo-watchlist-sync').textContent = `آخر مزامنة: ${time(state.lastSync)}`;
   }
 

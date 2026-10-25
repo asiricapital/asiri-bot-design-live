@@ -17,6 +17,8 @@ test('uses the authenticated GET bridge and exposes source state', () => {
   assert.match(js, /X-ASIRI-SAXO-TICKET/);
   assert.match(js, /symbols=\$\{encodeURIComponent/);
   assert.match(js, /asiri_saxo_bridge_ticket/);
+  assert.match(js, /انتهت جلسة Saxo/);
+  assert.match(js, /saxo-watchlist-reconnect/);
   assert.match(js, /Saxo LIVE/);
   assert.match(js, /observedAt/);
   assert.match(js, /readOnly:\s*true/);
