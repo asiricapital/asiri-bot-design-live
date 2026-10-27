@@ -14,6 +14,7 @@ assert.match(cycle, /Saxo أو Finnhub/);
 assert.match(cycle, /providerLabel/);
 assert.match(cycle, /api\/market-data\?symbols/);
 assert.match(cycle, /refreshDirectQuote/);
+assert.match(cycle, /scheduleDirectReads/);
 assert.match(cycle, /usableQuotes/);
 assert.match(index, /saxo-watchlist-ui-v1\.js\?v=2/);
 assert.match(index, /analysis-cycle-desk-v1\.js\?v=2/);

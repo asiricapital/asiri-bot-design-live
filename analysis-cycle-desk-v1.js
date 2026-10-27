@@ -31,6 +31,9 @@
     render();
     return true;
   }
+  function scheduleDirectReads() {
+    [1200, 3000, 6000].forEach((delay) => window.setTimeout(() => refreshDirectQuote().catch(() => {}), delay));
+  }
   const tickets = () => { try { const x = JSON.parse(localStorage.getItem(TICKET_KEY) || '[]'); return Array.isArray(x) ? x : []; } catch { return []; } };
   function findButton(text) { return [...document.querySelectorAll('button')].find((b) => String(b.textContent || '').trim().includes(text)); }
   function ensurePanel() {
@@ -59,7 +62,7 @@
   function openPlan() { const q = liveQuote(); if (!q) return; state.symbol = String(q.symbol || '').toUpperCase(); const desk = $('order-readiness-desk-v1'); desk?.scrollIntoView({ behavior:'smooth', block:'start' }); const select = $('ordSymbol'); if (select && [...select.options].some((o) => o.value === state.symbol)) select.value = state.symbol; $('ordUseQuote')?.click(); }
   function runPaper() { const run = $('paper-lab-run'); if (run) { run.click(); state.paperDone = true; render(); document.querySelector('.paper-lab-card')?.scrollIntoView({ behavior:'smooth', block:'start' }); } else { $('acdNote').textContent = 'لم يظهر زر المحاكاة بعد؛ مرّر إلى مختبر التداول التجريبي ثم حدّث الصفحة.'; } }
   function bind() { $('acdRefresh')?.addEventListener('click', refresh); $('acdAnalyze')?.addEventListener('click', openAnalysis); $('acdPlan')?.addEventListener('click', openPlan); $('acdRun')?.addEventListener('click', runPaper); window.addEventListener('asiri:saxo-watchlist-quotes', (event) => { const incoming = Array.isArray(event.detail?.quotes) ? event.detail.quotes : []; if (usableQuotes(incoming).length || !liveQuote()) { state.quotes = incoming; state.provider = event.detail?.provider || ''; state.observedAt = event.detail?.observedAt || new Date().toISOString(); state.symbol = liveQuote()?.symbol || state.symbol; render(); } }); window.addEventListener('storage', render); }
-  function init() { ensurePanel(); window.setTimeout(() => { render(); refreshDirectQuote().catch(() => {}); }, 1200); }
+  function init() { ensurePanel(); window.setTimeout(render, 1200); scheduleDirectReads(); }
   window.asiriAnalysisCycleDesk = Object.freeze({ readOnly:true, paperOnly:true, executionAllowed:false, render });
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init, { once:true }) : init();
 })();
