@@ -11,6 +11,8 @@ assert.match(bridge, /executionAllowed: false/);
 assert.match(bridge, /tradingEnabled: false/);
 assert.match(cycle, /Saxo أو Finnhub/);
 assert.match(cycle, /providerLabel/);
+assert.match(cycle, /api\/market-data\?symbols/);
+assert.match(cycle, /refreshDirectQuote/);
 assert.match(cycle, /asiri:saxo-watchlist-quotes/);
 assert.match(cycle, /executionAllowed:false/);
 assert.doesNotMatch(bridge, /POST|PUT|PATCH|DELETE/);
