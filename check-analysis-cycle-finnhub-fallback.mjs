@@ -14,6 +14,7 @@ assert.match(cycle, /providerLabel/);
 assert.match(cycle, /api\/market-data\?symbols/);
 assert.match(cycle, /refreshDirectQuote/);
 assert.match(cycle, /scheduleDirectReads/);
+assert.match(cycle, /schedulePanelMount/);
 assert.match(cycle, /usableQuotes/);
 assert.match(cycle, /asiri:saxo-watchlist-quotes/);
 assert.match(cycle, /executionAllowed:false/);
