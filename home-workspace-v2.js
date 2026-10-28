@@ -39,6 +39,11 @@
     foldDetails();
   }
   function init() {
+    $('home-open-health')?.addEventListener('click', () => {
+      const details = $('home-details'); if (details) details.open = true;
+      window.asiriOperationalTrust?.refresh?.();
+      $('operational-trust-panel')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
     $('home-symbol')?.addEventListener('change', render);
     $('home-open-analysis')?.addEventListener('click', () => {
       const select = $('technicals-symbol'); if (select) select.value = $('home-symbol').value;
