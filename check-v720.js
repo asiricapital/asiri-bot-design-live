@@ -9,6 +9,9 @@ execFileSync(process.execPath, ['check-batch2-data-truth.mjs'], { stdio: 'pipe' 
 execFileSync(process.execPath, ['check-batch3-honest-completeness.mjs'], { stdio: 'pipe' }); // ASIRI_BATCH3_HONEST_COMPLETENESS_V1
 execFileSync(process.execPath, ['check-batch4-data-health.mjs'], { stdio: 'pipe' }); // ASIRI_BATCH4_DATA_HEALTH_V1
 
+execFileSync(process.execPath, ['check-execution-readiness-runtime.mjs'], { stdio: 'pipe' });
+execFileSync(process.execPath, ['check-operational-trust-runtime.mjs'], { stdio: 'pipe' });
+
 const legacyPath = 'check.js';
 const generatedPath = '.check-v720-base.mjs';
 const legacy = fs.readFileSync(legacyPath, 'utf8');

@@ -325,7 +325,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 <section id="asiri-home" class="asiri-home" aria-labelledby="home-title">
   <header class="home-heading"><div><span class="home-eyebrow">ASIRI CAPITAL / MARKET WORKSPACE</span><h1 id="home-title">وضوحٌ يسبق القرار.</h1><p>سهمك، مصدر قراءتك، وخطوتك التالية. في مساحة واحدة.</p></div><span class="home-mode">بحث ومحاكاة · التنفيذ مقفول</span></header>
   <div class="home-metrics" aria-label="حالة قائمة المتابعة"><div><span>رموز المتابعة</span><strong id="home-total">—</strong></div><div><span>حديثة الآن</span><strong id="home-fresh">—</strong></div><div><span>تحتاج مراجعة</span><strong id="home-review">—</strong></div></div>
-  <div class="home-workspace"><section class="home-focus" aria-labelledby="home-focus-title"><div class="home-focus-head"><h2 id="home-focus-title">رحلة السهم</h2><label>الأصل<select id="home-symbol" aria-label="اختر أصل رحلة السهم"></select></label></div><div class="home-quote"><strong id="home-ticker">—</strong><div><b id="home-price">—</b><small>السعر المعروض · العملة بحسب المصدر</small></div></div><span id="home-state" class="home-state">بانتظار القراءة</span><dl class="home-evidence"><div><dt>المصدر</dt><dd id="home-source">—</dd></div><div><dt>وقت السعر الأصلي</dt><dd id="home-time">—</dd></div></dl><p id="home-next">أضف أصلًا إلى قائمة المتابعة للبدء.</p><div class="home-actions"><button type="button" id="home-open-analysis">مراجعة التحليل ↗</button><button type="button" id="home-open-portfolio" class="secondary">قائمة المتابعة</button></div></section>
+  <div class="home-workspace"><section class="home-focus" aria-labelledby="home-focus-title"><div class="home-focus-head"><h2 id="home-focus-title">رحلة السهم</h2><label>الأصل<select id="home-symbol" aria-label="اختر أصل رحلة السهم"></select></label></div><div class="home-quote"><strong id="home-ticker">—</strong><div><b id="home-price">—</b><small>السعر المعروض · العملة بحسب المصدر</small></div></div><span id="home-state" class="home-state">بانتظار القراءة</span><dl class="home-evidence"><div><dt>المصدر</dt><dd id="home-source">—</dd><dd id="home-source-status">بانتظار التحقق</dd></div><div><dt>وقت السعر الأصلي</dt><dd id="home-time">—</dd></div></dl><p id="home-next">أضف أصلًا إلى قائمة المتابعة للبدء.</p><div class="home-actions"><button type="button" id="home-open-analysis">مراجعة التحليل ↗</button><button type="button" id="home-open-portfolio" class="secondary">قائمة المتابعة</button></div></section>
   <aside class="home-route"><span class="home-eyebrow">YOUR NEXT STEP</span><h2>من القراءة إلى المراجعة</h2><ol><li><b>01</b><div><strong>تحقّق من البيانات</strong><small>المصدر والوقت وحالة القراءة</small></div></li><li><b>02</b><div><strong>افهم التحليل</strong><small>الاتجاه والأدلة والبيانات الناقصة</small></div></li><li><b>03</b><div><strong>راجع المخاطر والخطة</strong><small>مراكز موثقة وكمية وتكاليف</small></div></li><li><b>04</b><div><strong>اختبر بالمحاكاة</strong><small>نتائج افتراضية منفصلة عن الحقيقي</small></div></li></ol><p>السعر وحده لا يُكمل المراحل. البيانات القديمة تبقى للمرجع، ولا تنشئ هذه الشاشة أمرًا أو قرارًا محفوظًا.</p></aside></div>
 </section>
 <details id="home-details" class="home-details"><summary>تفاصيل المنصة والاتصال والملخصات</summary><div id="home-details-body"></div></details>
@@ -597,9 +597,9 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                 <section class="stock-evidence" aria-labelledby="evidence-title">
                     <header class="evidence-heading"><div><span class="evidence-kicker">ASIRI · STOCK LENS</span><h3 id="evidence-title">رحلة السهم</h3></div><label>اختر رمزًا<select id="evidence-symbol" aria-label="اختر رمز السهم"></select></label></header>
                     <div class="evidence-hero"><div><div class="evidence-ticker" id="evidence-ticker">—</div><span class="evidence-badge" id="evidence-state" data-state="UNAVAILABLE">غير متاحة</span></div><div class="evidence-price"><span id="evidence-price">—</span><small>السعر المعروض · العملة بحسب المصدر</small></div></div>
-                    <dl class="evidence-facts"><div><dt>مصدر القراءة</dt><dd id="evidence-source">غير متاح</dd></div><div><dt>وقت سعر السوق</dt><dd id="evidence-time">غير متاح</dd></div><div><dt>الجلسة</dt><dd id="evidence-session">غير متاحة</dd></div></dl>
+                    <dl class="evidence-facts"><div><dt>مصدر القراءة</dt><dd id="evidence-source">غير متاح</dd><dd id="evidence-source-status">بانتظار التحقق من الاتصال</dd></div><div><dt>وقت سعر السوق</dt><dd id="evidence-time">غير متاح</dd></div><div><dt>الجلسة</dt><dd id="evidence-session">غير متاحة</dd></div></dl>
                     <ol class="evidence-track" aria-label="مراحل مراجعة السهم"><li><b>١ · البيانات</b><small id="evidence-data-step">تحتاج مراجعة</small></li><li><b>٢ · التحليل</b><small>يحتاج تحققًا</small></li><li><b>٣ · المخاطر</b><small>يحتاج بيانات المحفظة</small></li><li><b>٤ · الخطة</b><small>غير مفعّلة هنا</small></li></ol>
-                    <p class="evidence-note" id="evidence-next">بانتظار قراءة السعر.</p><p class="evidence-disclosure">قائمة متابعة محلية؛ قيمة المركز والربح والخسارة غير متاحين دون مراكز وتكلفة موثقة. السعر المعروض ليس سعر تنفيذ مضمونًا. لا تحفظ البطاقة قرارًا ولا تنشئ أمرًا.</p>
+                    <p class="evidence-disclosure" id="evidence-age-note"></p><p class="evidence-note" id="evidence-next">بانتظار قراءة السعر.</p><p class="evidence-disclosure">قائمة متابعة محلية؛ قيمة المركز والربح والخسارة غير متاحين دون مراكز وتكلفة موثقة. السعر المعروض ليس سعر تنفيذ مضمونًا. لا تحفظ البطاقة قرارًا ولا تنشئ أمرًا.</p>
                 </section>
                 <div class="portfolio-kpis" aria-label="ملخص حالة قائمة المتابعة">
                     <article class="portfolio-kpi"><span>إجمالي الرموز</span><strong id="portfolio-count">0</strong></article>
@@ -1185,7 +1185,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 
             list.innerHTML = rows.map(({ symbol, item, view, hasPrice }) => {
                 const state = view.state.toLowerCase();
-                const price = hasPrice ? `$${finiteNumber(item.price).toFixed(2)}` : 'غير متاح';
+                const price = hasPrice ? `$${finiteNumber(item.price).toLocaleString('en-US', { maximumFractionDigits: 4 })}` : 'غير متاح';
                 const source = hasPrice ? item.source : 'غير متاح';
                 const readingTime = hasPrice ? portfolioTime(item.updatedAt || item.time) : 'غير متاح';
                 return `<article class="portfolio-row" data-portfolio-symbol="${escapeMarkup(symbol)}">
@@ -1297,6 +1297,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             renderPracticalDashboard();
             renderFavoritePerformance();
             renderFavoriteScenario();
+            window.dispatchEvent(new Event('asiri:quotes-rendered'));
             const wrapper = document.getElementById('stocks-list-wrapper');
             const filtered = watchlist.filter(sym => {
                 if (currentFilter === 'ALL') return true;
@@ -1313,7 +1314,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                 const item = stockMarketData[sym] || { symbol: sym, price: null };
                 const view = quoteDataView(item);
                 const hasPrice = view.state !== 'UNAVAILABLE';
-                const priceStr = hasPrice ? `$${finiteNumber(item.price).toFixed(2)}` : 'غير متاح';
+                const priceStr = hasPrice ? `$${finiteNumber(item.price).toLocaleString('en-US', { maximumFractionDigits: 4 })}` : 'غير متاح';
                 const colorCls = hasPrice ? 'val-price' : 'val-neutral';
                 const flashCls = item.updated ? 'tick-flash' : '';
 
@@ -1441,7 +1442,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             document.getElementById('research-source').textContent = hasCompleteReading ? item.source : 'غير متاح';
             document.getElementById('research-time').textContent = hasCompleteReading ? portfolioTime(item.updatedAt || item.time) : 'غير متاح';
             document.getElementById('research-session').textContent = view.detail;
-            document.getElementById('research-price-note').textContent = hasCompleteReading ? `آخر سعر ظاهر: $${finiteNumber(item.price).toFixed(2)} • يعتمد العرض على المصدر والوقت أعلاه.` : 'لا تعرض المنصة سعراً حتى تكتمل القراءة مع المصدر والوقت.';
+            document.getElementById('research-price-note').textContent = hasCompleteReading ? `آخر سعر ظاهر: $${finiteNumber(item.price).toLocaleString('en-US', { maximumFractionDigits: 4 })} • يعتمد العرض على المصدر والوقت أعلاه.` : 'لا تعرض المنصة سعراً حتى تكتمل القراءة مع المصدر والوقت.';
             const secUrl = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${encodeURIComponent(symbol)}&owner=exclude&count=40`;
             document.getElementById('research-filing-link').href = secUrl;
             document.querySelectorAll('[data-research-filing-symbol]').forEach(el => { el.textContent = symbol || '—'; });
@@ -1618,13 +1619,13 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 
         init();
     </script>
-    <script src="./stock-evidence-card.js?v=2"></script>
-    <script src="./home-workspace-v2.js?v=2"></script>
+    <script src="./stock-evidence-card.js?v=3"></script>
+    <script src="./home-workspace-v2.js?v=3"></script>
     <script src="./smart-decision-lens-static.js?v=5"></script>
     <script src="./paper-lab-ui.js?v=4g"></script>
     <script src="./paper-experiment-panel.js?v=1"></script>
-<script src="./execution-readiness-ui.js?v=2"></script>
-<script src="./operational-trust-panel-v1.js?v=1"></script>
+<script src="./execution-readiness-ui.js?v=3"></script>
+<script src="./operational-trust-panel-v1.js?v=2"></script>
 <script src="./unified-control-dashboard-v1.js?v=1"></script>
 <script src="./saxo-watchlist-ui-v1.js?v=3"></script>
 <script src="./order-readiness-desk-v1.js?v=1"></script>
