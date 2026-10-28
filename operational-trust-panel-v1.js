@@ -30,7 +30,7 @@
     const timeout = window.setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetch(`${API_BASE}${path}`, { signal: controller.signal, cache: 'no-store', method: 'GET' });
-      if (!response.ok) throw new Error(`HTTP_${response.status}`);
+      if (!response.ok && !(path === ENDPOINTS.service && response.status === 503)) throw new Error(`HTTP_${response.status}`);
       return await response.json();
     } finally { window.clearTimeout(timeout); }
   };
@@ -61,14 +61,15 @@
     const stream = data.stream;
     if (stream) {
       const disabled = stream.enabled === false || String(stream.state).toUpperCase() === 'DISABLED';
-      card('stream', disabled ? 'warn' : 'ok', 'البث المباشر', disabled ? 'معطل حاليًا' : 'متصل', disabled ? 'المزود الاختياري غير مفعل؛ الاعتماد الحالي على HTTP.' : `${stream.provider || 'المزود'} · كل ${Math.round(Number(stream.cadenceMs || 0) / 1000)} ثوانٍ`);
+      const connected = !disabled && Array.isArray(stream.connections) && stream.connections.some(item => ['STREAMING','AUTHENTICATED'].includes(String(item.status).toUpperCase()));
+      card('stream', connected ? 'ok' : 'warn', 'البث المباشر', disabled ? 'اختياري · غير مفعّل' : connected ? 'اتصال موثق' : 'الاتصال غير مثبت', disabled ? 'غير مطلوب لعرض الأسعار الحالية؛ قائمة المتابعة تستخدم قراءة HTTP.' : connected ? `${stream.provider || 'المزود'} · حالة اتصال من الخادم` : 'الإعداد وحده لا يثبت وصول بيانات؛ راجع اتصال المصدر.');
     } else errorCard('stream', 'البث المباشر');
 
     const notifications = data.notifications;
     if (notifications) {
       const enabled = notifications.backgroundAlertsEnabled === true;
       const scan = Number(notifications.alertScanMs);
-      card('notifications', enabled ? 'ok' : 'warn', 'التنبيهات', enabled ? 'مفعلة للمراجعة' : 'غير مفعلة', enabled && Number.isFinite(scan) ? `فحص كل ${Math.round(scan / 60000)} دقيقة · لا تنفيذ` : 'حالة العامل أو الفترة غير مكتملة');
+      card('notifications', enabled ? 'ok' : 'warn', 'التنبيهات', enabled ? 'عامل الخادم مفعّل' : 'عامل الخادم غير مفعّل', enabled && Number.isFinite(scan) ? `فحص الخادم كل ${Math.round(scan / 60000)} دقيقة؛ تنبيهات هذه الواجهة مستقلة.` : 'حالة العامل أو الفترة غير مكتملة');
     } else errorCard('notifications', 'التنبيهات');
 
     const execution = data.execution;
