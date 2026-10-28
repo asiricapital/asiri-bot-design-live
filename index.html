@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link href="./smart-decision-lens-static.css?v=5" rel="stylesheet">
     <link href="./opportunity-journey.css?v=1" rel="stylesheet">
+    <link href="./stock-evidence-card.css?v=1" rel="stylesheet">
     <link href="./x-sentiment.css?v=1" rel="stylesheet">
     <link href="./decision-intelligence-panel.css?v=1" rel="stylesheet">
     <link href="./favorite-star.css?v=1" rel="stylesheet">
@@ -507,6 +508,13 @@
                     <div><div class="portfolio-kicker">MY WATCHLIST · VERIFIED READINGS</div><h2 id="portfolio-title">محفظتي وقائمة المتابعة</h2><p>تعرض الرموز المحفوظة على هذا الجهاز وآخر قراءة موثقة لكل رمز. لا تُحسب قيمة استثمارية أو ربح وخسارة قبل ربط كميات وتكلفة مراكز موثقة.</p></div>
                     <div class="portfolio-seal">READ ONLY<br>NO BROKER</div>
                 </header>
+                <section class="stock-evidence" aria-labelledby="evidence-title">
+                    <header class="evidence-heading"><div><span class="evidence-kicker">ASIRI · STOCK LENS</span><h3 id="evidence-title">رحلة السهم</h3></div><label>اختر رمزًا<select id="evidence-symbol" aria-label="اختر رمز السهم"></select></label></header>
+                    <div class="evidence-hero"><div><div class="evidence-ticker" id="evidence-ticker">—</div><span class="evidence-badge" id="evidence-state" data-state="UNAVAILABLE">غير متاحة</span></div><div class="evidence-price"><span id="evidence-price">—</span><small>السعر المعروض · العملة بحسب المصدر</small></div></div>
+                    <dl class="evidence-facts"><div><dt>مصدر القراءة</dt><dd id="evidence-source">غير متاح</dd></div><div><dt>وقت سعر السوق</dt><dd id="evidence-time">غير متاح</dd></div><div><dt>الجلسة</dt><dd id="evidence-session">غير متاحة</dd></div></dl>
+                    <ol class="evidence-track" aria-label="مراحل مراجعة السهم"><li><b>١ · البيانات</b><small id="evidence-data-step">تحتاج مراجعة</small></li><li><b>٢ · التحليل</b><small>يحتاج تحققًا</small></li><li><b>٣ · المخاطر</b><small>يحتاج بيانات المحفظة</small></li><li><b>٤ · الخطة</b><small>غير مفعّلة هنا</small></li></ol>
+                    <p class="evidence-note" id="evidence-next">بانتظار قراءة السعر.</p><p class="evidence-disclosure">قائمة متابعة محلية؛ قيمة المركز والربح والخسارة غير متاحين دون مراكز وتكلفة موثقة. السعر المعروض ليس سعر تنفيذ مضمونًا. لا تحفظ البطاقة قرارًا ولا تنشئ أمرًا.</p>
+                </section>
                 <div class="portfolio-kpis" aria-label="ملخص حالة قائمة المتابعة">
                     <article class="portfolio-kpi"><span>إجمالي الرموز</span><strong id="portfolio-count">0</strong></article>
                     <article class="portfolio-kpi fresh"><span>حديثة الآن</span><strong id="portfolio-fresh-count">0</strong></article>
@@ -1426,6 +1434,7 @@
 
         init();
     </script>
+    <script src="./stock-evidence-card.js?v=1"></script>
     <script src="./smart-decision-lens-static.js?v=5"></script>
     <script src="./paper-lab-ui.js?v=4"></script>
 <script src="./execution-readiness-ui.js?v=1"></script>
