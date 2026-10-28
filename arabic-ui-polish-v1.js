@@ -79,12 +79,15 @@
     document.body?.classList.add('asiri-arabic-ui');
     localizeTree();
     const observer = new MutationObserver((records) => records.forEach((record) => {
+      if (record.type === 'characterData' && record.target?.nodeValue) {
+        record.target.nodeValue = localizeText(record.target.nodeValue);
+      }
       record.addedNodes.forEach((node) => {
         if (node.nodeType === Node.ELEMENT_NODE) localizeTree(node);
         else if (node.nodeType === Node.TEXT_NODE) node.nodeValue = localizeText(node.nodeValue);
       });
     }));
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
     window.asiriArabicUiPolish = Object.freeze({ enabled: true, locale: 'ar', direction: 'rtl' });
   }
 
