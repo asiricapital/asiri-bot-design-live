@@ -18,7 +18,9 @@
     ['ACTIVE RESEARCH', 'حالة البحث'],
     ['DATA QUALITY', 'جودة البيانات'],
     ['READ-ONLY', 'قراءة فقط'],
+    ['Read-Only', 'قراءة فقط'],
     ['PAPER ONLY', 'ورقي فقط'],
+    ['Paper Only', 'ورقي فقط'],
     ['EXECUTION', 'التنفيذ'],
     ['ACCESS', 'الوصول'],
     ['MODE', 'الوضع'],
@@ -34,6 +36,7 @@
     ['DELAYED', 'متأخر'],
     ['UNAVAILABLE', 'غير متاح'],
     ['LIVE', 'مباشر'],
+    ['Live', 'مباشر'],
     ['After-Hours', 'بعد الإغلاق'],
     ['Regular Session', 'الجلسة الاعتيادية'],
     ['Last Regular Close', 'آخر إغلاق اعتيادي'],
@@ -48,6 +51,7 @@
     text = text.replace(/الزخم\s*·\s*WATCH\s*(\d+)/g, 'الزخم · متابعة $1');
     text = text.replace(/المخاطر\s*·\s*قديم\s*(\d+)/g, 'المخاطر · قديم $1');
     text = text.replace(/التمويل\s*·\s*N\/A\s*(\d+)/g, 'التمويل · غير متاح $1');
+    text = text.replace(/قراءة مباشر\b/g, 'قراءة مباشرة');
     return text;
   }
 
