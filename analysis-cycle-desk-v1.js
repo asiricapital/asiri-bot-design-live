@@ -31,8 +31,18 @@
     render();
     return true;
   }
+  // Retry only until the first successful read: each call uses force=1 (bypasses the backend cache),
+  // so firing all three unconditionally multiplied upstream provider load and fed rate limits.
   function scheduleDirectReads() {
-    [1200, 3000, 6000].forEach((delay) => window.setTimeout(() => refreshDirectQuote().catch(() => {}), delay));
+    const delays = [1200, 3000, 6000];
+    let attempt = 0;
+    const tryRead = async () => {
+      let ok = false;
+      try { ok = await refreshDirectQuote(); } catch (_) { ok = false; }
+      attempt += 1;
+      if (!ok && attempt < delays.length) window.setTimeout(tryRead, delays[attempt] - delays[attempt - 1]);
+    };
+    window.setTimeout(tryRead, delays[0]);
   }
   const tickets = () => { try { const x = JSON.parse(localStorage.getItem(TICKET_KEY) || '[]'); return Array.isArray(x) ? x : []; } catch { return []; } };
   function findButton(text) { return [...document.querySelectorAll('button')].find((b) => String(b.textContent || '').trim().includes(text)); }
@@ -47,8 +57,9 @@
   }
   function setStep(name, done, current = false) { const node = document.querySelector(`[data-acd-step="${name}"]`); if (!node) return; node.classList.toggle('done', done); node.classList.toggle('current', current); const mark = node.querySelector('i'); if (mark) mark.textContent = done ? '✓' : current ? '●' : '○'; }
   function render() {
+    if (!$('analysis-cycle-desk-v1')) return; // quotes can arrive before the panel mounts; ensurePanel() renders on mount
     const q = liveQuote(); const status = q ? quoteStatus(q) : 'UNAVAILABLE'; const p = q ? priceOf(q) : NaN; const symbol = q?.symbol || state.symbol || '—';
-    const source = providerLabel(q); const quote = $('acdQuote'); if (quote) quote.innerHTML = `<span class="acd-symbol">${esc(symbol)}</span><span class="acd-price">${Number.isFinite(p) ? `$${p.toFixed(4)}` : '—'}</span><span class="acd-status ${q ? '' : 'warn'}">${q ? `${esc(source)} ${esc(status)} · ${state.observedAt ? new Date(state.observedAt).toLocaleTimeString('ar-SA') : 'الوقت غير متاح'}` : 'السعر غير متاح'}</span>`;
+    const source = providerLabel(q); const quote = $('acdQuote'); if (quote) quote.innerHTML = `<span class="acd-symbol">${esc(symbol)}</span><span class="acd-price">${Number.isFinite(p) ? `$${p.toFixed(p >= 1 ? 2 : 4)}` : '—'}</span><span class="acd-status ${q ? '' : 'warn'}">${q ? `${esc(source)} ${esc(status)} · ${state.observedAt ? new Date(state.observedAt).toLocaleTimeString('ar-SA') : 'الوقت غير متاح'}` : 'السعر غير متاح'}</span>`;
     const next = $('acdNext'); const note = $('acdNote'); const hasTicket = tickets().length > 0;
     if (!q) { next.innerHTML = '<b>ابدأ بتحديث الأسعار</b><br><span>سنحاول Saxo أولًا ثم Finnhub والمصادر البديلة قبل الانتقال للتحليل.</span>'; note.innerHTML = '<strong>البيانات غير جاهزة:</strong> لم تصل قراءة موثقة من أي مصدر؛ لا نعرض سعرًا قديمًا كسعر حي.'; }
     else if (!state.analysisDone) { next.innerHTML = `<b>حلّل ${esc(symbol)} الآن</b><br><span>وصل سعر ${esc(status)} من ${esc(source)}؛ اضغط «افتح تحليل الأصل» لمراجعة السياق الفني قبل الخطة.</span>`; note.innerHTML = '<strong>الخطوة الآمنة:</strong> التحليل قراءة فقط، ولا يعني وجوده توصية شراء.'; }
