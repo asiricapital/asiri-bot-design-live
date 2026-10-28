@@ -22,7 +22,8 @@
   };
   const statusLabel = (status, quote) => {
     const source = providerName(quote);
-    return ({ LIVE: `${source}`, DELAYED: `${source} متأخر`, STALE: `${source} قديم`, UNAVAILABLE: `${source} غير متاح` }[String(status || '').toUpperCase()] || `${source} غير متاح`);
+    const live = /LIVE/.test(source) ? source : `${source} LIVE`; // e.g. "Saxo LIVE", consistent with "Finnhub LIVE"
+    return ({ LIVE: live, DELAYED: `${source} متأخر`, STALE: `${source} قديم`, UNAVAILABLE: `${source} غير متاح` }[String(status || '').toUpperCase()] || `${source} غير متاح`);
   };
   const statusClass = (status) => String(status || '').toLowerCase().replace(/[^a-z]/g, '') || 'unavailable';
   const brokerGatewayUrl = `${API_BASE}/?saxo-return=${encodeURIComponent(location.href)}`;
@@ -100,17 +101,21 @@
       const status = String(quote.status || 'UNAVAILABLE').toUpperCase();
       const usable = Number.isFinite(Number(quote.mid ?? quote.last ?? quote.bid ?? quote.ask)) && status !== 'UNAVAILABLE';
       const displayPrice = quote.mid ?? quote.last ?? quote.bid ?? quote.ask;
+      // Write only when the value actually changes, so decorating never re-dirties the DOM it observes.
       if (price && usable) {
-        price.textContent = money(displayPrice);
+        const nextPrice = money(displayPrice);
+        if (price.dataset.saxoValue !== nextPrice) { price.textContent = nextPrice; price.dataset.saxoValue = nextPrice; }
         price.classList.add('saxo-bound-price');
         price.dataset.saxoPrice = 'true';
       }
-      if (name) name.textContent = `${statusLabel(status, quote)} · ${quote.exchange || quote.source || 'قراءة موثقة'}`;
+      const nextName = `${statusLabel(status, quote)} · ${quote.exchange || quote.source || 'قراءة موثقة'}`;
+      if (name && name.dataset.saxoValue !== nextName) { name.textContent = nextName; name.dataset.saxoValue = nextName; }
       if (action) {
         let meta = action.querySelector('.saxo-watchlist-row-meta');
         if (!meta) { meta = document.createElement('span'); meta.className = 'saxo-watchlist-row-meta'; action.insertBefore(meta, action.firstChild); }
         meta.className = `saxo-watchlist-row-meta ${statusClass(status)}`;
-        meta.innerHTML = `<b>${esc(statusLabel(status, quote))}</b><small>Bid ${esc(money(quote.bid))} · Ask ${esc(money(quote.ask))}</small><small>${esc(time(quote.observedAt || quote.updatedAt))}</small>`;
+        const nextMeta = `<b>${esc(statusLabel(status, quote))}</b><small>Bid ${esc(money(quote.bid))} · Ask ${esc(money(quote.ask))}</small><small>${esc(time(quote.observedAt || quote.updatedAt))}</small>`;
+        if (meta.dataset.saxoValue !== nextMeta) { meta.innerHTML = nextMeta; meta.dataset.saxoValue = nextMeta; }
       }
     });
   }
@@ -175,9 +180,15 @@
 
   function init() {
     ensurePanel();
-    const observer = new MutationObserver(() => decorateRows());
+    // decorateRows() mutates the table it observes; pause observation while it runs,
+    // otherwise each pass queues another callback and the page locks up once quotes arrive.
     const wrapper = $('stocks-list-wrapper');
-    if (wrapper) observer.observe(wrapper, { childList: true, subtree: true });
+    const observeOptions = { childList: true, subtree: true };
+    const observer = new MutationObserver(() => {
+      observer.disconnect();
+      try { decorateRows(); } finally { if (wrapper) observer.observe(wrapper, observeOptions); }
+    });
+    if (wrapper) observer.observe(wrapper, observeOptions);
     refresh();
     state.timer = window.setInterval(() => { if (document.visibilityState !== 'hidden') refresh(); }, POLL_MS);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refresh(true); });
