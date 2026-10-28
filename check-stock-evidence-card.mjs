@@ -16,7 +16,7 @@ assert.equal(elements['evidence-ticker'].textContent, 'AAPL');
 assert.equal(elements['evidence-price'].textContent, '123.45');
 assert.equal(elements['evidence-source'].textContent, 'Test source');
 assert.equal(elements['evidence-state'].dataset.state, 'FRESH');
-stockMarketData.AAPL.health.quoteAgeMs = 121000; refresh();
+stockMarketData.AAPL.health = { state: 'STALE', quoteAgeMs: 121000 }; refresh();
 assert.equal(elements['evidence-state'].dataset.state, 'STALE', 'old quote must not remain fresh');
 stockMarketData.AAPL.health = { state: 'DELAYED' }; refresh();
 assert.equal(elements['evidence-state'].dataset.state, 'DELAYED');

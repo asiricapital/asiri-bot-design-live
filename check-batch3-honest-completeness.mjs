@@ -55,7 +55,7 @@ const unavailable = dataCompleteness(unavailableItem, { state: 'UNAVAILABLE', he
 assert.equal(unavailable.label, 'غير مكتملة');
 assert.equal(unavailable.availableCount, 2);
 
-assert.ok(html.includes('quote-data-health.js?v=1') && html.includes('smart-decision-lens-static.css?v=5') && html.includes('smart-decision-lens-static.js?v=5'), 'Fresh quote-lens assets must be cache-busted for Safari');
+assert.ok(html.includes('quote-data-health.js?v=2') && html.includes('smart-decision-lens-static.css?v=5') && html.includes('smart-decision-lens-static.js?v=5'), 'Fresh quote-lens assets must be cache-busted for Safari');
 for (const marker of ['اكتمال بيانات السعر', 'جودة التحليل', 'غير محسوبة', 'هذا فحص لنقل البيانات فقط', 'smart-lens-field-grid']) {
   assert.ok(script.includes(marker), `Honest completeness marker missing: ${marker}`);
 }

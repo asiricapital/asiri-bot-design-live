@@ -5,7 +5,7 @@ const script = readFileSync(new URL('./smart-decision-lens-static.js', import.me
 const css = readFileSync(new URL('./smart-decision-lens-static.css', import.meta.url), 'utf8');
 
 for (const marker of [
-  'quote-data-health.js?v=1',
+  'quote-data-health.js?v=2',
   'smart-decision-lens-static.css?v=5',
   'smart-decision-lens-static.js?v=5',
   'class="smart-summary-btn"'

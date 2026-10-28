@@ -17,7 +17,7 @@ const isoBefore = (milliseconds) => new Date(now - milliseconds).toISOString();
 const complete = {
   price: 6.75,
   source: 'Yahoo Finance • After-Hours • 10s polling',
-  updatedAt: isoBefore(10 * 60 * 1000),
+  updatedAt: isoBefore(30 * 1000),
   observedAt: isoBefore(30 * 1000),
   isFresh: true,
   isLiveSession: true,
@@ -26,11 +26,15 @@ const complete = {
 };
 
 const fresh = api.classifyQuote(complete, now);
-assert.equal(fresh.state, 'FRESH', 'A connected source may be fresh even when an illiquid symbol has not traded recently');
+assert.equal(fresh.state, 'FRESH', 'A fresh quote requires a recent market timestamp');
 assert.equal(fresh.sourceStatus, 'المصدر متصل الآن');
 assert.equal(api.describeQuote(fresh).label, 'حديثة الآن');
-assert.match(api.describeQuote(fresh).detail, /آخر حركة منذ 10 دقيقة/);
+assert.match(api.describeQuote(fresh).detail, /آخر حركة منذ 30 ثانية/);
 assert.deepEqual(Object.keys(fresh.checks), ['price', 'source', 'time', 'observation']);
+
+assert.equal(api.classifyQuote({ ...complete, updatedAt: isoBefore(10 * 60 * 1000) }, now).state, 'STALE', 'A newly received old trade must stay stale');
+assert.equal(api.classifyQuote({ ...complete, updatedAt: isoBefore(120001) }, now).reasonCode, 'QUOTE_NOT_RECENT');
+assert.equal(api.classifyQuote({ ...complete, updatedAt: isoBefore(120000) }, now).state, 'FRESH');
 
 const delayed = api.classifyQuote({ ...complete, isFresh: false }, now);
 assert.equal(delayed.state, 'DELAYED', 'A connected provider that does not claim freshness must be delayed');
@@ -94,7 +98,7 @@ for (const [index, match] of [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
 }
 
 for (const marker of [
-  'quote-data-health.js?v=1',
+  'quote-data-health.js?v=2',
   'smart-decision-lens-static.css?v=5',
   'smart-decision-lens-static.js?v=5',
   "new Set(['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE', 'FAVORITES'])",
