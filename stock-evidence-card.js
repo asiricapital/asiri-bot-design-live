@@ -30,6 +30,10 @@
     $('evidence-price').textContent = Number.isFinite(price) && price > 0 ? price.toLocaleString('en-US', { maximumFractionDigits: 4 }) : '—';
     $('evidence-state').textContent = labels[state];
     $('evidence-state').dataset.state = state;
+    const sourceStatus = $('evidence-source-status');
+    if (sourceStatus) sourceStatus.textContent = health?.sourceStatus || 'الاتصال غير مؤكد';
+    const ageNote = $('evidence-age-note');
+    if (ageNote) ageNote.textContent = health?.reasonCode === 'QUOTE_NOT_RECENT' ? 'وصل تحديث من المصدر، لكن آخر سعر أقدم من دقيقتين؛ يُعرض للمرجع حتى تصل حركة أحدث.' : window.asiriQuoteDataHealth?.describeQuote?.(health)?.reason || '';
     $('evidence-source').textContent = item.source || 'غير متاح';
     $('evidence-time').textContent = formatTime(item.updatedAt || item.time);
     $('evidence-session').textContent = item.sessionLabel || item.session || 'غير متاحة';
@@ -40,6 +44,7 @@
   function init() {
     if (!$('evidence-symbol')) return;
     $('evidence-symbol').addEventListener('change', render);
+    window.addEventListener('asiri:quotes-rendered', render);
     render();
     window.setInterval(() => { if (!document.hidden) render(); }, 5000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });

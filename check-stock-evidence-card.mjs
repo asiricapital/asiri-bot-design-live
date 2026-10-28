@@ -8,7 +8,7 @@ for (const id of ['evidence-symbol','evidence-ticker','evidence-price','evidence
 }
 const document = { readyState: 'complete', hidden: false, getElementById: id => elements[id], createElement: () => ({ value: '', textContent: '' }), addEventListener() {} };
 let refresh;
-const window = { asiriQuoteDataHealth: { classifyQuote: item => item.health || { state: 'UNAVAILABLE' } }, setInterval: f => { refresh = f; } };
+const window = { addEventListener() {}, asiriQuoteDataHealth: { classifyQuote: item => item.health || { state: 'UNAVAILABLE' } }, setInterval: f => { refresh = f; } };
 const stockMarketData = { AAPL: { price: 123.45, source: 'Test source', updatedAt: '2026-01-01T10:00:00Z', sessionLabel: 'مفتوح', health: { state: 'FRESH', quoteAgeMs: 1000 } }, MSFT: { price: null, health: { state: 'UNAVAILABLE' } } };
 const watchlist = ['AAPL','MSFT'];
 vm.runInNewContext(await readFile(new URL('./stock-evidence-card.js', import.meta.url), 'utf8'), { window, document, watchlist, stockMarketData, Date, Number, JSON });

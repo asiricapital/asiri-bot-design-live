@@ -29,6 +29,7 @@
     set('home-price', Number.isFinite(price) && price > 0 ? price.toLocaleString('en-US', { maximumFractionDigits: 4 }) : '—');
     set('home-state', described.label); $('home-state').dataset.state = current.state;
     set('home-source', item.source || 'غير متاح');
+    set('home-source-status', current.sourceStatus || 'الاتصال غير مؤكد');
     const quoteTime = new Date(item.updatedAt || item.time || '');
     set('home-time', Number.isNaN(quoteTime.getTime()) ? 'غير متاح' : quoteTime.toLocaleString('ar-SA'));
     set('home-next', current.state === 'FRESH' ? 'الخطوة التالية: راجع الأدلة الفنية، ثم المخاطر. حداثة السعر لا تعني اكتمال التحليل.' : 'الخطوة التالية: راجع حالة السوق وانتظر قراءة صالحة. لا تعامل السعر المحفوظ كقراءة جديدة.');
@@ -47,9 +48,12 @@
     });
     $('home-open-portfolio')?.addEventListener('click', () => {
       if (typeof switchMainTab === 'function') switchMainTab('portfolio');
+      const target = $('evidence-symbol');
+      if (target && [...target.options].some(option => option.value === $('home-symbol').value)) { target.value = $('home-symbol').value; target.dispatchEvent(new Event('change')); }
       $('sec-portfolio')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
     });
     $('home-details')?.addEventListener('toggle', () => window.dispatchEvent(new Event('resize')));
+    window.addEventListener('asiri:quotes-rendered', render);
     render();
     window.setInterval(() => { if (!document.hidden) render(); }, 5000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });

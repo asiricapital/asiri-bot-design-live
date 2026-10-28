@@ -1,6 +1,7 @@
 // Read-only execution readiness panel. paperOnly=true · executionAllowed=false · no activation or broker request exists here.
 (() => {
   'use strict';
+  const $ = id => document.getElementById(id);
   const API = 'https://asiri-bot.onrender.com/api/execution-readiness';
   const EVIDENCE_BASE = 'https://asiri-bot.onrender.com';
   const labels = {
@@ -20,8 +21,11 @@
   const row = (label, ok, yes = 'مكتمل', no = 'غير مكتمل') => `<div class="execution-readiness-gate" data-state="${ok ? 'ready' : 'blocked'}"><span>${esc(label)}</span><b>${esc(ok ? yes : no)}</b></div>`;
   async function load() {
     const gates = $('execution-readiness-gates');
+    if (!gates) return;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await fetch(API, { cache: 'no-store', headers: { accept: 'application/json' } });
+      const response = await fetch(API, { signal: controller.signal, cache: 'no-store', headers: { accept: 'application/json' } });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const ev = data.strategyEvidence;
@@ -49,7 +53,8 @@
       gates.innerHTML = `<div class="paper-lab-empty">تعذر قراءة بوابات الأمان: ${esc(error.message)}</div>`;
       $('execution-readiness-state').textContent = 'غير متاح — مقفول احتياطيًا';
       $('execution-readiness-card')?.setAttribute('data-server-open', 'false');
-    }
+    } finally { window.clearTimeout(timeout); }
   }
-  window.addEventListener('DOMContentLoaded', () => { $('execution-review-button')?.addEventListener('click', () => document.querySelector('#execution-readiness-gates')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })); load(); });
+  function init() { $('execution-review-button')?.addEventListener('click', () => document.querySelector('#execution-readiness-gates')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })); load(); }
+  document.readyState === 'loading' ? window.addEventListener('DOMContentLoaded', init, { once: true }) : init();
 })();
