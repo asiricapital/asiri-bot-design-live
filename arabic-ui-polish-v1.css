@@ -1,0 +1,66 @@
+/* ASIRI ARABIC UI POLISH V1 · RTL presentation only. */
+html[dir='rtl'] body.asiri-arabic-ui,
+html[dir='rtl'] body.asiri-arabic-ui .main-container {
+  direction: rtl;
+}
+
+.asiri-arabic-ui .command-center-strip,
+.asiri-arabic-ui .command-ticker,
+.asiri-arabic-ui .command-kpi-deck,
+.asiri-arabic-ui .cc-topology,
+.asiri-arabic-ui .practical-dashboard,
+.asiri-arabic-ui .unified-control-dashboard {
+  direction: rtl;
+}
+
+.asiri-arabic-ui .command-ticker {
+  text-align: right;
+  letter-spacing: 0;
+  line-height: 1.8;
+}
+
+.asiri-arabic-ui .cc-status,
+.asiri-arabic-ui .command-kpi,
+.asiri-arabic-ui .cc-topology-head {
+  text-align: right;
+}
+
+.asiri-arabic-ui .cc-status b,
+.asiri-arabic-ui .command-kpi strong,
+.asiri-arabic-ui .stock-col-price,
+.asiri-arabic-ui .stock-col-change,
+.asiri-arabic-ui .val-price,
+.asiri-arabic-ui .unified-watch-price strong {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.asiri-arabic-ui input,
+.asiri-arabic-ui select,
+.asiri-arabic-ui textarea {
+  text-align: right;
+}
+
+.asiri-arabic-ui input[type='number'],
+.asiri-arabic-ui input[type='text'][id*='Symbol'],
+.asiri-arabic-ui [data-symbol],
+.asiri-arabic-ui .sym {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+@media (max-width: 760px) {
+  .asiri-arabic-ui .command-center-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    text-align: right;
+  }
+
+  .asiri-arabic-ui .cc-identity {
+    grid-column: 1 / -1;
+  }
+
+  .asiri-arabic-ui .command-ticker {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
