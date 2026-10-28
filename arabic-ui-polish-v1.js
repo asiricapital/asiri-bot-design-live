@@ -80,7 +80,8 @@
     localizeTree();
     const observer = new MutationObserver((records) => records.forEach((record) => {
       if (record.type === 'characterData' && record.target?.nodeValue) {
-        record.target.nodeValue = localizeText(record.target.nodeValue);
+        const next = localizeText(record.target.nodeValue);
+        if (next !== record.target.nodeValue) record.target.nodeValue = next;
       }
       record.addedNodes.forEach((node) => {
         if (node.nodeType === Node.ELEMENT_NODE) localizeTree(node);
