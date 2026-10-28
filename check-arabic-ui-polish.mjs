@@ -12,6 +12,8 @@ assert.match(html, /arabic-ui-polish-v1\.js\?v=1/);
 assert.match(polish, /document\.documentElement\.lang = 'ar'/);
 assert.match(polish, /document\.documentElement\.dir = 'rtl'/);
 assert.match(polish, /executionAllowed|التنفيذ/);
+assert.match(polish, /MutationObserver/);
+assert.match(polish, /next !== record\.target\.nodeValue/);
 assert.match(css, /direction: rtl/);
 assert.doesNotMatch(polish, /fetch\s*\(/);
 assert.doesNotMatch(polish, /placeOrder|submitOrder|SAXO_EXECUTION_FEATURE_ENABLED/i);
