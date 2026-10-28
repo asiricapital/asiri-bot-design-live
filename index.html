@@ -2,6 +2,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <script>if (location.pathname === "/") location.replace("/index.html" + location.search + location.hash);</script>
+    <meta name="asiri-release" content="unified-home-v2">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ASIRI | غرفة أبحاث السوق</title>
@@ -317,8 +319,16 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
  .cc-topology{margin-top:8px;opacity:.68}.cc-topology-head{cursor:default}
  @media(max-width:620px){.practical-dashboard{margin:10px 0 14px;padding:13px}.practical-dashboard-head{display:block}.practical-dashboard-badge{display:inline-block;margin-top:9px}.practical-kpis{grid-template-columns:1fr 1fr}.practical-next{grid-template-columns:1fr}.practical-actions{display:grid;grid-template-columns:1fr 1fr}.practical-actions button{width:100%}}
 </style>
+    <link rel="stylesheet" href="./home-workspace-v2.css?v=2">
 </head>
 <body>
+<section id="asiri-home" class="asiri-home" aria-labelledby="home-title">
+  <header class="home-heading"><div><span class="home-eyebrow">ASIRI CAPITAL / MARKET WORKSPACE</span><h1 id="home-title">وضوحٌ يسبق القرار.</h1><p>سهمك، مصدر قراءتك، وخطوتك التالية. في مساحة واحدة.</p></div><span class="home-mode">بحث ومحاكاة · التنفيذ مقفول</span></header>
+  <div class="home-metrics" aria-label="حالة قائمة المتابعة"><div><span>رموز المتابعة</span><strong id="home-total">—</strong></div><div><span>حديثة الآن</span><strong id="home-fresh">—</strong></div><div><span>تحتاج مراجعة</span><strong id="home-review">—</strong></div></div>
+  <div class="home-workspace"><section class="home-focus" aria-labelledby="home-focus-title"><div class="home-focus-head"><h2 id="home-focus-title">رحلة السهم</h2><label>الأصل<select id="home-symbol" aria-label="اختر أصل رحلة السهم"></select></label></div><div class="home-quote"><strong id="home-ticker">—</strong><div><b id="home-price">—</b><small>السعر المعروض · العملة بحسب المصدر</small></div></div><span id="home-state" class="home-state">بانتظار القراءة</span><dl class="home-evidence"><div><dt>المصدر</dt><dd id="home-source">—</dd></div><div><dt>وقت السعر الأصلي</dt><dd id="home-time">—</dd></div></dl><p id="home-next">أضف أصلًا إلى قائمة المتابعة للبدء.</p><div class="home-actions"><button type="button" id="home-open-analysis">مراجعة التحليل ↗</button><button type="button" id="home-open-portfolio" class="secondary">قائمة المتابعة</button></div></section>
+  <aside class="home-route"><span class="home-eyebrow">YOUR NEXT STEP</span><h2>من القراءة إلى المراجعة</h2><ol><li><b>01</b><div><strong>تحقّق من البيانات</strong><small>المصدر والوقت وحالة القراءة</small></div></li><li><b>02</b><div><strong>افهم التحليل</strong><small>الاتجاه والأدلة والبيانات الناقصة</small></div></li><li><b>03</b><div><strong>راجع المخاطر والخطة</strong><small>مراكز موثقة وكمية وتكاليف</small></div></li><li><b>04</b><div><strong>اختبر بالمحاكاة</strong><small>نتائج افتراضية منفصلة عن الحقيقي</small></div></li></ol><p>السعر وحده لا يُكمل المراحل. البيانات القديمة تبقى للمرجع، ولا تنشئ هذه الشاشة أمرًا أو قرارًا محفوظًا.</p></aside></div>
+</section>
+<details id="home-details" class="home-details"><summary>تفاصيل المنصة والاتصال والملخصات</summary><div id="home-details-body"></div></details>
 <section class="command-center-strip" aria-label="حالة غرفة القيادة"><div class="cc-identity"><span class="cc-kicker">ASIRI COMMAND CENTER V1</span><span class="cc-title">غرفة قيادة الاستخبارات السوقية</span></div><div class="cc-status"><span class="cc-kicker">MODE</span><b class="safe">PAPER ONLY</b></div><div class="cc-status"><span class="cc-kicker">ACCESS</span><b class="safe">READ-ONLY</b></div><div class="cc-status"><span class="cc-kicker">EXECUTION</span><b class="locked">LOCKED</b></div><div class="cc-status"><span class="cc-kicker">DATA QUALITY</span><b class="wait">WAITING</b></div></section>
 <div class="command-ticker" aria-label="شريط حالة النظام"><span>● RESEARCH SHELL</span> &nbsp; / &nbsp; MARKET DATA &nbsp; / &nbsp; PAPER RESEARCH &nbsp; / &nbsp; NO BROKER SUBMISSION &nbsp; / &nbsp; ASIRI CAPITAL INTELLIGENCE OS</div>
 <section id="practical-dashboard" class="practical-dashboard" aria-labelledby="practical-dashboard-title">
@@ -653,7 +663,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
         </div>
     </div>
 
-    <script src="./quote-data-health.js?v=1"></script>
+    <script src="./quote-data-health.js?v=2"></script>
     <script src="./plan-risk.js?v=5"></script>
     <script src="./opportunity-journey.js?v=6"></script>
     <script src="./decision-intelligence-panel.js?v=1"></script>
@@ -1608,17 +1618,18 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 
         init();
     </script>
-    <script src="./stock-evidence-card.js?v=1"></script>
+    <script src="./stock-evidence-card.js?v=2"></script>
+    <script src="./home-workspace-v2.js?v=2"></script>
     <script src="./smart-decision-lens-static.js?v=5"></script>
     <script src="./paper-lab-ui.js?v=4g"></script>
     <script src="./paper-experiment-panel.js?v=1"></script>
 <script src="./execution-readiness-ui.js?v=2"></script>
 <script src="./operational-trust-panel-v1.js?v=1"></script>
 <script src="./unified-control-dashboard-v1.js?v=1"></script>
-<script src="./saxo-watchlist-ui-v1.js?v=2"></script>
+<script src="./saxo-watchlist-ui-v1.js?v=3"></script>
 <script src="./order-readiness-desk-v1.js?v=1"></script>
-<script src="./decision-mission-control-v1.js?v=1"></script>
-<script src="./analysis-cycle-desk-v1.js?v=2"></script>
+
+
 <script src="./arabic-ui-polish-v1.js?v=1"></script>
 <script>
 (() => { const canvas=document.getElementById('cc-topology-canvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; const palette=['#56e0d2','#b7ff5a','#f4c95d','#ff667d','#76a8ff']; let w=0,h=0,dpr=1,t=0; let topologyState={total:0,fresh:0,stale:0,unavailable:0};

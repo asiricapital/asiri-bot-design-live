@@ -35,7 +35,7 @@
     const panel = document.createElement('section');
     panel.id = 'saxo-watchlist-bridge-v1';
     panel.className = 'saxo-watchlist-bridge';
-    panel.innerHTML = `<div class="saxo-watchlist-bridge-head"><div><span class="eyebrow">MULTI-SOURCE LIVE WATCHLIST</span><h3>أسعار قائمة المراقبة الحية</h3><p id="saxo-watchlist-bridge-message">جارٍ تجهيز القراءة الآمنة…</p></div><button id="saxo-watchlist-refresh" type="button" class="secondary">تحديث الآن</button></div><a id="saxo-watchlist-reconnect" class="saxo-watchlist-reconnect" href="${brokerGatewayUrl}" target="_blank" rel="noopener" hidden>فتح بوابة Saxo وإعادة فتح اللوحة</a><div class="saxo-watchlist-bridge-meta"><span id="saxo-watchlist-source">المصدر: Saxo ثم Finnhub عند الحاجة</span><span id="saxo-watchlist-sync">آخر مزامنة: —</span><b>قراءة فقط · لا تنفيذ</b></div>`;
+    panel.innerHTML = `<div class="saxo-watchlist-bridge-head"><div><span class="eyebrow">BROKER · SEPARATE SNAPSHOT</span><h3>اتصال الوسيط والمصادر البديلة</h3><p id="saxo-watchlist-bridge-message">جارٍ تجهيز القراءة الآمنة…</p></div><button id="saxo-watchlist-refresh" type="button" class="secondary">تحديث الآن</button></div><a id="saxo-watchlist-reconnect" class="saxo-watchlist-reconnect" href="${brokerGatewayUrl}" target="_blank" rel="noopener" hidden>فتح بوابة Saxo وإعادة فتح اللوحة</a><div class="saxo-watchlist-bridge-meta"><span id="saxo-watchlist-source">المصدر: Saxo ثم Finnhub عند الحاجة</span><span id="saxo-watchlist-sync">آخر مزامنة: —</span><b>قراءة فقط · لا تنفيذ</b></div>`;
     wrapper.parentNode.insertBefore(panel, wrapper);
     $('saxo-watchlist-refresh')?.addEventListener('click', () => refresh(true));
   }
@@ -91,33 +91,7 @@
   }
 
   function decorateRows() {
-    document.querySelectorAll('#stocks-list-wrapper .stock-row[data-symbol], #stocks-list-wrapper .stock-row[id^="row-"]').forEach((row) => {
-      const symbol = String(row.dataset.symbol || row.id.replace(/^row-/, '')).toUpperCase();
-      const quote = state.quotes.get(symbol);
-      const price = row.querySelector('.stock-col-price');
-      const name = row.querySelector('.stock-col-name .name');
-      const action = row.querySelector('.stock-col-action');
-      if (!quote) return;
-      const status = String(quote.status || 'UNAVAILABLE').toUpperCase();
-      const usable = Number.isFinite(Number(quote.mid ?? quote.last ?? quote.bid ?? quote.ask)) && status !== 'UNAVAILABLE';
-      const displayPrice = quote.mid ?? quote.last ?? quote.bid ?? quote.ask;
-      // Write only when the value actually changes, so decorating never re-dirties the DOM it observes.
-      if (price && usable) {
-        const nextPrice = money(displayPrice);
-        if (price.dataset.saxoValue !== nextPrice) { price.textContent = nextPrice; price.dataset.saxoValue = nextPrice; }
-        price.classList.add('saxo-bound-price');
-        price.dataset.saxoPrice = 'true';
-      }
-      const nextName = `${statusLabel(status, quote)} · ${quote.exchange || quote.source || 'قراءة موثقة'}`;
-      if (name && name.dataset.saxoValue !== nextName) { name.textContent = nextName; name.dataset.saxoValue = nextName; }
-      if (action) {
-        let meta = action.querySelector('.saxo-watchlist-row-meta');
-        if (!meta) { meta = document.createElement('span'); meta.className = 'saxo-watchlist-row-meta'; action.insertBefore(meta, action.firstChild); }
-        meta.className = `saxo-watchlist-row-meta ${statusClass(status)}`;
-        const nextMeta = `<b>${esc(statusLabel(status, quote))}</b><small>Bid ${esc(money(quote.bid))} · Ask ${esc(money(quote.ask))}</small><small>${esc(time(quote.observedAt || quote.updatedAt))}</small>`;
-        if (meta.dataset.saxoValue !== nextMeta) { meta.innerHTML = nextMeta; meta.dataset.saxoValue = nextMeta; }
-      }
-    });
+    // Broker snapshots are separate evidence. Never overwrite the canonical watchlist DOM.
   }
 
   async function fetchUnifiedQuotes(symbols) {

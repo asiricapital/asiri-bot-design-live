@@ -25,8 +25,6 @@
     const item = stockMarketData[symbol] || {};
     const health = window.asiriQuoteDataHealth?.classifyQuote(item);
     let state = health?.state || 'UNAVAILABLE';
-    // A recently observed response can still contain an old market quote.
-    if (state === 'FRESH' && (!Number.isFinite(health.quoteAgeMs) || health.quoteAgeMs > 120000)) state = 'STALE';
     const price = item.price == null || item.price === '' ? NaN : Number(item.price);
     $('evidence-ticker').textContent = symbol || '—';
     $('evidence-price').textContent = Number.isFinite(price) && price > 0 ? price.toLocaleString('en-US', { maximumFractionDigits: 4 }) : '—';

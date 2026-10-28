@@ -5,6 +5,7 @@
   const LIMITS = Object.freeze({
     futureToleranceMs: 60 * 1000,
     sourceRecentMs: 2 * 60 * 1000,
+    activeQuoteRecentMs: 2 * 60 * 1000,
     closedQuoteStaleMs: 7 * 24 * 60 * 60 * 1000
   });
   const ANALYSIS_FIELDS = Object.freeze(['priceHistory', 'liquidity', 'technicals', 'news', 'risk']);
@@ -94,7 +95,9 @@
       if (complete.quoteAgeMs > LIMITS.closedQuoteStaleMs) return result(complete, 'STALE', 'CLOSED_QUOTE_TOO_OLD');
       return result(complete, 'DELAYED', 'MARKET_CLOSED');
     }
-    if (item?.isFresh === true) return result(complete, 'FRESH', 'CURRENT');
+    if (complete.quoteAgeMs > LIMITS.activeQuoteRecentMs) return result(complete, 'STALE', 'QUOTE_NOT_RECENT');
+    const activeSession = item?.isLiveSession === true || ['REGULAR', 'PRE', 'POST', 'PREMARKET', 'AFTERHOURS'].includes(base.session);
+    if (item?.isFresh === true && activeSession) return result(complete, 'FRESH', 'CURRENT');
     return result(complete, 'DELAYED', 'PROVIDER_NOT_FRESH');
   }
 
