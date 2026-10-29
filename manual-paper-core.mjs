@@ -4,16 +4,20 @@ export const newWallet=()=>({schema:1,version:0,initialCash:PAPER_RULES.initialC
 const positive=x=>typeof x==='number'&&Number.isFinite(x)&&x>0;
 const round=x=>Math.round(x*1e8)/1e8;
 function fail(message){throw new Error(message)}
+export function quoteBlockReason(quote, symbol, now=Date.now()) {
+ if(quote?.currency && quote.currency!=='USD') return 'هذا النموذج يدعم الدولار الأمريكي فقط.';
+ const age=now-Date.parse(quote?.updatedAt||quote?.time||'');const observed=now-Date.parse(quote?.observedAt||'');
+ if(quote?.symbol!==symbol||!positive(quote?.price)||!quote.source||!quote.isFresh||quote.error||quote.fromSnapshot||quote.isLiveSession!==true||!Number.isFinite(age)||age< -5000||age>120000||!Number.isFinite(observed)||observed< -5000||observed>120000) return 'السعر غير صالح الآن؛ انتظر قراءة حديثة بجلسة نشطة.';
+ return null;
+}
 export function previewOrder(wallet, order, quote, now=Date.now()) {
  if(!positive(wallet?.initialCash)||!Number.isSafeInteger(wallet?.version)||Object.values(wallet?.positions||{}).some(p=>!Number.isSafeInteger(p.quantity)||p.quantity<=0||!positive(p.costBasis))) fail('بيانات المراكز المحفوظة غير صالحة.');
  if(wallet?.schema!==1||!Number.isFinite(wallet.cash)||wallet.cash<0||!Array.isArray(wallet.trades)) fail('سجل المحاكاة غير صالح؛ لا تعِد ضبطه تلقائيًا.');
  if(wallet.trades.length>=2000) fail('بلغ السجل حد المراجعة؛ احتفظ بالسجل قبل بدء تجربة أخرى.');
  if(!/^[A-Z][A-Z0-9.-]{0,9}$/.test(order.symbol)||!['BUY','SELL'].includes(order.side)||!Number.isSafeInteger(order.quantity)||order.quantity<=0) fail('اختر سهمًا وكمية صحيحة موجبة.');
  if(!String(order.reason||'').trim()||String(order.reason).length>1000) fail('اكتب سبب العملية بما لا يتجاوز 1000 حرف.');
- if(quote?.currency && quote.currency!=='USD') fail('هذا النموذج يدعم الدولار الأمريكي فقط.');
  if(order.currencyAcknowledged!==true) fail('أكد افتراض الدولار الأمريكي لهذه المحاكاة.');
- const age=now-Date.parse(quote?.updatedAt||quote?.time||'');const observed=now-Date.parse(quote?.observedAt||'');
- if(quote?.symbol!==order.symbol||!positive(quote?.price)||!quote.source||!quote.isFresh||quote.error||quote.fromSnapshot||quote.isLiveSession!==true||!Number.isFinite(age)||age< -5000||age>120000||!Number.isFinite(observed)||observed< -5000||observed>120000) fail('السعر غير صالح الآن؛ انتظر قراءة حديثة بجلسة نشطة.');
+ const blocked=quoteBlockReason(quote,order.symbol,now);if(blocked)fail(blocked);
  const spread=halfSpreadBps({bid:quote.bidPrice,ask:quote.askPrice});
  if(spread.bps>PAPER_RULES.maxEntryHalfSpreadBps) fail('فرق السعر أوسع من حد المحاكاة.');
  const fill=quote.price*(1+(order.side==='BUY'?1:-1)*(PAPER_RULES.slippageBps+spread.bps)/10000);
