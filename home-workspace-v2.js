@@ -39,6 +39,7 @@
     foldDetails();
   }
   function init() {
+    $('home-open-paper')?.addEventListener('click', () => window.asiriManualPaper?.open($('home-symbol').value));
     $('home-open-health')?.addEventListener('click', () => {
       const details = $('home-details'); if (details) details.open = true;
       window.asiriOperationalTrust?.refresh?.();

@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';import {newWallet,previewOrder,commitOrder} from './manual-paper-core.mjs';
+const now=Date.parse('2026-10-28T15:00:00Z');const q={symbol:'TEST',price:10,source:'fixture',updatedAt:new Date(now).toISOString(),observedAt:new Date(now).toISOString(),isFresh:true,isLiveSession:true};
+const o={id:'test-buy',symbol:'TEST',side:'BUY',quantity:5,reason:'اختبار',stop:9,target:12,currencyAcknowledged:true};
+const original=newWallet();const p=previewOrder(original,o,q,now);const bought=commitOrder(original,p,q,now);
+assert.equal(original.cash,1000);assert(bought.cash<950);assert.equal(bought.positions.TEST.quantity,5);assert.deepEqual(commitOrder(bought,p,q,now),bought);
+const sellQuote={...q,price:11};const sell=previewOrder(bought,{...o,id:'test-sell',side:'SELL'},sellQuote,now);const closed=commitOrder(bought,sell,sellQuote,now);
+assert.equal(Object.keys(closed.positions).length,0);assert(Math.abs(closed.cash-1000-closed.trades[1].realizedPnl)<1e-7);assert(closed.trades[1].realizedPnl<5);
+assert.throws(()=>previewOrder(original,{...o,side:'SELL'},q,now));assert.throws(()=>previewOrder(original,{...o,quantity:100},q,now));assert.throws(()=>commitOrder(original,p,{...q,price:12},now));assert.throws(()=>commitOrder(original,p,q,now+60001));assert.throws(()=>commitOrder({...original,version:1},p,q,now));assert.throws(()=>previewOrder(original,o,{...q,isFresh:false},now));assert.throws(()=>previewOrder(original,o,{...q,updatedAt:new Date(now-121000).toISOString()},now));
+const partial=previewOrder(bought,{...o,id:'partial',side:'SELL',quantity:2},sellQuote,now);assert.equal(commitOrder(bought,partial,sellQuote,now).positions.TEST.quantity,3);
+console.log('Manual paper lifecycle passed: buy, partial/full sell, net cash reconciliation, unchanged input, idempotency, stale/changed price, expiry, version race and limits.');
