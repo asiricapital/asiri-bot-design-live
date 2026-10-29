@@ -50,3 +50,28 @@ Successful execution cases use synthetic fixtures; no live trade is executed.
 
 The design borrows broad ideas from the researched interfaces, with original
 ASIRI HTML/CSS. No third-party repository code, branding or mock data is copied.
+
+
+## Follow-up verification / 29 October 2026
+
+The deployed UI was exercised in Chrome: stock navigation, completed daily
+history, panel visibility/order/width, saved preferences after reload, and
+stale-price rejection without ledger mutation. Public quote samples for SG,
+SNAP and MVIS matched between `/api/unified-market/quotes` and the legacy risk
+view's `/api/binance-lab/stock-quotes` on price, currency, original timestamp,
+source and session. Source-observation times can differ between requests.
+The authenticated legacy account UI was not compared: the test session shows
+its sign-in screen. This is not evidence of account or broker availability.
+
+The audit found currency metadata was dropped by the frontend bridge. It now
+flows through the canonical row and saved/restored quote snapshot so the
+existing non-USD guards can work. A missing currency remains explicitly an
+acknowledged USD assumption, and never inherits a prior row's currency.
+Original timestamps stay unchanged; only the human-readable display uses
+Riyadh time. New UI/view/layout module paths are v2 for cache compatibility.
+Charts use measured panel dimensions, redraw on resize and inspect points
+using their current SVG viewBox. Tests cover a 340px chart and unchanged
+original timestamps. Safari/iPhone device rendering has not been observed.
+
+The pre-correction commit is `bed7679986c6131c4cd1ddb881cd0e93c3cf4b2d`.
+The earlier pre-Focus backup remains available for restoring the old design.

@@ -604,7 +604,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                 <section id="manual-paper-workspace" class="manual-paper" aria-labelledby="manual-title" data-view="overview">
                     <header class="mp-hero">
                         <div class="mp-identity"><span class="mp-eyebrow">ASIRI / STOCK JOURNEY</span><h3 id="manual-title">رحلة السهم<span>اقرأ. خطّط. اختبر.</span></h3><label class="mp-symbol-label">السهم<select id="manual-symbol"></select></label></div>
-                        <div class="mp-market"><span id="manual-market-state" class="mp-state">بانتظار القراءة</span><div class="mp-price-line"><strong id="manual-hero-price" dir="ltr">—</strong><span id="manual-hero-change" dir="ltr">—</span></div><small>سعر مرجعي · العملة بحسب المصدر</small><p id="manual-quote"></p></div>
+                        <div class="mp-market"><span id="manual-market-state" class="mp-state">بانتظار القراءة</span><div class="mp-price-line"><strong id="manual-hero-price" dir="ltr">—</strong><span id="manual-hero-change" dir="ltr">—</span></div><small><span id="manual-reference-currency">عملة السعر بانتظار التوثيق</span> · سعر مرجعي</small><p id="manual-quote"></p></div>
                         <div class="mp-account"><span class="mp-paper-label">محاكاة يدوية · على هذا الجهاز</span><div><span>النقد المتاح <small>USD</small></span><strong id="manual-cash" dir="ltr">—</strong></div><div><span>صافي المحقق <small>USD</small></span><b id="manual-realized" dir="ltr">—</b></div><small>حساب افتراضي مستقل عن الوسيط</small></div>
                     </header>
                     <nav class="mp-tabs" role="tablist" aria-label="أقسام رحلة السهم"><button type="button" id="mp-tab-focus" role="tab" aria-selected="false" aria-controls="mp-panel-focus" tabindex="-1" data-mp-tab="focus">وضع التركيز</button><button type="button" id="mp-tab-overview" role="tab" aria-selected="true" aria-controls="mp-panel-overview" data-mp-tab="overview">نظرة عامة</button><button type="button" id="mp-tab-chart" role="tab" aria-selected="false" aria-controls="mp-panel-chart" tabindex="-1" data-mp-tab="chart">الرسم</button><button type="button" id="mp-tab-plan" role="tab" aria-selected="false" aria-controls="mp-panel-plan" tabindex="-1" data-mp-tab="plan">الخطة <span class="mp-tab-dot"></span></button><button type="button" id="mp-tab-journal" role="tab" aria-selected="false" aria-controls="mp-panel-journal" tabindex="-1" data-mp-tab="journal">السجل <span id="manual-trade-count">0</span></button></nav>
@@ -1023,6 +1023,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                         observedAt: saved.observedAt || null,
                         source: saved.source || null,
                         provider: saved.provider || null,
+                        currency: normalizeQuoteCurrency(saved.currency),
                         session: saved.session || null,
                         sessionLabel: saved.sessionLabel || null,
                         isLiveSession: typeof saved.isLiveSession === 'boolean' ? saved.isLiveSession : null,
@@ -1049,6 +1050,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                     observedAt: item.observedAt || null,
                     source: item.source || null,
                     provider: item.provider || null,
+                    currency: normalizeQuoteCurrency(item.currency),
                     session: item.session || null,
                     sessionLabel: item.sessionLabel || null,
                     isLiveSession: typeof item.isLiveSession === 'boolean' ? item.isLiveSession : null,
@@ -1088,6 +1090,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                     const incoming = {
                         price: finiteNumber(row?.price),
                         source: row?.source || null,
+                        currency: normalizeQuoteCurrency(row?.currency),
                         updatedAt: row?.updatedAt || row?.time || null,
                         observedAt: row?.observedAt || payload?.observedAt || null,
                         time: row?.updatedAt || row?.time || null,
@@ -1141,6 +1144,10 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             }
         }
 
+        function normalizeQuoteCurrency(value) {
+            return typeof value === 'string' && /^[A-Za-z]{3}$/.test(value.trim()) ? value.trim().toUpperCase() : null;
+        }
+
         function updateVerifiedStockPrice(row, payloadObservedAt = null) {
             const sym = String(row.symbol || '').trim().toUpperCase();
             // A response that began before a local deletion must never re-add the removed symbol.
@@ -1154,6 +1161,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             item.receivedAt = new Date().toISOString();
             item.source = row.source || null;
             item.provider = row.provider || null;
+            item.currency = normalizeQuoteCurrency(row.currency);
             item.session = row.session || null;
             item.sessionLabel = row.sessionLabel || null;
             item.marketState = row.marketState || null;
@@ -1680,6 +1688,6 @@ function draw(){readTopologyState();ctx.clearRect(0,0,w,h); const nodeCount=Math
 /* COMMAND CENTER DATA BINDING V1 — read-only bridge to existing paper/readiness DOM */
 (() => { const kpis=[...document.querySelectorAll('.command-kpi')]; const byLabel=label=>kpis.find(node=>node.querySelector('small')?.textContent?.trim()===label); const set=(label,value,state='bound')=>{const node=byLabel(label)?.querySelector('strong');if(!node)return;node.textContent=value;node.className=state;node.dataset.bound='paper-lab'}; const source=id=>document.getElementById(id)?.textContent?.trim(); function sync(){const pnl=source('paper-lab-pnl'),sharpe=source('paper-lab-sharpe'),dd=source('paper-lab-max-dd'); set('PORTFOLIO PNL',pnl&&pnl!=='—'?pnl:'PENDING',pnl&&pnl!=='—'?'bound':'unavailable'); set('SHARPE RATIO',sharpe&&sharpe!=='—'&&sharpe!=='غير متاح'?sharpe:'PENDING',sharpe&&sharpe!=='—'&&sharpe!=='غير متاح'?'bound':'unavailable'); set('MAX DRAWDOWN',dd&&dd!=='—'?dd:'PENDING',dd&&dd!=='—'?'bound':'unavailable'); set('ACTIVE RESEARCH','READ-ONLY','bound'); const stage=document.querySelector('.cc-topology-stage'); if(stage){stage.dataset.dataSource='paper-lab-readiness';stage.dataset.total=source('readiness-total')||'0';stage.dataset.fresh=source('readiness-fresh')||'0';}} const targets=['paper-lab-pnl','paper-lab-sharpe','paper-lab-max-dd','readiness-total','readiness-fresh','readiness-stale','readiness-unavailable'].map(id=>document.getElementById(id)).filter(Boolean); const observer=new MutationObserver(sync); targets.forEach(node=>observer.observe(node,{childList:true,subtree:true,characterData:true})); sync(); window.setInterval(sync,5000); })();
 </script>
-<script type="module" src="./manual-paper-focus-ui-v1.mjs"></script>
+<script type="module" src="./manual-paper-focus-ui-v2.mjs"></script>
 </body>
 </html>

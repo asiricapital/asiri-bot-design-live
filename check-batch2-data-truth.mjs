@@ -33,6 +33,7 @@ new vm.Script(healthSource, { filename: 'quote-data-health.js' }).runInContext(h
 const healthApi = healthContext.window.asiriQuoteDataHealth;
 const quoteDataState = (item, nowMs = Date.now()) => healthApi.classifyQuote(item, nowMs).state;
 const finiteNumber = vm.runInNewContext(`(${extractFunction(html, 'finiteNumber')})`);
+const normalizeQuoteCurrency = vm.runInNewContext(`(${extractFunction(html, 'normalizeQuoteCurrency')})`);
 const normalizeDataFilter = vm.runInNewContext(`(${extractFunction(html, 'normalizeDataFilter')})`, {
   DATA_FILTERS: new Set(['ALL', 'FRESH', 'DELAYED', 'STALE', 'UNAVAILABLE'])
 });
@@ -129,7 +130,7 @@ const recentStoredAt = new Date(snapshotNow.getTime() - 60_000).toISOString();
 const expiredStoredAt = new Date(snapshotNow.getTime() - (25 * 60 * 60 * 1000)).toISOString();
 const futureStoredAt = new Date(snapshotNow.getTime() + 60_000).toISOString();
 const snapshotPayload = { storedAt: snapshotNow.toISOString(), rows: {
-  SG: { ...complete, storedAt: recentStoredAt, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
+  SG: { ...complete, currency:'usd', storedAt: recentStoredAt, decision: 'BUY', text: 'شراء', cls: 'badge-buy' },
   LEGACY: { ...complete, decision: 'WAIT', text: 'انتظار' },
   OLD: { ...complete, storedAt: expiredStoredAt }, FUTURE: { ...complete, storedAt: futureStoredAt },
   BROKEN: { price: 4.2, source: null, time: complete.time, storedAt: recentStoredAt }
@@ -139,11 +140,12 @@ const restoreContext = vm.createContext({
   localStorage: { getItem: () => JSON.stringify(snapshotPayload) },
   watchlist: ['SG', 'LEGACY', 'OLD', 'FUTURE', 'BROKEN'],
   stockMarketData: Object.fromEntries(['SG', 'LEGACY', 'OLD', 'FUTURE', 'BROKEN'].map((symbol) => [symbol, { symbol }])),
-  portfolioHasPrice: (item) => quoteDataState(item) !== 'UNAVAILABLE', finiteNumber
+  portfolioHasPrice: (item) => quoteDataState(item) !== 'UNAVAILABLE', finiteNumber, normalizeQuoteCurrency
 });
 const restoreSnapshot = vm.runInContext(`(${extractFunction(html, 'restoreVerifiedQuoteSnapshot')})`, restoreContext);
 restoreSnapshot();
 assert.equal(restoreContext.stockMarketData.SG.price, 6.76);
+assert.equal(restoreContext.stockMarketData.SG.currency, 'USD');
 assert.equal(restoreContext.stockMarketData.SG.fromSnapshot, true);
 for (const field of ['decision', 'text', 'cls']) assert.ok(!(field in restoreContext.stockMarketData.SG));
 assert.equal(restoreContext.stockMarketData.OLD.price, undefined);
@@ -157,17 +159,18 @@ const saveContext = vm.createContext({
   QUOTE_SNAPSHOT_KEY: 'snapshot', QUOTE_SNAPSHOT_MAX_AGE_MS: 24 * 60 * 60 * 1000,
   watchlist: ['GOOD', 'OLD', 'FUTURE', 'INCOMPLETE'],
   stockMarketData: {
-    GOOD: { ...complete, price: 8.4, snapshotStoredAt: recentStoredAt, provider: 'Provider A' },
+    GOOD: { ...complete, currency:'eur', price: 8.4, snapshotStoredAt: recentStoredAt, provider: 'Provider A' },
     OLD: { ...complete, price: 7.1, snapshotStoredAt: expiredStoredAt },
     FUTURE: { ...complete, price: 6.2, snapshotStoredAt: futureStoredAt },
     INCOMPLETE: { ...complete, price: 5.3, observedAt: null, snapshotStoredAt: recentStoredAt }
   },
-  portfolioHasPrice: (item) => quoteDataState(item) !== 'UNAVAILABLE', finiteNumber,
+  portfolioHasPrice: (item) => quoteDataState(item) !== 'UNAVAILABLE', finiteNumber, normalizeQuoteCurrency,
   localStorage: { setItem: (_key, value) => { savedSnapshot = JSON.parse(value); } }
 });
 const saveSnapshot = vm.runInContext(`(${extractFunction(html, 'saveVerifiedQuoteSnapshot')})`, saveContext);
 saveSnapshot();
 assert.deepEqual(Object.keys(savedSnapshot.rows), ['GOOD']);
+assert.equal(savedSnapshot.rows.GOOD.currency, 'EUR');
 assert.equal(savedSnapshot.rows.GOOD.storedAt, recentStoredAt, 'Saving must preserve the original snapshot age instead of renewing it');
 assert.equal(savedSnapshot.rows.GOOD.observedAt, complete.observedAt, 'The independent source-observation timestamp must be preserved');
 assert.equal(savedSnapshot.rows.GOOD.updatedAt, complete.time, 'The market timestamp must remain separate from source observation');
