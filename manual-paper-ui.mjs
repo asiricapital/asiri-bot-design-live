@@ -1,6 +1,6 @@
 import {MANUAL_KEY,newWallet,previewOrder,commitOrder} from './manual-paper-core.mjs?v=2';
 import {buildPaperPlan} from './manual-paper-plan.mjs';
-import {createWorkspaceView} from './manual-paper-view.mjs';
+import {createWorkspaceView} from './manual-paper-view.mjs?v=2';
 const $=id=>document.getElementById(id);const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=x=>Number.isFinite(x)?x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}):'—';
 let wallet,draft=null,busy=false,history=[],chartGeneration=0;
 let technicals=null,activeSymbol='',pendingAuto=true,plan=null,designView=null;
@@ -35,11 +35,11 @@ function render(){
  if(select.dataset.key!==key){select.replaceChildren();list.forEach(q=>{let o=document.createElement('option');o.value=q.symbol;o.textContent=q.symbol;select.append(o)});select.dataset.key=key;if(list.some(q=>q.symbol===prior))select.value=prior;invalidate();}
  if(activeSymbol!==select.value)selectSymbol();
  const q=quote(),health=q?window.asiriMarketView.health(q):null;
- $('manual-quote').textContent=q?`${q.symbol} · ${money(q.price)} · ${window.asiriQuoteDataHealth.describeQuote(health).label} · ${q.source||'غير متاح'} · ${q.updatedAt||q.time||'وقت غير متاح'}`:'بانتظار البيانات';
+ $('manual-quote').textContent=q?`${q.source||'مصدر غير متاح'} · وقت السعر ${q.updatedAt||q.time||'غير متاح'}`:'بانتظار البيانات';
  if(draft&&(health?.state!=='FRESH'||q?.price!==draft.referencePrice||(q.updatedAt||q.time)!==draft.quoteAt||q.source!==draft.source)){invalidate();notice('تغير السعر أو صلاحيته؛ أعد المعاينة.');}
  if(pendingAuto)populatePlan();
  else if(plan&&plan.side==='BUY'&&(q?.price!==plan.referencePrice||(q?.updatedAt||q?.time)!==plan.quoteAt)){$('manual-plan-status').textContent='وصلت قراءة أخرى؛ المسودة السابقة محفوظة للمراجعة. اضغط «إعادة تجهيز حسب الرصيد والسوق» لتحديثها.';}
- $('manual-cash').textContent=money(wallet.cash);$('manual-realized').textContent=money(wallet.trades.reduce((sum,t)=>sum+(Number.isFinite(t.realizedPnl)?t.realizedPnl:0),0));
+ $('manual-cash').textContent=wallet.cash.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});$('manual-realized').textContent=money(wallet.trades.reduce((sum,t)=>sum+(Number.isFinite(t.realizedPnl)?t.realizedPnl:0),0));
  $('manual-holdings').innerHTML=Object.entries(wallet.positions).map(([s,p])=>{const row=list.find(q=>q.symbol===s);const valid=row&&window.asiriMarketView.health(row).state==='FRESH';return `<div><b>${esc(s)}</b> · ${esc(p.quantity)} سهم · تكلفة شاملة ${money(p.costBasis)} USD · ${valid?`القيمة المرجعية ${money(p.quantity*row.price)} USD`:'التقييم الحالي غير متاح'}</div>`}).join('')||'محفظتك تنتظر أول تجربة. لا توجد مراكز يدوية.';
  $('manual-ledger').innerHTML=wallet.trades.slice().reverse().slice(0,100).map(t=>`<article><b>${t.side==='BUY'?'شراء':'بيع'} ${esc(t.symbol)} · ${esc(t.quantity)} سهم</b><p>تنفيذ افتراضي ${money(t.fill)} · رسوم ${money(t.fee)} · النقد بعد العملية ${money(t.cashAfter)} USD${t.realizedPnl===null?'':` · صافي المحقق ${money(t.realizedPnl)}`}</p><small>${esc(t.committedAt)} · ${esc(t.source)} · وقت السعر ${esc(t.quoteAt)}</small><p>${esc(t.reason)}</p></article>`).join('')||'لا توجد عمليات بعد. كل تأكيد تجريبي سيظهر هنا مع سببه وتكاليفه.';
  syncVisuals();
