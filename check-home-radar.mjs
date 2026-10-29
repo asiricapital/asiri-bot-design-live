@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import vm from 'node:vm';
+const context=vm.createContext({window:{},Date,Number,String,Boolean,Object,Array,Math,Map,Set});
+vm.runInContext(readFileSync('quote-data-health.js','utf8'),context);vm.runInContext(readFileSync('home-radar-model.js','utf8'),context);
+const now=Date.parse('2026-10-29T15:00:00Z'),health=q=>context.window.asiriQuoteDataHealth.classifyQuote(q,now),model=context.window.asiriRadarData,store=model.createStore();
+const q={symbol:'AAA',price:10,source:'fixture',updatedAt:new Date(now-20000).toISOString(),observedAt:new Date(now).toISOString(),isLiveSession:true,isFresh:true};
+const closed={...q,symbol:'BBB',price:2,isLiveSession:false,isFresh:false,updatedAt:new Date(now-18*3600000).toISOString()},missing={symbol:'CCC',price:null};const original=structuredClone(q);
+store.ingest([q,closed,missing],health);assert.equal(store.counts().fresh,1);assert.equal(store.counts().delayed,1);assert.equal(store.counts().missing,1);assert.equal(store.counts().review,2);assert.equal(store.select({filter:'FRESH'}).length,1);assert.equal(store.select({filter:'REVIEW'}).length,2);assert.equal(store.select({query:'bb'}).at(0).symbol,'BBB');assert.equal(store.select({sort:'price'}).at(0).symbol,'BBB');assert.equal(store.select().at(0).points.length,1);assert.equal(model.miniPath(store.select().at(0).points),null);assert.equal(store.select().at(0).sampleChange,null);
+store.ingest([q,closed,missing],health);assert.equal(store.select().at(0).points.length,1,'same market timestamp must not create chart samples');
+store.ingest([{...q,price:11,updatedAt:new Date(now-10000).toISOString()},closed,missing],health);assert.equal(store.select().at(0).points.length,2);assert(Math.abs(store.select().at(0).sampleChange-10)<1e-9);assert(model.miniPath(store.select().at(0).points));assert.equal(store.select().find(r=>r.symbol==='BBB').points.length,0,'last-close quotes must not create live sample charts');
+const copy=store.select();copy[0].points[0].price=999;assert.equal(store.select()[0].points[0].price,10,'public rows cannot mutate stored samples');
+store.ingest([{...q,price:9,updatedAt:new Date(now-25000).toISOString()}],health);assert.equal(store.select()[0].points.length,2,'out of order quote is not a new sample');
+store.ingest([{...q,source:'other-provider'}],health);assert.equal(store.select()[0].points.length,1);assert.equal(store.select()[0].sampleChange,null,'provider switch resets baseline');
+for(let i=0;i<40;i++)store.ingest([{...q,source:'other-provider',updatedAt:new Date(now+i*500).toISOString()}],health);assert.equal(store.select()[0].points.length,24);
+store.ingest([],health);assert.equal(store.counts().total,0);assert.equal(store.select().length,0);assert.deepEqual(q,original);
+console.log('Home radar passed: canonical freshness counts, filters/sorting, no fabricated series, market-time deduplication, source reset, bounded samples, immutability and removed symbols.');
