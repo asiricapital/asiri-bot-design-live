@@ -7,3 +7,7 @@ The radar reads the same watchlist snapshot exposed by `asiriMarketView`. It per
 Mini charts are not historical daily series. `home-radar-model.js` records up to 24 in-memory samples per symbol, only when canonical quote health is FRESH and original market time advances. Repeated polling of a last close does not add samples. Switching provider resets that symbol's sample baseline. No movement percentage or path is drawn with fewer than two samples. The percentage is the first-to-last change of the displayed samples, explicitly labeled as such, not a daily return. Samples are not persisted and disappear on reload; previous samples remain labeled as previous when current health is no longer FRESH.
 
 Validation: `check-home-radar.mjs` is part of `npm run check`. It covers canonical counts, missing data, filtering/sorting, timestamp deduplication, source changes, sample caps and immutable output. Additional jsdom integration covers no extra quote reads or wallet writes, readiness, real module symbol navigation, search/filter/expand, keyed focus preservation and an empty watchlist. Existing paper lifecycle tests remain unchanged.
+
+## Asset delivery
+
+The command room uses release-specific `home-command-room-v1.js` and `.css` filenames. The legacy `home-workspace-v2` assets retain their previous implementation so cached older HTML stays compatible. A query-string revision alone did not reliably avoid the older served asset during live verification, so new page markup points to distinct asset paths.
