@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {normalizeLayout,FOCUS_KEY,FOCUS_PANELS} from './focus-workspace-v2.mjs';
+import {normalizeLayout,FOCUS_KEY,FOCUS_PANELS} from './focus-workspace-v3.mjs';
 // Persisted preferences are untrusted: retain all valid panels exactly once,
 // keep the chart discoverable and never share the financial ledger key.
 const raw={order:['journal','ticket','ticket','<script>'],hidden:['chart','ticket','invalid','ticket'],wide:true,mode:'classic'};
@@ -15,7 +15,7 @@ for(const value of [null,undefined,0,[],{order:'wrong',hidden:0},{order:[null,{}
 }
 assert.notEqual(FOCUS_KEY,'asiri.design.manual-paper.v1');
 const html=fs.readFileSync('index.html','utf8');
-assert(html.includes('./manual-paper-focus-ui-v2.mjs'));assert(html.includes('./focus-workspace-v1.css'));
+assert(html.includes('./manual-paper-focus-ui-v3.mjs'));assert(html.includes('./focus-workspace-v1.css'));
 for(const id of ['manual-symbol','manual-quantity','manual-stop','manual-target','manual-confirm','manual-chart'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
-for(const file of ['focus-workspace-v2.mjs','manual-paper-focus-view-v2.mjs','manual-paper-focus-ui-v2.mjs'])execFileSync(process.execPath,['--check',file]);
+for(const file of ['focus-workspace-v3.mjs','manual-paper-focus-view-v3.mjs','manual-paper-focus-ui-v3.mjs'])execFileSync(process.execPath,['--check',file]);
 console.log('Focus workspace passed: corrupt preferences, required chart, distinct storage, unique financial controls, release assets and syntax.');
