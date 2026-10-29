@@ -1,5 +1,6 @@
 import {visualTicket,visualAllocation,chartTradeMarkers} from './manual-paper-visual-model.mjs';
 const money=n=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}):'—';
+const usd=n=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
 const $=id=>document.getElementById(id),put=(id,value)=>{$(id).textContent=value;};
 const date=t=>{const d=new Date(t);return Number.isFinite(d.getTime())?new Intl.DateTimeFormat('ar-SA',{dateStyle:'medium',calendar:'gregory',timeZone:'Asia/Riyadh'}).format(d):'غير متاح';};
 const svgNode=(tag,attrs={},text)=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;};
@@ -44,9 +45,9 @@ export function createWorkspaceView(host){
   put('manual-market-state',window.asiriQuoteDataHealth?.describeQuote(health||{state:'UNAVAILABLE'})?.label||'بانتظار القراءة');
   const t=technicals?.indicators;put('manual-trend',t?.trendLabel||'غير متاح');put('manual-rsi',money(t?.rsi14));put('manual-atr',money(t?.atr14));put('manual-trade-count',wallet.trades.length);
   const ticket=visualTicket(wallet,order,q),allocation=visualAllocation(wallet,ticket);
-  put('manual-summary-quantity',ticket.available?`${ticket.quantity} سهم`:'—');put('manual-summary-cost',ticket.available?`${money(ticket.cost)} USD`:'—');
-  for(const[id,value]of [['manual-ticket-stop',ticket.levels?ticket.stop:null],['manual-ticket-entry',ticket.available?ticket.entry:null],['manual-ticket-target',ticket.levels?ticket.target:null],['manual-ticket-cash',ticket.available?ticket.cashAfter:null],['manual-ticket-fee',ticket.available?ticket.fee:null],['manual-ticket-risk',ticket.levels?ticket.risk:null]])put(id,value===null?'—':`${money(value)}${id.includes('cash')||id.includes('fee')||id.includes('risk')?' USD':''}`);
-  put('manual-visual-risk',ticket.levels?`${money(ticket.risk)} USD`:'—');put('manual-visual-reward',ticket.levels?`${money(ticket.reward)} USD`:'—');
+  put('manual-summary-quantity',ticket.available?`${ticket.quantity} سهم`:'—');put('manual-summary-cost',ticket.available?`${usd(ticket.cost)} USD`:'—');
+  for(const[id,value]of [['manual-ticket-stop',ticket.levels?ticket.stop:null],['manual-ticket-entry',ticket.available?ticket.entry:null],['manual-ticket-target',ticket.levels?ticket.target:null],['manual-ticket-cash',ticket.available?ticket.cashAfter:null],['manual-ticket-fee',ticket.available?ticket.fee:null],['manual-ticket-risk',ticket.levels?ticket.risk:null]])put(id,value===null?'—':`${id.includes('cash')||id.includes('fee')||id.includes('risk')?usd(value):money(value)}${id.includes('cash')||id.includes('fee')||id.includes('risk')?' USD':''}`);
+  put('manual-visual-risk',ticket.levels?`${usd(ticket.risk)} USD`:'—');put('manual-visual-reward',ticket.levels?`${usd(ticket.reward)} USD`:'—');
   const map=$('manual-risk-map');map.replaceChildren();
   if(ticket.levels){
    const lossPct=(ticket.entry-ticket.stop)/(ticket.target-ticket.stop)*100;
@@ -59,8 +60,8 @@ export function createWorkspaceView(host){
    put('manual-map-note',`${healthState==='FRESH'?'تقدير من القراءة الحالية':'مسودة مرجعية من آخر سعر متاح'} · ${ticket.capacity?'ضمن حدود المحاكاة':'تحتاج مراجعة حدود الرصيد أو المخاطرة'}. ${next.resistanceWarning?'مقاومة يومية قبل الهدف. ':''}المستويات لا تنفذ تلقائيًا.`);
   }else{const p=document.createElement('p');p.textContent=order.side==='SELL'?'خطة بيع من المملوك فقط؛ لا مستويات شراء أو وقف جديد.':'تظهر خريطة المخاطرة بعد تجهيز مستويات صالحة.';map.append(p);put('manual-map-badge',order.side==='SELL'?'بيع من المملوك':'بانتظار الخطة');put('manual-map-note',ticket.available&&!ticket.ownedEnough?'الكمية تتجاوز المملوك؛ البيع غير متاح.':'اختر السهم وراجع الخطة قبل أي تأكيد.');}
   const bar=$('manual-allocation-bar'),legend=$('manual-allocation-legend');bar.replaceChildren();legend.replaceChildren();
-  for(const segment of allocation.segments){const strip=document.createElement('span');strip.style.width=`${segment.pct}%`;strip.style.background=segment.color;bar.append(strip);const item=document.createElement('div');item.className='mp-allocation-item';item.style.setProperty('--segment-color',segment.color);const dot=document.createElement('i'),label=document.createElement('span'),value=document.createElement('strong');label.textContent=segment.label;value.textContent=`${money(segment.value)} USD`;item.append(dot,label,value);legend.append(item);}
-  bar.setAttribute('aria-label',allocation.segments.map(s=>`${s.label} ${money(s.value)} USD`).join('، '));put('manual-allocation-basis',allocation.projected?'تقدير بعد المسودة':'التوزيع الحالي بالتكلفة');
+  for(const segment of allocation.segments){const strip=document.createElement('span');strip.style.width=`${segment.pct}%`;strip.style.background=segment.color;bar.append(strip);const item=document.createElement('div');item.className='mp-allocation-item';item.style.setProperty('--segment-color',segment.color);const dot=document.createElement('i'),label=document.createElement('span'),value=document.createElement('strong');label.textContent=segment.label;value.textContent=`${usd(segment.value)} USD`;item.append(dot,label,value);legend.append(item);}
+  bar.setAttribute('aria-label',allocation.segments.map(s=>`${s.label} ${usd(s.value)} USD`).join('، '));put('manual-allocation-basis',allocation.projected?'تقدير بعد المسودة':'التوزيع الحالي بالتكلفة');
   put('manual-allocation-note','الأرقام نقد وتكلفة مراكز، وليست قيمة سوقية. توزيع المسودة تقديري؛ لا يغير الرصيد قبل التأكيد.');
   drawHistory(history,wallet,order.symbol,Number($('manual-chart-point').value));
  }
