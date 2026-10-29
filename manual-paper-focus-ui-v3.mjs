@@ -1,3 +1,4 @@
+import {createPaperRecommendationDesk} from './paper-recommendations-ui.mjs';
 import {selectChartHistory} from './verified-candle-model-v1.mjs';
 import {formatMarketTime,referenceCurrencyLabel} from './market-reading-format-v1.mjs';
 import {MANUAL_KEY,newWallet,previewOrder,commitOrder,quoteBlockReason} from './manual-paper-core.mjs?v=3';
@@ -5,7 +6,7 @@ import {buildPaperPlan} from './manual-paper-plan.mjs?v=2';
 import {createWorkspaceView} from './manual-paper-focus-view-v3.mjs';
 const $=id=>document.getElementById(id);const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=x=>Number.isFinite(x)?x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}):'—';
 let wallet,draft=null,busy=false,refreshBusy=false,history=[],chartGeneration=0;
-let technicals=null,activeSymbol='',pendingAuto=true,plan=null,designView=null;
+let technicals=null,activeSymbol='',pendingAuto=true,plan=null,designView=null,recommendationId=null,recommendationDesk=null;
 function syncVisuals(){designView?.sync({wallet,quote:quote(),health:quote()?window.asiriMarketView.health(quote()):null,technicals,history,order:{symbol:$('manual-symbol').value,side:$('manual-side').value,quantity:Number($('manual-quantity').value),stop:Number($('manual-stop').value),target:Number($('manual-target').value)},resistanceWarning:plan?.resistanceWarning===true})}
 function readWallet(){const raw=localStorage.getItem(MANUAL_KEY);if(raw===null)return newWallet();const value=JSON.parse(raw);if(value.schema!==1||!Number.isFinite(value.cash)||!Array.isArray(value.trades)||!value.positions||!Number.isSafeInteger(value.version))throw Error('تعذر قراءة السجل المحفوظ؛ لم يُمسح ولم يُستبدل.');return value;}
 const rows=()=>window.asiriMarketView?.snapshots?.()||[];const quote=()=>rows().find(q=>q.symbol===$('manual-symbol').value);
@@ -41,7 +42,11 @@ function resetPlan(){
 }
 function populatePlan(){
  if(!pendingAuto)return;
- plan=buildPaperPlan(wallet,$('manual-symbol').value,$('manual-side').value,quote(),technicals);
+ if(recommendationId){
+  const current=recommendationDesk?.get($('manual-symbol').value);
+  plan=current?.status==='READY'&&current.id===recommendationId?current.plan:{status:'UNAVAILABLE',message:current?.message||'انتهت صلاحية الترشيح؛ حدّث الفحص.'};
+  if(plan.status==='UNAVAILABLE'){['manual-quantity','manual-stop','manual-target','manual-reason'].forEach(id=>$(id).value='');}
+ }else plan=buildPaperPlan(wallet,$('manual-symbol').value,$('manual-side').value,quote(),technicals);
  $('manual-plan-status').textContent=plan.message;
  if(plan.status==='UNAVAILABLE'){syncVisuals();return;}
  $('manual-quantity').value=String(plan.quantity);$('manual-stop').value=plan.stop??'';$('manual-target').value=plan.target??'';$('manual-reason').value=plan.reason;
@@ -51,7 +56,7 @@ function populatePlan(){
  notice('تعبئة مسودة فقط؛ راجع الحقول ثم عاين. لا تأكيد أو تنفيذ تلقائي.');syncVisuals();
 }
 function selectSymbol(){
- activeSymbol=$('manual-symbol').value;technicals=null;history=[];$('manual-chart-point').disabled=true;resetPlan();populatePlan();loadChart();
+ recommendationId=null;activeSymbol=$('manual-symbol').value;technicals=null;history=[];$('manual-chart-point').disabled=true;resetPlan();populatePlan();loadChart();
 }
 function render(){
  const list=rows(),select=$('manual-symbol'),prior=select.value,key=JSON.stringify(list.map(q=>q.symbol));
@@ -70,22 +75,30 @@ function render(){
  $('manual-ledger').innerHTML=wallet.trades.slice().reverse().slice(0,100).map(t=>`<article><b>${t.side==='BUY'?'شراء':'بيع'} ${esc(t.symbol)} · ${esc(t.quantity)} سهم</b><p>تنفيذ افتراضي ${money(t.fill)} · رسوم ${money(t.fee)} · النقد بعد العملية ${money(t.cashAfter)} USD${t.realizedPnl===null?'':` · صافي المحقق ${money(t.realizedPnl)}`}</p><small>${esc(t.committedAt)} · ${esc(t.source)} · وقت السعر ${esc(t.quoteAt)}</small><p>${esc(t.reason)}</p></article>`).join('')||'لا توجد عمليات بعد. كل تأكيد تجريبي سيظهر هنا مع سببه وتكاليفه.';
  syncVisuals();
 }
-function order(){return{id:crypto.randomUUID(),symbol:$('manual-symbol').value,side:$('manual-side').value,quantity:Number($('manual-quantity').value),stop:Number($('manual-stop').value),target:Number($('manual-target').value),reason:$('manual-reason').value,currencyAcknowledged:$('manual-currency').checked};}
-function preview(){try{wallet=readWallet();const blocked=quoteBlockReason(quote(),$('manual-symbol').value);if(blocked)throw Error(blocked);if(plan){pendingAuto=true;populatePlan();}draft=previewOrder(wallet,order(),quote());$('manual-preview-result').textContent=`${draft.side==='BUY'?'شراء':'بيع'} ${draft.quantity} ${draft.symbol} · سعر مرجعي ${money(draft.referencePrice)} · تنفيذ افتراضي ${money(draft.fill)} · رسوم ${money(draft.fee)} · النقد المتوقع ${money(draft.cashAfter)} USD${draft.side==='BUY'?` · وقف ${money(draft.stop)} · هدف ${money(draft.target)}`:''}. فرق السعر ${draft.spreadSource==='quote'?'من الاقتباس':'افتراض 0.15% لكل جانب'}، والانزلاق 0.05% والعمولة 0.10%.`; $('manual-confirm').disabled=false;notice('راجع المعاينة ثم أكد خلال دقيقة. لا توجد صفقة حقيقية.');}catch(e){invalidate();notice(e.message)}}
-async function confirm(){if(busy||!draft)return;if(!navigator.locks){notice('الحفظ متوقف: المتصفح لا يدعم قفل السجل بين النوافذ. استخدم متصفحًا يدعم Web Locks.');return;}busy=true;$('manual-confirm').disabled=true;try{await navigator.locks.request(MANUAL_KEY,()=>{const current=readWallet();const next=commitOrder(current,draft,quote());localStorage.setItem(MANUAL_KEY,JSON.stringify(next));wallet=next;});resetPlan();populatePlan();render();notice('حُفظت العملية التجريبية محليًا وتحدث الرصيد. لا إرسال إلى وسيط.');}catch(e){invalidate();notice(`لم يُؤكد الحفظ: ${e.message}`)}finally{busy=false}}
+function order(){return{recommendation:plan?.recommendation,id:crypto.randomUUID(),symbol:$('manual-symbol').value,side:$('manual-side').value,quantity:Number($('manual-quantity').value),stop:Number($('manual-stop').value),target:Number($('manual-target').value),reason:$('manual-reason').value,currencyAcknowledged:$('manual-currency').checked};}
+function preview(){try{wallet=readWallet();const blocked=quoteBlockReason(quote(),$('manual-symbol').value);if(blocked)throw Error(blocked);if(plan){pendingAuto=true;populatePlan();}if(recommendationId&&plan?.status!=='DRAFT')throw Error(plan?.message||'الترشيح غير صالح الآن.');draft=previewOrder(wallet,order(),quote());$('manual-preview-result').textContent=`${draft.side==='BUY'?'شراء':'بيع'} ${draft.quantity} ${draft.symbol} · سعر مرجعي ${money(draft.referencePrice)} · تنفيذ افتراضي ${money(draft.fill)} · رسوم ${money(draft.fee)} · النقد المتوقع ${money(draft.cashAfter)} USD${draft.side==='BUY'?` · وقف ${money(draft.stop)} · هدف ${money(draft.target)}`:''}. فرق السعر ${draft.spreadSource==='quote'?'من الاقتباس':'افتراض 0.15% لكل جانب'}، والانزلاق 0.05% والعمولة 0.10%.`; $('manual-confirm').disabled=false;notice('راجع المعاينة ثم أكد خلال دقيقة. لا توجد صفقة حقيقية.');}catch(e){invalidate();notice(e.message)}}
+async function confirm(){if(busy||!draft)return;if(!navigator.locks){notice('الحفظ متوقف: المتصفح لا يدعم قفل السجل بين النوافذ. استخدم متصفحًا يدعم Web Locks.');return;}busy=true;$('manual-confirm').disabled=true;try{await navigator.locks.request(MANUAL_KEY,()=>{const current=readWallet();
+ if(draft.recommendation){const candidate=recommendationDesk?.get(draft.symbol);if(candidate?.status!=='READY'||candidate.id!==draft.recommendation.id||candidate.plan.quantity!==draft.quantity||candidate.plan.stop!==draft.stop||candidate.plan.target!==draft.target)throw Error(candidate?.message||'تغير الترشيح أو الرصيد؛ أعد المعاينة.');}
+ const next=commitOrder(current,draft,quote());localStorage.setItem(MANUAL_KEY,JSON.stringify(next));wallet=next;});recommendationId=null;recommendationDesk?.render();resetPlan();populatePlan();render();notice('حُفظت العملية التجريبية محليًا وتحدث الرصيد. لا إرسال إلى وسيط.');}catch(e){invalidate();notice(`لم يُؤكد الحفظ: ${e.message}`)}finally{busy=false}}
 function chartPoint(){const i=Number($('manual-chart-point').value),p=history[i];$('manual-chart-label').textContent=p?`${formatMarketTime(p.date||p.time,true)} · إغلاق ${money(Number(p.close))}`:'السجل غير متاح';syncVisuals();}
 async function loadChart(){const symbol=$('manual-symbol').value,gen=++chartGeneration;history=[];$('manual-chart').replaceChildren();$('manual-chart-label').textContent='جارٍ قراءة السجل اليومي…';$('manual-chart-source').textContent='';$('manual-chart-point').disabled=true;if(!symbol){$('manual-chart-label').textContent='لا توجد رموز لعرض السجل.';syncVisuals();return;}const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),12000);try{const response=await fetch(`https://asiri-bot.onrender.com/api/live-terminal/technicals/${encodeURIComponent(symbol)}`,{cache:'no-store',signal:ctrl.signal});const p=await response.json();if(gen!==chartGeneration)return;if(!response.ok||p.symbol!==symbol)throw Error('السجل غير متاح');const parsed=selectChartHistory(p,symbol);technicals=p.availability==='available'?p:null;history=parsed.rows;if(history.length<2)throw Error('السجل غير كافٍ');$('manual-chart-point').min=0;$('manual-chart-point').max=history.length-1;$('manual-chart-point').value=history.length-1;$('manual-chart-point').disabled=false;$('manual-chart-source').textContent=`${parsed.source||'مصدر غير متاح'}${parsed.origin==='VERIFIED_MEMORY'?' · سجل محفوظ من المصدر':''} · نهاية السجل ${formatMarketTime(history.at(-1)?.date,true)} · ${p.historyStatus==='RECENT_DAILY'?'سجل يومي حديث':p.historyStatus==='STALE_DAILY'?'سجل يومي قديم':'راجع تاريخ السجل'} · ${parsed.kind==='candles'?'شموع يومية موثقة':'إغلاقات يومية فقط'}${parsed.lastBarMayUpdate?' · آخر شمعة قابلة للتحديث':''} · ليست أسعار تنفيذ`;chartPoint();populatePlan();}catch(e){if(gen===chartGeneration){history=[];technicals=null;$('manual-chart-label').textContent='تعذر السجل؛ لم يُرسم بديل.';populatePlan()}}finally{clearTimeout(timer);if(gen===chartGeneration)syncVisuals()}}
 function init(){
  const host=$('manual-paper-workspace');if(!host)return;
  try{wallet=readWallet()}catch(e){notice(e.message);host.querySelectorAll('button,input,select').forEach(n=>n.disabled=true);return;}
  designView=createWorkspaceView(host);const status=document.createElement('p');status.id='manual-quote-status';status.setAttribute('role','status');const refresh=document.createElement('button');refresh.id='manual-refresh-quote';refresh.type='button';refresh.className='mp-text-button';refresh.addEventListener('click',refreshQuote);$('manual-quote').after(status,refresh);render();if($('home-open-paper'))$('home-open-paper').disabled=false;
- host.addEventListener('input',e=>{if(e.target.id==='manual-chart-point'){chartPoint();return}invalidate();if(['manual-quantity','manual-stop','manual-target','manual-reason'].includes(e.target.id)){pendingAuto=false;plan=null;$('manual-plan-details').textContent='عاين التكاليف وأثر الرصيد للتحقق من القيم المعدلة.';$('manual-plan-status').textContent='مسودة معدلة يدويًا؛ لن تستبدل قراءات الأسعار تعديلاتك. أعد التجهيز إذا أردت إعادة الحساب.';}syncVisuals()});
- $('manual-symbol').addEventListener('change',()=>{selectSymbol();render()});$('manual-side').addEventListener('change',()=>{resetPlan();populatePlan();syncVisuals()});$('manual-auto-plan').addEventListener('click',()=>{try{wallet=readWallet();resetPlan();if($('manual-side').value==='BUY'){technicals=null;loadChart()}populatePlan();render()}catch(e){notice(e.message)}});$('manual-preview').addEventListener('click',preview);$('manual-confirm').addEventListener('click',confirm);
+ host.addEventListener('input',e=>{if(e.target.id==='manual-chart-point'){chartPoint();return}invalidate();if(['manual-quantity','manual-stop','manual-target','manual-reason'].includes(e.target.id)){recommendationId=null;pendingAuto=false;plan=null;$('manual-plan-details').textContent='عاين التكاليف وأثر الرصيد للتحقق من القيم المعدلة.';$('manual-plan-status').textContent='مسودة معدلة يدويًا؛ لن تستبدل قراءات الأسعار تعديلاتك. أعد التجهيز إذا أردت إعادة الحساب.';}syncVisuals()});
+ $('manual-symbol').addEventListener('change',()=>{selectSymbol();render()});$('manual-side').addEventListener('change',()=>{recommendationId=null;resetPlan();populatePlan();syncVisuals()});$('manual-auto-plan').addEventListener('click',()=>{try{wallet=readWallet();resetPlan();if($('manual-side').value==='BUY'){technicals=null;loadChart()}populatePlan();render()}catch(e){notice(e.message)}});$('manual-preview').addEventListener('click',preview);$('manual-confirm').addEventListener('click',confirm);
  $('manual-research').addEventListener('click',()=>{if(typeof switchMainTab==='function')switchMainTab('research');$('sec-research')?.scrollIntoView({block:'start',behavior:'smooth'})});
- window.addEventListener('asiri:quotes-rendered',render);window.addEventListener('storage',e=>{if(e.key===MANUAL_KEY){try{wallet=readWallet();invalidate();pendingAuto=false;plan=null;$('manual-plan-status').textContent='تغير الرصيد في نافذة أخرى؛ أعد تجهيز المسودة.';render()}catch(err){invalidate();notice(err.message)}}});
+ window.addEventListener('asiri:quotes-rendered',render);window.addEventListener('asiri:recommendations-updated',()=>{if(recommendationId){invalidate();pendingAuto=true;}render()});window.addEventListener('storage',e=>{if(e.key===MANUAL_KEY){try{wallet=readWallet();invalidate();pendingAuto=false;plan=null;$('manual-plan-status').textContent='تغير الرصيد في نافذة أخرى؛ أعد تجهيز المسودة.';render()}catch(err){invalidate();notice(err.message)}}});
  setInterval(()=>{if(!document.hidden){if(draft&&Date.now()-draft.previewAt>60000)invalidate();render()}},5000);
  window.asiriManualPaper=Object.freeze({open:symbol=>{render();if([...$('manual-symbol').options].some(o=>o.value===symbol))$('manual-symbol').value=symbol;$('manual-side').value='BUY';selectSymbol();designView.openDefault();if(typeof switchMainTab==='function')switchMainTab('portfolio');host.scrollIntoView({block:'start',behavior:'smooth'});render()},paperOnly:true});
+ recommendationDesk=createPaperRecommendationDesk({host,getWallet:readWallet,getQuotes:rows,onReview:current=>{
+  window.asiriManualPaper.open(current.symbol);recommendationId=current.id;invalidate();pendingAuto=true;populatePlan();syncVisuals();
+  notice('تم ربط ترشيح محرك ASIRI بالخطة. راجع السبب والمستويات ثم عاين وأكد بنفسك.');
+  $('manual-preview').focus();
+ }});
  window.dispatchEvent(new Event('asiri:paper-ready'));
 }
 init();
+
 
