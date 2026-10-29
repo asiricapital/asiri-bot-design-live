@@ -1,5 +1,5 @@
 import { PAPER_RULES, halfSpreadBps } from './paper-lab-shared-engine.mjs';
-import { quoteBlockReason } from './manual-paper-core.mjs?v=2';
+import { quoteBlockReason } from './manual-paper-core.mjs?v=3';
 
 // A reproducible planning scenario, never an entry signal or permission to execute.
 const positive = n => typeof n === 'number' && Number.isFinite(n) && n > 0;
@@ -58,3 +58,4 @@ export function buildPaperPlan(wallet, symbol, side, quote, technicals, now = Da
   rewardRisk:2,resistanceWarning,spreadSource:spread.source,
   context:typeof t.trendLabel==='string'?t.trendLabel:'غير متاح',rsi:Number.isFinite(t.rsi14)?t.rsi14:null};
 }
+

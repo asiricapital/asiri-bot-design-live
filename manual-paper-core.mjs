@@ -6,8 +6,19 @@ const round=x=>Math.round(x*1e8)/1e8;
 function fail(message){throw new Error(message)}
 export function quoteBlockReason(quote, symbol, now=Date.now()) {
  if(quote?.currency && quote.currency!=='USD') return 'هذا النموذج يدعم الدولار الأمريكي فقط.';
- const age=now-Date.parse(quote?.updatedAt||quote?.time||'');const observed=now-Date.parse(quote?.observedAt||'');
- if(quote?.symbol!==symbol||!positive(quote?.price)||!quote.source||!quote.isFresh||quote.error||quote.fromSnapshot||quote.isLiveSession!==true||!Number.isFinite(age)||age< -5000||age>120000||!Number.isFinite(observed)||observed< -5000||observed>120000) return 'السعر غير صالح الآن؛ انتظر قراءة حديثة بجلسة نشطة.';
+ if(quote?.symbol!==symbol||!positive(quote?.price)||!String(quote?.source||'').trim()) return 'السعر أو مصدره غير مكتمل لهذا السهم؛ حدّث القراءة.';
+ if(quote.error) return 'تعذر آخر تحديث للسعر؛ القراءة المعروضة مرجعية. أعد تحديثها.';
+ if(quote.fromSnapshot) return 'السعر من نسخة محفوظة على الجهاز؛ حدّثه من المصدر قبل المعاينة.';
+ const age=now-Date.parse(quote.updatedAt||quote.time||'');const observed=now-Date.parse(quote.observedAt||'');
+ if(!Number.isFinite(age)||!Number.isFinite(observed)) return 'وقت السعر أو وقت فحص المصدر مفقود؛ حدّث القراءة.';
+ if(age< -5000||observed< -5000) return 'وقت السعر أو المصدر متقدم على ساعة الجهاز؛ تحقق من الوقت التلقائي.';
+ const session=String(quote.session||'').trim().toUpperCase();
+ if(quote.isLiveSession===false||['CLOSED','REGULAR_CLOSE'].includes(session)) return 'السعر من جلسة مغلقة؛ المسودة مرجعية حتى تصل قراءة من جلسة نشطة.';
+ if(observed>120000) return `آخر فحص للمصدر منذ ${Math.floor(observed/60000)} دقيقة؛ حدّث الاتصال قبل المعاينة.`;
+ if(age>120000) return `السعر المعروض قديم: آخر حركة منذ ${Math.floor(age/60000)} دقيقة. يلزم سعر عمره دقيقتان أو أقل؛ تحديث الاتصال وحده لا يجدد وقت السعر.`;
+ const active=quote.isLiveSession===true||['REGULAR','PRE','POST','PREMARKET','AFTERHOURS'].includes(session);
+ if(!active) return 'حالة جلسة السوق غير مؤكدة لهذا السعر؛ حدّث القراءة.';
+ if(quote.isFresh!==true) return 'المصدر يصنف السعر متأخرًا؛ انتظر قراءة حديثة قبل المعاينة.';
  return null;
 }
 export function previewOrder(wallet, order, quote, now=Date.now()) {
@@ -45,3 +56,4 @@ export function commitOrder(wallet,preview,quote,now=Date.now()) {
  else {const allocated=old.costBasis*preview.quantity/old.quantity;realized=round(fresh.cost-allocated);const remaining=old.quantity-preview.quantity;if(remaining) next.positions[preview.symbol]={quantity:remaining,costBasis:round(old.costBasis-allocated)};else delete next.positions[preview.symbol];}
  next.cash=fresh.cashAfter;next.version++;next.trades.push({...fresh,id:preview.id,realizedPnl:realized,committedAt:new Date(now).toISOString()});return next;
 }
+
