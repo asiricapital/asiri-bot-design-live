@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {visualTicket,visualAllocation,chartTradeMarkers} from './manual-paper-visual-model.mjs';
+import {newWallet,previewOrder,commitOrder} from './manual-paper-core.mjs';
+const now=Date.parse('2026-10-28T15:00:00Z'),q={symbol:'TEST',price:10,source:'fixture',updatedAt:new Date(now).toISOString(),observedAt:new Date(now).toISOString(),isFresh:true,isLiveSession:true};
+const wallet=newWallet(),order={symbol:'TEST',side:'BUY',quantity:5,stop:9,target:12,reason:'اختبار بصري',currencyAcknowledged:true,id:'visual-buy'};
+const visual=visualTicket(wallet,order,q,now),preview=previewOrder(wallet,order,q,now);
+assert(visual.available&&visual.capacity&&visual.levels);assert(Math.abs(visual.entry-preview.fill)<1e-8);assert(Math.abs(visual.cost-preview.cost)<1e-8);assert(Math.abs(visual.cashAfter-preview.cashAfter)<1e-8);
+const a=visualAllocation(wallet,visual);assert(a.projected);assert(Math.abs(a.segments.reduce((n,s)=>n+s.pct,0)-100)<1e-8);assert(Math.abs(a.total-1000)<1e-8);assert(a.segments.find(s=>s.label==='الشراء المخطط').value>50);
+const bought=commitOrder(wallet,preview,q,now),sellOrder={...order,id:'visual-sell',side:'SELL'},sell=visualTicket(bought,sellOrder,{...q,price:11},now),sellPreview=previewOrder(bought,sellOrder,{...q,price:11},now);
+assert(Math.abs(sell.cost-sellPreview.cost)<1e-8);assert(!sell.levels);assert(sell.capacity);const sold=commitOrder(bought,sellPreview,{...q,price:11},now),b=visualAllocation(bought,sell);assert(b.projected);assert(Math.abs(b.total-sold.cash)<1e-8);assert.equal(b.segments.find(s=>s.label==='مراكز بالتكلفة').value,0);
+const oversell=visualTicket(bought,{...sellOrder,quantity:6},q,now);assert(!oversell.capacity);assert(!visualAllocation(bought,oversell).projected);
+const overbuy=visualTicket(wallet,{...order,quantity:500},q,now);assert(!overbuy.capacity);assert(!visualAllocation(wallet,overbuy).projected);
+assert(!visualTicket(wallet,order,{...q,price:null},now).available);assert(!visualTicket(wallet,order,{...q,symbol:'OTHER'},now).available);assert(!visualTicket(wallet,order,{...q,updatedAt:'2026-01-01'},now).available);assert(!visualTicket(wallet,{...order,quantity:0},q,now).available);
+assert(!visualTicket(wallet,{...order,stop:11},q,now).levels);assert.equal(wallet.trades.length,0);assert.equal(wallet.cash,1000);
+const history=[{date:'2026-10-27T13:30:00Z',close:9},{date:'2026-10-28T13:30:00Z',close:10}],trades=[...sold.trades,{...sold.trades[0],symbol:'OTHER'},{...sold.trades[0],committedAt:'2025-01-01T15:00:00Z'}];
+const markers=chartTradeMarkers(history,trades,'TEST');assert.equal(markers.length,2);assert(markers.every(m=>m.index===1));assert.equal(chartTradeMarkers(history,[],'TEST').length,0);
+console.log('Visual model passed: preview-equivalent estimates, projected cost/cash reconciliation, no mutation, invalid capacity, missing quotes, and actual symbol/date trade markers.');

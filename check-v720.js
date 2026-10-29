@@ -13,6 +13,7 @@ execFileSync(process.execPath, ['check-execution-readiness-runtime.mjs'], { stdi
 execFileSync(process.execPath, ['check-operational-trust-runtime.mjs'], { stdio: 'pipe' });
 
 execFileSync(process.execPath, ['check-manual-paper.mjs'], { stdio: 'pipe' });
+execFileSync(process.execPath, ['check-manual-paper-visual.mjs'], { stdio: 'pipe' });
 
 const legacyPath = 'check.js';
 const generatedPath = '.check-v720-base.mjs';
