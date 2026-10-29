@@ -1061,7 +1061,13 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             try { localStorage.setItem(QUOTE_SNAPSHOT_KEY, JSON.stringify({ schemaVersion: 2, rows })); } catch (_) {}
         }
 
+        let quoteRefreshPromise = null;
         async function refreshVerifiedQuotes() {
+            if (!quoteRefreshPromise) quoteRefreshPromise = performVerifiedQuoteRefresh().finally(() => { quoteRefreshPromise = null; });
+            return quoteRefreshPromise;
+        }
+
+        async function performVerifiedQuoteRefresh() {
             if (quoteRefreshInFlight) return;
             if (!watchlist.length) {
                 document.getElementById('sync-status-text').textContent = 'لا توجد رموز في قائمة المتابعة';
@@ -1689,6 +1695,6 @@ function draw(){readTopologyState();ctx.clearRect(0,0,w,h); const nodeCount=Math
 /* COMMAND CENTER DATA BINDING V1 — read-only bridge to existing paper/readiness DOM */
 (() => { const kpis=[...document.querySelectorAll('.command-kpi')]; const byLabel=label=>kpis.find(node=>node.querySelector('small')?.textContent?.trim()===label); const set=(label,value,state='bound')=>{const node=byLabel(label)?.querySelector('strong');if(!node)return;node.textContent=value;node.className=state;node.dataset.bound='paper-lab'}; const source=id=>document.getElementById(id)?.textContent?.trim(); function sync(){const pnl=source('paper-lab-pnl'),sharpe=source('paper-lab-sharpe'),dd=source('paper-lab-max-dd'); set('PORTFOLIO PNL',pnl&&pnl!=='—'?pnl:'PENDING',pnl&&pnl!=='—'?'bound':'unavailable'); set('SHARPE RATIO',sharpe&&sharpe!=='—'&&sharpe!=='غير متاح'?sharpe:'PENDING',sharpe&&sharpe!=='—'&&sharpe!=='غير متاح'?'bound':'unavailable'); set('MAX DRAWDOWN',dd&&dd!=='—'?dd:'PENDING',dd&&dd!=='—'?'bound':'unavailable'); set('ACTIVE RESEARCH','READ-ONLY','bound'); const stage=document.querySelector('.cc-topology-stage'); if(stage){stage.dataset.dataSource='paper-lab-readiness';stage.dataset.total=source('readiness-total')||'0';stage.dataset.fresh=source('readiness-fresh')||'0';}} const targets=['paper-lab-pnl','paper-lab-sharpe','paper-lab-max-dd','readiness-total','readiness-fresh','readiness-stale','readiness-unavailable'].map(id=>document.getElementById(id)).filter(Boolean); const observer=new MutationObserver(sync); targets.forEach(node=>observer.observe(node,{childList:true,subtree:true,characterData:true})); sync(); window.setInterval(sync,5000); })();
 </script>
-<script type="module" src="./manual-paper-focus-ui-v3.mjs"></script>
+<script type="module" src="./manual-paper-focus-ui-v3.mjs?v=2"></script>
 </body>
 </html>
