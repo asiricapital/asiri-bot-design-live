@@ -15,7 +15,7 @@ for(const value of [null,undefined,0,[],{order:'wrong',hidden:0},{order:[null,{}
 }
 assert.notEqual(FOCUS_KEY,'asiri.design.manual-paper.v1');
 const html=fs.readFileSync('index.html','utf8');
-assert(html.includes('./manual-paper-focus-ui-v3.mjs'));assert(html.includes('./focus-workspace-v1.css'));
+assert(html.includes('./manual-paper-focus-ui-v4.mjs'));assert(html.includes('./focus-workspace-v1.css'));
 for(const id of ['manual-symbol','manual-quantity','manual-stop','manual-target','manual-confirm','manual-chart'])assert.equal((html.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
-for(const file of ['focus-workspace-v3.mjs','manual-paper-focus-view-v3.mjs','manual-paper-focus-ui-v3.mjs'])execFileSync(process.execPath,['--check',file]);
+for(const file of ['focus-workspace-v3.mjs','manual-paper-focus-view-v4.mjs','manual-paper-focus-ui-v4.mjs'])execFileSync(process.execPath,['--check',file]);
 console.log('Focus workspace passed: corrupt preferences, required chart, distinct storage, unique financial controls, release assets and syntax.');

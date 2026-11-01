@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {buildPaperRecommendation} from './paper-recommendation-model.mjs';
-import {newWallet,previewOrder,commitOrder,quoteBlockReason,MANUAL_KEY} from './manual-paper-core.mjs';
+import {newWallet,previewOrder,commitOrder,quoteBlockReason,MANUAL_KEY} from './manual-paper-core-v4.mjs';
 import {buildPaperPlan} from './manual-paper-plan.mjs';
 const now=Date.now();
 const quote={symbol:'TEST',price:5,source:'fixture',currency:'USD',updatedAt:new Date(now-10000).toISOString(),observedAt:new Date(now).toISOString(),isLiveSession:true,isFresh:true,session:'REGULAR',bidPrice:4.999,askPrice:5.001};
@@ -36,7 +36,7 @@ const nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{value:'',t
 let saved=null,allowCandidate=true;const desk={get:()=>allowCandidate?buildPaperRecommendation(saved?JSON.parse(saved):newWallet(),analysis,quote,Date.now(),now):{status:'WAIT',message:'انتهت صلاحية الترشيح'},render:()=>{}};
 node('manual-symbol').value='TEST';node('manual-side').value='BUY';node('manual-currency').checked=true;
 const context=vm.createContext({document:{getElementById:node},window:{asiriMarketView:{snapshots:()=>[quote]}},navigator:{locks:{request:async(_key,fn)=>fn()}},localStorage:{getItem:()=>saved,setItem:(_key,value)=>{saved=value}},crypto:{randomUUID},Date,Number,String,JSON,Error,console,MANUAL_KEY,newWallet,previewOrder,commitOrder,quoteBlockReason,buildPaperPlan});
-const source=(await readFile(new URL('./manual-paper-focus-ui-v3.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace(/\ninit\(\);\s*$/,'');
+const source=(await readFile(new URL('./manual-paper-focus-ui-v4.mjs',import.meta.url),'utf8')).replace(/^import .*;\n/gm,'').replace(/\ninit\(\);\s*$/,'');
 context.testDesk=desk;context.testId=candidate.id;
 vm.runInContext(source+"\nwallet=newWallet();recommendationDesk=testDesk;recommendationId=testId;pendingAuto=true;populatePlan();globalThis.getDraft=()=>draft;globalThis.render=()=>{};",context);
 vm.runInContext('preview()',context);assert.equal(context.getDraft().recommendation.id,candidate.id);assert.equal(saved,null);assert.equal(node('manual-confirm').disabled,false);

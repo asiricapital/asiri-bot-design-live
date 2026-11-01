@@ -18,6 +18,7 @@ execFileSync(process.execPath, ['check-home-radar.mjs'], { stdio: 'pipe' });
 execFileSync(process.execPath, ['check-focus-workspace.mjs'], { stdio: 'pipe' });
 execFileSync(process.execPath, ['check-market-reading.mjs'], { stdio: 'pipe' });
 execFileSync(process.execPath, ['check-verified-candles.mjs'], { stdio: 'pipe' });
+execFileSync(process.execPath, ['check-plan-chart-snapshots.mjs'], { stdio: 'pipe' });
 
 const legacyPath = 'check.js';
 const generatedPath = '.check-v720-base.mjs';
