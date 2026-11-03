@@ -1,4 +1,6 @@
 import {createDecisionReview} from './decision-review-ui-v1.mjs';
+import {createDataCompass} from './stock-data-compass-v1.mjs';
+import {createStockEvents} from './stock-events-v1.mjs';
 import {createPaperRecommendationDesk} from './paper-recommendations-ui.mjs';
 import {selectChartHistory} from './verified-candle-model-v1.mjs';
 import {formatMarketTime,referenceCurrencyLabel} from './market-reading-format-v1.mjs';
@@ -7,7 +9,7 @@ import {buildPaperPlan} from './manual-paper-plan.mjs?v=2';
 import {createWorkspaceView} from './manual-paper-focus-view-v4.mjs';
 const $=id=>document.getElementById(id);const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=x=>Number.isFinite(x)?x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}):'—';
 let wallet,draft=null,busy=false,refreshBusy=false,history=[],chartGeneration=0;
-let technicals=null,activeSymbol='',pendingAuto=true,plan=null,designView=null,recommendationId=null,recommendationDesk=null,decisionReview=null,chartEvidence=null;
+let technicals=null,activeSymbol='',pendingAuto=true,plan=null,designView=null,recommendationId=null,recommendationDesk=null,decisionReview=null,chartEvidence=null,dataCompass=null,stockEvents=null;
 function syncVisuals(){designView?.sync({wallet,quote:quote(),health:quote()?window.asiriMarketView.health(quote()):null,technicals,history,order:{symbol:$('manual-symbol').value,side:$('manual-side').value,quantity:Number($('manual-quantity').value),stop:Number($('manual-stop').value),target:Number($('manual-target').value)},resistanceWarning:plan?.resistanceWarning===true})}
 function readWallet(){const raw=localStorage.getItem(MANUAL_KEY);if(raw===null)return newWallet();const value=JSON.parse(raw);if(value.schema!==1||!Number.isFinite(value.cash)||!Array.isArray(value.trades)||!value.positions||!Number.isSafeInteger(value.version))throw Error('تعذر قراءة السجل المحفوظ؛ لم يُمسح ولم يُستبدل.');return value;}
 const rows=()=>window.asiriMarketView?.snapshots?.()||[];const quote=()=>rows().find(q=>q.symbol===$('manual-symbol').value);
@@ -65,6 +67,10 @@ function render(){
  if(activeSymbol!==select.value)selectSymbol();
  const q=quote(),health=q?window.asiriMarketView.health(q):null;
  renderQuoteStatus();
+ if(!dataCompass){const host=$('manual-chart')?.closest('[data-mp-panel]')?.parentElement||document;dataCompass=createDataCompass(host);}
+ dataCompass.render(q,quoteBlockReason(q,select.value));
+ if(!stockEvents)stockEvents=createStockEvents(document,()=>select.value);
+ stockEvents.render();
  $('manual-quote').textContent=q?`${q.source||'مصدر غير متاح'} · وقت السعر ${formatMarketTime(q.updatedAt||q.time)} · الرياض`:'بانتظار البيانات';
  $('manual-reference-currency').textContent=referenceCurrencyLabel(q?.currency);
  if(draft&&(quoteBlockReason(q,select.value)||q?.price!==draft.referencePrice||(q.updatedAt||q.time)!==draft.quoteAt||q.source!==draft.source)){invalidate();notice('تغير السعر أو صلاحيته؛ أعد المعاينة.');}
