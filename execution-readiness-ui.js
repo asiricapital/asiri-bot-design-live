@@ -27,6 +27,7 @@
   }
   async function loadSaxoReadiness() {
     try {
+      if (!window.supabase?.createClient) return { state: 'SESSION_SEPARATE', accountReadVerified: false, message: 'فحص الحساب متاح في المنصة الأساسية؛ جلسة تسجيل الدخول لا تنتقل تلقائيًا إلى منصة التصميم.' };
       const token = await getSessionToken();
       if (!token) return { state: 'AUTH_REQUIRED', accountReadVerified: false, message: 'سجّل الدخول بحسابك المعتاد ثم أعد فحص حساب Saxo.' };
       const response = await fetch(SAXO_API, { cache: 'no-store', headers: { authorization: `Bearer ${token}`, accept: 'application/json' }, signal: AbortSignal.timeout(30000) });
@@ -43,7 +44,7 @@
       const time=Number.isFinite(Date.parse(data.balanceUpdatedAt||''))?new Date(data.balanceUpdatedAt).toLocaleString('ar-SA',{timeZone:'Asia/Riyadh'}):'غير متاح';
       return `<div class="execution-readiness-saxo" data-state="verified"><strong>حساب Saxo: مثبت للقراءة فقط</strong><span>البيئة: ${esc(String(data.environment || 'غير محدد').toUpperCase())} · حسابات نشطة: ${esc(data.activeAccountsCount ?? data.accountsCount ?? 0)}</span><span>${esc(label)}: <b>${esc(funds)}</b> · إجمالي العميل</span><small>وقت قراءة الرصيد · الرياض: ${esc(time)}. القيمة ليست رصيد الحساب المختار؛ تُراجع مع تكاليف الأمر في البروفة.</small><small>تمت قراءة جديدة من Saxo. هذا لا يفتح التنفيذ ولا يرسل أمرًا.</small></div>`;
     }
-    return `<div class="execution-readiness-saxo" data-state="blocked"><strong>حساب Saxo: ${esc(data?.state === 'AUTH_REQUIRED' ? 'يتطلب تسجيل الدخول' : 'لم تثبت القراءة بعد')}</strong><span>${esc(data?.message || 'افتح جلسة Saxo المرتبطة ثم أعد فحص الحساب.')}</span><small>بقيت بوابة التنفيذ مقفولة بأمان.</small></div>`;
+    return `<div class="execution-readiness-saxo" data-state="blocked"><strong>حساب Saxo: ${esc(data?.state === 'SESSION_SEPARATE' ? 'الفحص في المنصة الأساسية' : data?.state === 'AUTH_REQUIRED' ? 'يتطلب تسجيل الدخول هنا' : 'لم تثبت القراءة بعد')}</strong><span>${esc(data?.message || 'افتح جلسة Saxo المرتبطة ثم أعد فحص الحساب.')}</span><small>هذه البطاقة للقراءة فقط ولا تغيّر حالة التنفيذ.</small></div>`;
   }
   async function load() {
     const gates = $('execution-readiness-gates'); if (!gates) return;
@@ -56,14 +57,14 @@
       const serverOpen = server.serverGatesOpenForLiveOrders === true && contractOpen; const conflict = server.serverGatesOpenForLiveOrders === true && !contractOpen;
       const rows = [];
       if (ev) rows.push(row('استراتيجية نجحت في الاختبار العادل ثم التداول الورقي', ev.passed === true && ev.paperTradingPassed === true, 'نجحت', `لم تنجح بعد (${ev.approachesPassed ?? 0} من ${ev.approachesTested ?? 0})`));
-      rows.push(row('هوية حساب Saxo المرتبط', saxo.accountReadVerified === true, 'مثبتة للقراءة', saxo.state === 'AUTH_REQUIRED' ? 'تسجيل الدخول مطلوب' : 'لم تثبت القراءة الجديدة'));
+      rows.push(row('هوية حساب Saxo المرتبط', saxo.accountReadVerified === true, 'مثبتة للقراءة', saxo.state === 'SESSION_SEPARATE' ? 'افحص في المنصة الأساسية' : saxo.state === 'AUTH_REQUIRED' ? 'تسجيل الدخول مطلوب هنا' : 'لم تثبت القراءة الجديدة'));
       rows.push(row('اتصال Saxo الشخصي', saxo.accountReadVerified === true, 'قراءة حديثة ناجحة', 'غير مثبت'));
       rows.push(...Object.entries(data.gates || {}).filter(([key]) => !['brokerIdentity', 'brokerConnectivity'].includes(key)).map(([key, value]) => row(labels[key] || key, value === true)));
       rows.push(row('عقد التنفيذ الفعلي', contractOpen, 'مغلق بأمان قبل التفعيل', 'غير جاهز — التنفيذ مقفول'));
       const blockers = [...new Set([...(data.blockers || []), ...(saxo.accountReadVerified === true ? [] : ['broker-account-identified', 'broker-read-only-connectivity-verified'])])];
       gates.innerHTML = saxoSummary(saxo) + rows.join('') + `<div class="execution-readiness-blockers"><strong>ما يمنع التفعيل الآن</strong><ul>${blockers.map(item => `<li>${esc(blockerLabels[item] || item)}</li>`).join('')}</ul></div>`;
       const lock = $('execution-lock-toggle'); if (lock) { lock.checked = true; lock.disabled = true; const text = lock.parentElement?.querySelector('span'); if (text) text.textContent = 'التداول الحقيقي مقفول — لا يوجد تفعيل من هذه اللوحة'; }
-      const state = $('execution-readiness-state'); if (state) state.textContent = serverOpen ? 'جاهز للمراجعة فقط' : conflict ? 'مقفول — تعارض تمت معالجته' : 'غير جاهز للتداول الحقيقي';
+      const state = $('execution-readiness-state'); if (state) state.textContent = serverOpen ? 'جاهز للمراجعة فقط' : conflict ? 'تعارض في حالة الأقفال — يحتاج مراجعة' : 'غير جاهز للتداول الحقيقي';
       $('execution-readiness-card')?.setAttribute('data-server-open', 'false'); $('execution-readiness-card')?.setAttribute('data-readiness', serverOpen ? 'review-only' : 'blocked');
       const report = ev?.reportUrl ? ` <a href="${EVIDENCE_BASE}${esc(ev.reportUrl)}" target="_blank" rel="noopener">مختبر الأدلة ↗</a>` : '';
       const next = saxo.accountReadVerified === true ? 'تم إثبات قراءة حساب Saxo؛ راجع بقية بوابات المخاطر والموافقة المستقلة.' : (data.nextReview || 'سجّل الدخول وافحص حساب Saxo المرتبط، ثم استكمل حدود المخاطر واختبار Paper/Shadow.');
