@@ -36,7 +36,13 @@
     } catch { return { state: 'READ_FAILED', accountReadVerified: false, message: 'تعذر الوصول إلى فحص Saxo الشخصي؛ لم نعتبر الحساب جاهزًا.' }; }
   }
   function saxoSummary(data) {
-    if (data?.accountReadVerified === true) return `<div class="execution-readiness-saxo" data-state="verified"><strong>حساب Saxo: مثبت للقراءة فقط</strong><span>البيئة: ${esc(String(data.environment || 'غير محدد').toUpperCase())} · حسابات نشطة: ${esc(data.activeAccountsCount ?? data.accountsCount ?? 0)}</span><small>تمت قراءة جديدة من Saxo. هذا لا يفتح التنفيذ ولا يرسل أمرًا.</small></div>`;
+    if (data?.accountReadVerified === true) {
+      const amount=data.balance?.cashAvailableForTrading, currency=data.balance?.currency;
+      const funds=typeof amount==='number'&&Number.isFinite(amount)&&/^[A-Z]{3}$/.test(currency||'') ? `${amount.toLocaleString('en-US',{maximumFractionDigits:2})} ${currency}` : 'غير متحقق';
+      const label=data.balance?.availableFundsKind==='buying-power'?'قوة الشراء المبلّغ عنها':data.balance?.availableFundsKind==='cash'?'النقد المتاح للتداول':'المتاح للشراء';
+      const time=Number.isFinite(Date.parse(data.balanceUpdatedAt||''))?new Date(data.balanceUpdatedAt).toLocaleString('ar-SA',{timeZone:'Asia/Riyadh'}):'غير متاح';
+      return `<div class="execution-readiness-saxo" data-state="verified"><strong>حساب Saxo: مثبت للقراءة فقط</strong><span>البيئة: ${esc(String(data.environment || 'غير محدد').toUpperCase())} · حسابات نشطة: ${esc(data.activeAccountsCount ?? data.accountsCount ?? 0)}</span><span>${esc(label)}: <b>${esc(funds)}</b> · إجمالي العميل</span><small>وقت قراءة الرصيد · الرياض: ${esc(time)}. القيمة ليست رصيد الحساب المختار؛ تُراجع مع تكاليف الأمر في البروفة.</small><small>تمت قراءة جديدة من Saxo. هذا لا يفتح التنفيذ ولا يرسل أمرًا.</small></div>`;
+    }
     return `<div class="execution-readiness-saxo" data-state="blocked"><strong>حساب Saxo: ${esc(data?.state === 'AUTH_REQUIRED' ? 'يتطلب تسجيل الدخول' : 'لم تثبت القراءة بعد')}</strong><span>${esc(data?.message || 'افتح جلسة Saxo المرتبطة ثم أعد فحص الحساب.')}</span><small>بقيت بوابة التنفيذ مقفولة بأمان.</small></div>`;
   }
   async function load() {
@@ -65,6 +71,6 @@
     } catch (error) { gates.innerHTML = `<div class="paper-lab-empty">تعذر قراءة بوابات الأمان: ${esc(error.message)}</div>`; $('execution-readiness-state').textContent = 'غير متاح — مقفول احتياطيًا'; $('execution-readiness-card')?.setAttribute('data-server-open', 'false'); }
     finally { window.clearTimeout(timeout); }
   }
-  function init() { $('execution-review-button')?.addEventListener('click', () => document.querySelector('#execution-readiness-gates')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })); load(); }
+  function init() { $('execution-review-button')?.addEventListener('click', () => document.querySelector('#execution-readiness-gates')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })); $('execution-recheck-button')?.addEventListener('click', load); load(); }
   document.readyState === 'loading' ? window.addEventListener('DOMContentLoaded', init, { once: true }) : init();
 })();
