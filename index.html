@@ -346,6 +346,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
         <button class="nav-pill" data-tab="command" onclick="switchMainTab('command', this)">ملخص البيانات ⚡</button>
         <button class="nav-pill" data-tab="alerts" onclick="switchMainTab('alerts', this)">التنبيهات</button>
         <button class="nav-pill" data-tab="portfolio" onclick="switchMainTab('portfolio', this)">محفظتي</button>
+        <a class="nav-pill" id="asiri-decision-studio-link" href="./trade-decision-studio.html" style="text-decoration:none;display:inline-flex;align-items:center">مختبر قرار الصفقة ✦</a>
     </div>
 
 
@@ -1689,6 +1690,15 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 <script src="./unified-control-dashboard-v1.js?v=1"></script>
 <script src="./saxo-watchlist-ui-v1.js?v=3"></script>
 <script src="./order-readiness-desk-v1.js?v=1"></script>
+<script>
+(() => {
+  const link=document.getElementById('asiri-decision-studio-link');
+  const selected=document.getElementById('home-symbol');
+  if(!link || !selected) return;
+  const sync=()=>{const symbol=String(selected.value||'').trim().toUpperCase();link.href='./trade-decision-studio.html'+(/^[A-Z0-9.]{1,12}$/.test(symbol)?'?symbol='+encodeURIComponent(symbol):'');};
+  selected.addEventListener('change',sync);sync();
+})();
+</script>
 
 
 <script src="./arabic-ui-polish-v1.js?v=1"></script>
