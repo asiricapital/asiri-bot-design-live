@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ASIRI | Trade Decision Studio</title>
+  <meta name="description" content="مختبر اتخاذ قرار للأسهم: مخاطر الصفقة، واختبار تاريخي مستقل على ملف شموع المستخدم، دون تنفيذ أوامر.">
+  <link rel="stylesheet" href="./trade-decision-studio.css?v=1">
+</head>
+<body>
+  <div class="studio-shell">
+    <header class="studio-header">
+      <a class="brand" href="./index.html">A<span>↗</span> <small>ASIRI CAPITAL</small></a>
+      <div class="header-actions"><span class="status-pill">RESEARCH ONLY · NO EXECUTION</span><a href="./index.html">العودة للمنصة ←</a></div>
+    </header>
+    <main>
+      <section class="hero">
+        <div><p class="eyebrow">TRADE INTELLIGENCE / 01</p><h1>قبل الصفقة،<br><em>اعرف حدودها.</em></h1><p>غرفة قرار واحدة تجمع خطة المخاطرة، واختبار الشموع الفعلي، والمقارنة على فترة لم تُستخدم في التطوير. لا توجد أوامر شراء أو بيع هنا.</p></div>
+        <div class="hero-figure"><span>DECISION STATUS</span><strong id="decision-grade">بانتظار الخطة</strong><small id="decision-reason">أدخل بيانات الصفقة أولًا</small><div class="hero-line"></div><b>DATA FIRST. CAPITAL SECOND.</b></div>
+      </section>
+      <div class="studio-grid">
+        <section class="panel plan-panel" aria-labelledby="plan-heading">
+          <div class="panel-heading"><span class="num">01</span><div><p class="eyebrow">RISK GATE</p><h2 id="plan-heading">مخطط الصفقة</h2></div><span class="tag">حسابي فقط</span></div>
+          <div class="fields">
+            <label>رمز السهم<input id="symbol" type="text" value="SOUN" maxlength="12" autocomplete="off"></label>
+            <label>رأس المال ($)<input id="equity" type="number" value="1000" min="1" step="10"></label>
+            <label>سعر الدخول ($)<input id="entry" type="number" value="5" min="0.001" step="0.01"></label>
+            <label>وقف الخسارة ($)<input id="stop" type="number" value="4.75" min="0.001" step="0.01"></label>
+            <label>هدف الربح ($)<input id="target" type="number" value="5.50" min="0.001" step="0.01"></label>
+            <label>المخاطرة (%)<input id="risk" type="number" value="1" min="0.1" max="2" step="0.1"></label>
+            <label>حد رأس المال للمركز (%)<input id="allocation" type="number" value="10" min="1" max="100" step="1"></label>
+            <label>السبريد لكل سهم ($)<input id="spread" type="number" value="0.02" min="0" step="0.01"></label>
+            <label>عمولة لكل سهم لكل جانب ($)<input id="commission" type="number" value="0" min="0" step="0.001"></label>
+          </div>
+          <button id="calculate" type="button" class="primary">احسب جاهزية الخطة ←</button>
+          <div id="risk-message" class="note" role="status">يجب إدخال الأسعار يدويًا والتحقق من حداثتها من الوسيط.</div>
+          <div class="stats" id="risk-stats"><div><span>عدد الأسهم</span><b id="shares">—</b></div><div><span>الخسارة المخططة</span><b id="planned-loss">—</b></div><div><span>الربح المخطط</span><b id="planned-profit">—</b></div><div><span>العائد / المخاطرة</span><b id="planned-rr">—</b></div></div>
+        </section>
+        <section class="panel replay-panel" aria-labelledby="replay-heading">
+          <div class="panel-heading"><span class="num">02</span><div><p class="eyebrow">REPLAY LAB</p><h2 id="replay-heading">مختبر الشموع</h2></div><span class="tag">بدون وسيط</span></div>
+          <p class="muted">ارفع ملف CSV تاريخيًا للسهم نفسه بأعمدة <code>time,open,high,low,close</code>. الاختبار المرجعي هنا لاستراتيجية اختراق أعلى 20 شمعة؛ لا يمثل استراتيجية Fibo أو توقعًا للسوق.</p>
+          <label class="upload"><input id="bars-file" type="file" accept=".csv,.txt,text/csv"><span>⬆ تحميل ملف شموع CSV</span><small id="file-status">لا توجد بيانات محمّلة</small></label>
+          <div class="mini-fields"><label>فترة الاختراق<input id="lookback" type="number" min="5" max="100" value="20"></label><label>الوقف × ATR<input id="stop-atr" type="number" min="0.2" step="0.1" value="1.5"></label><label>الهدف × المخاطرة<input id="test-rr" type="number" min="0.5" step="0.25" value="2"></label></div>
+          <button id="run-test" type="button" class="secondary" disabled>تشغيل الاختبار المستقل</button>
+          <div class="two-stages"><article><small>70% · فترة التطوير</small><strong id="train-net">—</strong><span id="train-meta">بانتظار بيانات</span></article><article><small>30% · فترة التحقق</small><strong id="test-net">—</strong><span id="test-meta">بانتظار بيانات</span></article></div>
+          <div class="stats"><div><span>إجمالي الصفقات المغلقة</span><b id="total-trades">—</b></div><div><span>نسبة الربح</span><b id="win-rate">—</b></div><div><span>أكبر تراجع (R)</span><b id="drawdown">—</b></div><div><span>Profit Factor</span><b id="profit-factor">—</b></div></div>
+          <div id="replay-message" class="note" role="status">لا توجد بيانات تاريخية. لن تُعرض أي نتائج افتراضية.</div>
+        </section>
+      </div>
+      <section class="bottom-notes"><div><span>03 / REVIEW</span><h2>ثلاث بوابات قبل أي تنفيذ</h2></div><ol><li><b>مصدر موثوق</b><small>تاريخ البيانات والأصل الصحيح، دون أسعار تخمينية.</small></li><li><b>مخاطرة مقبولة</b><small>حجم الصفقة يحترم حد رأس المال وحد الخسارة.</small></li><li><b>اختبار مستقل</b><small>نتيجة فترة التحقق منفصلة عن فترة التطوير.</small></li></ol></section>
+      <p class="disclaimer">هذه أداة تعليمية للبحث الورقي وليست توصية استثمارية. الاختبار مبسّط: لا يستخدم ترتيب التيكات داخل الشمعة، ويفترض تنفيذ الوقف أولًا عند ملامسة الوقف والهدف في شمعة واحدة، ولا يشمل فجوات وسيطك بصورة كاملة. لا يتصل بحساب تداول ولا يرسل أوامر.</p>
+    </main>
+  </div>
+  <script type="module" src="./trade-decision-studio.mjs?v=1"></script>
+</body>
+</html>
