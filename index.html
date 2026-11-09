@@ -3,10 +3,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <script>if (location.pathname === "/") location.replace("/index.html" + location.search + location.hash);</script>
-    <meta name="asiri-release" content="unified-home-v2">
+    <meta name="asiri-release" content="operations-inbox-v1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ASIRI | غرفة أبحاث السوق</title>
+    <title>ASIRI | مركز التوصيات والمتابعة</title>
     <link rel="icon" href="./icon.svg" type="image/svg+xml">
     <meta name="theme-color" content="#06111d">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -328,6 +328,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 <link rel="stylesheet" href="./plan-chart-v1.css">
 <link rel="stylesheet" href="./stock-data-compass-v1.css">
 <link rel="stylesheet" href="./saxo-quick-path-v1.css">
+<link rel="stylesheet" href="./operations-center.css?v=1">
 </head>
 <body>
     <div class="account-bar">
@@ -339,6 +340,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
     </div>
 
     <div class="nav-pills-container">
+        <button class="nav-pill" data-tab="home" type="button" onclick="window.asiriOperations?.open('inbox')">التوصيات والمتابعة</button>
         <button class="nav-pill active" data-tab="tools" onclick="switchMainTab('tools', this)">حالة الأسعار</button>
         <button class="nav-pill journey-pill" data-tab="journey" onclick="switchMainTab('journey', this)">مسار العميل ✦</button>
         <button class="nav-pill research-pill" data-tab="research" onclick="switchMainTab('research', this)">مركز الأبحاث</button>
@@ -351,13 +353,29 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 
 
 <section id="asiri-home" class="asiri-home" aria-labelledby="home-title">
-  <header class="home-masthead"><a class="home-brand" href="#asiri-home" aria-label="ASIRI غرفة القيادة"><span class="home-monogram">A<span>↗</span></span><span>ASIRI<span>CAPITAL / WORKSPACE</span></span></a><div class="home-masthead-meta"><span id="home-date">غرفة القيادة</span><span class="home-mode"><i></i>بحث ومحاكاة · التنفيذ مقفول</span></div></header>
-  <div class="home-heading"><div><span class="home-eyebrow">YOUR MARKET. IN FOCUS.</span><h1 id="home-title">الصورة أوضح.<br><span>والخطوة لك.</span></h1><p>قائمة متابعتك، حالة بياناتها، ورحلة كل سهم — من مكان واحد.</p></div><div class="home-heading-note"><span>01 / COMMAND ROOM</span><p>ابدأ من البيانات.<br>انتقل إلى الخطة بثقة في مصدرها.</p><a href="#home-radar">استكشف رادارك <span>↓</span></a></div></div>
+  <header class="home-masthead"><a class="home-brand" href="#asiri-home" aria-label="ASIRI غرفة القيادة"><span class="home-monogram">A<span>↗</span></span><span>ASIRI<span>CAPITAL / WORKSPACE</span></span></a><div class="home-masthead-meta"><span id="home-date">غرفة القيادة</span><span class="home-mode"><i></i>توصيات ومتابعة · مراجعة القرار</span></div></header>
+  <div class="home-heading ops-home-heading"><div><span class="home-eyebrow">ASIRI / YOUR DECISION DESK</span><h1 id="home-title">التوصيات والمتابعة</h1><p>من رصد الفرصة إلى مراجعة القرار ومتابعة المستويات.</p></div><div class="ops-heading-stamp"><span>01 — 04</span><small>رصد · توصية · مراجعة · متابعة</small></div></div>
+  <section id="operations-center" class="operations-center" data-asiri-verbatim aria-labelledby="operations-title">
+    <div class="ops-status-bar"><span id="operations-feed-status" role="status">جارٍ الاتصال بسجل الخادم…</span><span id="operations-last-fetch">بانتظار أول مزامنة</span></div>
+    <details id="operations-process" class="ops-process-details"><summary>مسار العمليات <small>الفحص · الاقتراح · المراجعة · المتابعة</small></summary>    <div class="ops-pipeline" aria-label="مسار العمليات"><button type="button" data-ops-view="candidates"><span class="ops-step">01</span><span>فحص التجربة<small>تحليل / داخل النطاق</small></span><b id="operations-analysis-count">—</b></button><button type="button" data-ops-view="inbox"><span class="ops-step">02</span><span>اقتراحات الوارد<small>خلال آخر 24 ساعة</small></span><b id="operations-buy-count">0</b></button><button type="button" data-ops-view="candidates"><span class="ops-step">03</span><span>مراجعة التجربة<small>ترشيحات مكتملة</small></span><b id="operations-ready-count">0</b></button><button type="button" data-ops-view="following"><span class="ops-step">04</span><span>متابعة المستويات<small>اختيارك على هذا الجهاز</small></span><b id="operations-follow-count">0</b></button></div>
+    </details>
+    <div class="ops-next"><span>التالي عليك</span><p id="operations-next">جارٍ قراءة التوصيات وحالة الفحص…</p></div>
+    <div class="ops-desk-head"><div><span class="home-eyebrow">RECOMMENDATION INBOX</span><h2 id="operations-title">الوارد من محرك ASIRI</h2><p>نصوص من سجل رسائل Telegram في الخادم، مع وقتها وتفاصيلها الأصلية.</p></div><div class="ops-tools"><button type="button" id="operations-sound" class="ops-button">تفعيل صوت الرسائل</button><button type="button" id="operations-refresh" class="ops-button ops-primary">تحديث الوارد</button></div></div>
+    <div class="ops-view-nav" role="group" aria-label="مساحات التوصيات"><button type="button" data-ops-view="inbox" aria-pressed="true">الوارد <b id="operations-unread">0</b></button><button type="button" data-ops-view="following" aria-pressed="false">أتابعها</button><button type="button" data-ops-view="candidates" aria-pressed="false">ترشيحات التجربة</button><button type="button" data-ops-view="history" aria-pressed="false">سجل المتابعة</button></div>
+    <p id="operations-notice" class="ops-notice" role="status" aria-live="polite"></p>
+    <div data-ops-panel="inbox"><div class="ops-inbox-toolbar"><label class="ops-search"><span>بحث</span><input id="operations-search" type="search" placeholder="رمز سهم أو كلمة في الرسالة" autocomplete="off"></label><div class="ops-kind-filter" role="group" aria-label="نوع الرسالة"><button type="button" data-ops-kind="all" aria-pressed="true">الكل</button><button type="button" data-ops-kind="buy" aria-pressed="false">شراء</button><button type="button" data-ops-kind="alert" aria-pressed="false">تنبيهات</button><button type="button" data-ops-kind="report" aria-pressed="false">تقارير</button></div></div><div class="ops-list-meta"><span id="operations-inbox-count">0 رسالة</span><button id="operations-read-all" type="button" class="ops-text-button">تعليم الوارد كمقروء</button></div><div id="operations-inbox-list" class="ops-message-grid"></div><p id="operations-inbox-empty" class="ops-empty">جارٍ قراءة سجل الرسائل الحقيقي…</p><button type="button" id="operations-more" class="ops-button ops-more" hidden>بقية الرسائل</button></div>
+    <div data-ops-panel="following" hidden><p class="ops-panel-note">المتابعة ترصد المستويات أثناء فتح الصفحة وبقراءة حديثة. تتوقف بعد 24 ساعة من الرسالة، ولا تعيد بناء ما حدث أثناء إغلاق الصفحة. تسجيل المتابعة لا يسجّل شراءً أو بيعًا.</p><div id="operations-follow-list" class="ops-message-grid"></div></div>
+    <div data-ops-panel="candidates" hidden><div id="operations-candidates"><p class="ops-panel-note">الترشيحات هنا للمحاكاة الورقية من أسهم قائمتك بين 1 و10 دولارات، وتُفحص منفصلة عن رسائل اقتراحات Saxo.</p></div></div>
+    <div data-ops-panel="history" hidden><p class="ops-panel-note">سجل محلي لبدء المتابعة وإغلاقها والمستويات المرصودة. لا يمثل سجل تنفيذ الوسيط أو نتائج تداول.</p><ol id="operations-history-list" class="ops-history"></ol></div>
+    <footer class="ops-footer"><span id="operations-channel-status">جارٍ التحقق من إعداد القنوات…</span><p>الوارد يستقبل رسائل المحرك الحالي؛ لا يغيّر قواعده. مراجعة حالة اقتراح Saxo تتم في مركزه الأصلي. حالة القراءة والمتابعة محفوظة على هذا الجهاز فقط.</p></footer>
+  </section>
+  <details id="home-market-details" class="ops-market-details"><summary>الأسعار ورادار الأسهم <span>عرض بيانات قائمتك وتحليل كل سهم</span></summary>
   <div class="home-workspace">
     <section class="home-focus" aria-labelledby="home-focus-title"><div class="home-focus-head"><div><span class="home-eyebrow">STOCK IN FOCUS</span><h2 id="home-focus-title">سهم تحت عدستك</h2></div><label>الأصل<select id="home-symbol" aria-label="اختر أصل رحلة السهم"></select></label></div><div class="home-focus-price"><div><strong id="home-ticker">—</strong><span id="home-state" class="home-state">بانتظار القراءة</span></div><div class="home-quote"><b id="home-price" dir="ltr">—</b><small>سعر مرجعي · العملة بحسب المصدر</small></div></div><dl class="home-evidence"><div><dt>المصدر</dt><dd id="home-source">—</dd><dd id="home-source-status">بانتظار التحقق</dd></div><div><dt>وقت السعر · الرياض</dt><dd id="home-time">—</dd></div></dl><p id="home-next">بانتظار أول قراءة موثقة.</p><div class="home-actions"><button type="button" id="home-open-paper" disabled>افتح رحلة السهم <span>←</span></button><button type="button" id="home-open-analysis" class="secondary">مراجعة التحليل ↗</button></div><div class="home-focus-links"><button type="button" id="home-open-portfolio">قائمة المتابعة</button><button type="button" id="home-open-health">فحص صحة المنصة ↗</button></div></section>
     <aside class="home-signal-room" aria-labelledby="home-health-title"><div class="home-room-head"><div><span class="home-eyebrow">DATA BEFORE DECISIONS</span><h2 id="home-health-title">نبض بياناتك</h2></div><span id="home-room-label">بانتظار القراءة</span></div><div class="home-health-visual"><svg id="home-health-ring" viewBox="0 0 200 200" role="img" aria-label="بانتظار حالة بيانات المتابعة"><circle cx="100" cy="100" r="79" fill="none" stroke="#1e3541" stroke-width="13"></circle><g id="home-health-arcs" transform="rotate(-90 100 100)"></g></svg><div><strong id="home-total">—</strong><span>رموز المتابعة</span></div></div><div class="home-metrics" aria-label="حداثة بيانات قائمة المتابعة"><div><i class="fresh"></i><span>حديثة الآن</span><strong id="home-fresh">—</strong></div><div><i class="review"></i><span>تحتاج مراجعة</span><strong id="home-review">—</strong></div></div><div id="home-health-breakdown" class="home-health-breakdown"></div><p id="home-health-note">يعكس الرسم حداثة قراءات قائمتك، لا اتجاه السوق أو احتمال الربح.</p></aside>
   </div>
   <section id="home-radar" class="home-radar" aria-labelledby="home-radar-title"><div class="home-radar-head"><div><span class="home-eyebrow">WATCHLIST RADAR</span><h2 id="home-radar-title">رادارك الخاص<span>كل سهم، وبابه إلى الخطة.</span></h2></div><span id="home-radar-count">بانتظار الرموز</span></div><div class="home-radar-toolbar"><label class="home-search"><span>⌕</span><input id="home-radar-search" type="search" placeholder="ابحث بالرمز…" aria-label="ابحث في رادار الأسهم بالرمز" autocomplete="off" spellcheck="false"></label><div class="home-radar-filters" role="group" aria-label="تصفية رادار الأسهم"><button type="button" data-radar-filter="ALL" aria-pressed="true">الكل</button><button type="button" data-radar-filter="FRESH" aria-pressed="false">حديثة</button><button type="button" data-radar-filter="REVIEW" aria-pressed="false">للمراجعة</button></div><label class="home-radar-sort-label">ترتيب<select id="home-radar-sort"><option value="watchlist">قائمة المتابعة</option><option value="price">الأقل سعرًا</option><option value="recent">وقت السعر الأحدث</option></select></label></div><div id="home-radar-grid" class="home-radar-grid"></div><div id="home-radar-empty" class="home-radar-empty" hidden>لا توجد رموز مطابقة. جرّب رمزًا آخر أو ألغِ التصفية.</div><div class="home-radar-bottom"><button type="button" id="home-radar-more" hidden>عرض بقية الأسهم</button><p>الحركة المصغرة من القراءات الحديثة المستلمة أثناء هذه الزيارة، وليست تغيرًا يوميًا. اضغط بطاقة السهم لفتح رحلته.</p></div><p id="home-radar-notice" class="home-radar-notice" role="status"></p></section>
+  </details>
   <footer class="home-room-footer"><div><span class="home-eyebrow">ONE SOURCE / CONNECTED JOURNEY</span><p>الأسعار وحالتها من القراءة نفسها في الرادار ورحلة السهم.</p></div><a href="#home-details">تفاصيل المنصة والاتصال <span>↗</span></a></footer>
 </section>
 <details id="home-details" class="home-details"><summary>تفاصيل المنصة والاتصال والملخصات</summary><div id="home-details-body"></div></details>
@@ -597,10 +615,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
         </div>
 
         <div id="sec-alerts" class="app-section">
-            <section class="card-section feature-status-card" aria-labelledby="alerts-title">
-                <header class="feature-status-head"><div><div class="feature-status-kicker">PRICE ALERTS · CONNECTION STATUS</div><h2 id="alerts-title">التنبيهات السعرية</h2><p>ستُبنى هذه القناة على عتبات موثقة وسجل أحداث واضح قبل تفعيلها.</p></div><span class="feature-status-badge">غير مفعّلة</span></header>
-                <div class="feature-status-body"><b>الحالة الحالية:</b> لا تُحفظ عتبات سعرية، ولا تُرسل إشعارات داخلية أو Push من هذه النسخة. لن تعرض المنصة تنبيهًا تجريبيًا على أنه حدث حقيقي.</div>
-            </section>
+            <section class="card-section feature-status-card" aria-labelledby="alerts-title"><header class="feature-status-head"><div><div class="feature-status-kicker">CONNECTED INBOX</div><h2 id="alerts-title">رسائلك وتنبيهات المتابعة</h2><p>رسائل الخادم والأسباب والمستويات وسجل المتابعة مجتمعة في مركز التوصيات.</p></div></header><button class="ops-button ops-primary" type="button" onclick="window.asiriOperations?.open('inbox')">فتح الوارد والتنبيهات ↑</button><button class="ops-button" type="button" onclick="window.asiriOperations?.open('history')">فتح سجل المتابعة ↑</button></section>
         </div>
 
         <div id="sec-portfolio" class="app-section">
@@ -662,37 +677,37 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
     </div>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" type="button" data-tab="tools" onclick="bottomNavClick('tools', this)">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
-            <span>الأسعار</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="journey" onclick="bottomNavClick('journey', this)">
-            <svg viewBox="0 0 24 24"><path d="M5 3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM5 15a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2Z"/></svg>
-            <span>المسار</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="research" onclick="bottomNavClick('research', this)">
-            <svg viewBox="0 0 24 24"><path d="M4 3h11a2 2 0 0 1 2 2v12H6a2 2 0 0 0-2 2V3Zm15 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM7 7h7v2H7V7Zm0 4h7v2H7v-2Z"/></svg>
-            <span>الأبحاث</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="technicals" onclick="bottomNavClick('technicals', this)">
-            <svg viewBox="0 0 24 24"><path d="M3 17h2.5l3-5 3 4 4.5-8 2 3H21v2h-4l-2-3-3.2 5.7-3.1-4.1L6.6 19H3v-2z"/></svg>
-            <span>الفني</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="alerts" onclick="bottomNavClick('alerts', this)">
-            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-            <span>التنبيهات</span>
-        </button>
-        <button class="nav-item" type="button" data-tab="command" onclick="bottomNavClick('opportunities', this)">
-            <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-            <span>الملخص</span>
+        <button class="nav-item" type="button" data-action="home" data-tab="home" onclick="window.asiriOperations?.open('inbox')">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span>التوصيات</span>
         </button>
         <button class="nav-item" type="button" data-tab="portfolio" onclick="bottomNavClick('portfolio', this)">
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
             <span>محفظتي</span>
         </button>
-        <button class="nav-item" type="button" data-action="back" onclick="bottomNavClick('back', this)">
-            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            <span>السابق</span>
+        <button class="nav-item" type="button" data-tab="alerts" onclick="bottomNavClick('alerts', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <span>التنبيهات</span>
+        </button>
+        <button class="nav-item active" type="button" data-tab="tools" onclick="bottomNavClick('tools', this)">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
+            <span>الأسعار</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="technicals" onclick="bottomNavClick('technicals', this)">
+            <svg viewBox="0 0 24 24"><path d="M3 17h2.5l3-5 3 4 4.5-8 2 3H21v2h-4l-2-3-3.2 5.7-3.1-4.1L6.6 19H3v-2z"/></svg>
+            <span>الفني</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="research" onclick="bottomNavClick('research', this)">
+            <svg viewBox="0 0 24 24"><path d="M4 3h11a2 2 0 0 1 2 2v12H6a2 2 0 0 0-2 2V3Zm15 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM7 7h7v2H7V7Zm0 4h7v2H7v-2Z"/></svg>
+            <span>الأبحاث</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="journey" onclick="bottomNavClick('journey', this)">
+            <svg viewBox="0 0 24 24"><path d="M5 3a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5ZM5 15a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H5Zm10 2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2Z"/></svg>
+            <span>المسار</span>
+        </button>
+        <button class="nav-item" type="button" data-tab="command" onclick="bottomNavClick('opportunities', this)">
+            <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            <span>الملخص</span>
         </button>
     </nav>
 
@@ -743,8 +758,8 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
         const autoScenarioCache = new Map();
         const TECHNICALS_API = 'https://asiri-bot.onrender.com/api/live-terminal/technicals';
         let technicalRequestInFlight = false;
-        let activeMainTab = 'tools';
-        const mainTabHistory = ['tools'];
+        let activeMainTab = 'home';
+        const mainTabHistory = ['home'];
 
         function normalizeSymbol(value) {
             const symbol = String(value || '').trim().toUpperCase();
@@ -821,7 +836,8 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             renderResearchHub();
             syncTechnicalSymbolOptions();
             renderTechnicalUnavailable(null, 'اختر رمزاً من قائمة المراقبة لعرض التحليل التقني.');
-            switchMainTab('tools', document.querySelector('.nav-pill[data-tab="tools"]'), { fromHistory: true });
+            switchMainTab('home', document.querySelector('.nav-pill[data-tab="home"]'), { fromHistory: true, preserveScroll: true });
+            const initialMarketDetails = document.getElementById('home-market-details'); if (initialMarketDetails) initialMarketDetails.open = false;
             refreshVerifiedQuotes();
             window.setInterval(refreshVerifiedQuotes, QUOTE_REFRESH_MS);
         }
@@ -1430,7 +1446,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
         }
 
         function switchMainTab(tab, btn, options = {}) {
-            const section = document.getElementById(`sec-${tab}`);
+            const section = document.getElementById(tab === 'home' ? 'asiri-home' : `sec-${tab}`);
             if (!section) return false;
 
             if (!options.fromHistory && activeMainTab !== tab) {
@@ -1438,6 +1454,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
                 if (mainTabHistory.length > 20) mainTabHistory.shift();
             }
             activeMainTab = tab;
+            document.body.dataset.mainTab = tab;
 
             document.querySelectorAll('.nav-pill').forEach((pill) => {
                 const selected = pill.dataset.tab === tab;
@@ -1455,6 +1472,8 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
             if (tab === 'technicals') refreshTechnicalAnalysis();
             if (tab === 'portfolio') renderPortfolioSummary();
             if (tab === 'command') renderDataReadinessSummary();
+            const marketDetails = document.getElementById('home-market-details');
+            if (tab === 'tools' && marketDetails) marketDetails.open = true;
             if (!options.preserveScroll) { if (typeof section.scrollIntoView === 'function') section.scrollIntoView({ block: 'start', behavior: 'auto' }); else window.scrollTo({ top: 0, behavior: 'auto' }); }
             return true;
         }
@@ -1701,7 +1720,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#123048 0,#07111d 38%,var(--
 </script>
 
 
-<script src="./arabic-ui-polish-v1.js?v=1"></script>
+<script src="./arabic-ui-polish-v1.js?v=operations-1"></script>
 <script>
 (() => { const canvas=document.getElementById('cc-topology-canvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; const palette=['#56e0d2','#b7ff5a','#f4c95d','#ff667d','#76a8ff']; let w=0,h=0,dpr=1,t=0; let topologyState={total:0,fresh:0,stale:0,unavailable:0};
 function readTopologyState(){const n=id=>Number(document.getElementById(id)?.textContent?.replace(/[^0-9.-]/g,''))||0; topologyState={total:n('readiness-total'),fresh:n('readiness-fresh'),stale:n('readiness-stale'),unavailable:n('readiness-unavailable')}; const labels=[['l1',`LIQUIDITY · FRESH ${topologyState.fresh}`],['l2',`MOMENTUM · WATCH ${topologyState.total}`],['l3',`RISK · STALE ${topologyState.stale}`],['l4',`FUNDING · N/A ${topologyState.unavailable}`]]; labels.forEach(([cls,text])=>{const el=document.querySelector(`.cc-topology-label.${cls}`);if(el)el.textContent=text})}
@@ -1712,6 +1731,8 @@ function draw(){readTopologyState();ctx.clearRect(0,0,w,h); const nodeCount=Math
 /* COMMAND CENTER DATA BINDING V1 — read-only bridge to existing paper/readiness DOM */
 (() => { const kpis=[...document.querySelectorAll('.command-kpi')]; const byLabel=label=>kpis.find(node=>node.querySelector('small')?.textContent?.trim()===label); const set=(label,value,state='bound')=>{const node=byLabel(label)?.querySelector('strong');if(!node)return;node.textContent=value;node.className=state;node.dataset.bound='paper-lab'}; const source=id=>document.getElementById(id)?.textContent?.trim(); function sync(){const pnl=source('paper-lab-pnl'),sharpe=source('paper-lab-sharpe'),dd=source('paper-lab-max-dd'); set('PORTFOLIO PNL',pnl&&pnl!=='—'?pnl:'PENDING',pnl&&pnl!=='—'?'bound':'unavailable'); set('SHARPE RATIO',sharpe&&sharpe!=='—'&&sharpe!=='غير متاح'?sharpe:'PENDING',sharpe&&sharpe!=='—'&&sharpe!=='غير متاح'?'bound':'unavailable'); set('MAX DRAWDOWN',dd&&dd!=='—'?dd:'PENDING',dd&&dd!=='—'?'bound':'unavailable'); set('ACTIVE RESEARCH','READ-ONLY','bound'); const stage=document.querySelector('.cc-topology-stage'); if(stage){stage.dataset.dataSource='paper-lab-readiness';stage.dataset.total=source('readiness-total')||'0';stage.dataset.fresh=source('readiness-fresh')||'0';}} const targets=['paper-lab-pnl','paper-lab-sharpe','paper-lab-max-dd','readiness-total','readiness-fresh','readiness-stale','readiness-unavailable'].map(id=>document.getElementById(id)).filter(Boolean); const observer=new MutationObserver(sync); targets.forEach(node=>observer.observe(node,{childList:true,subtree:true,characterData:true})); sync(); window.setInterval(sync,5000); })();
 </script>
-<script type="module" src="./manual-paper-focus-ui-v4.mjs?v=stock-events-v1"></script>
+<dialog id="operations-copy-dialog" class="ops-copy-dialog"><form method="dialog"><h3>نسخ الرسالة</h3><p>حدّد النص ثم انسخه من قائمة جهازك.</p><textarea id="operations-copy-text" readonly aria-label="نص الرسالة للنسخ"></textarea><button id="operations-copy-close" type="button" class="ops-button">إغلاق</button></form></dialog>
+<script type="module" src="./operations-center.mjs?v=1"></script>
+<script type="module" src="./manual-paper-focus-ui-v4.mjs?v=operations-1"></script>
 </body>
 </html>
