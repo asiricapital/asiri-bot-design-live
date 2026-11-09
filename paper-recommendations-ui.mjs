@@ -12,10 +12,11 @@ export function createPaperRecommendationDesk({host,getWallet,getQuotes,onReview
  const grid=el('div');grid.id='paper-recommendations-list';grid.className='pr-grid';
  const waiting=el('details');waiting.className='pr-wait';const summary=el('summary','أسباب انتظار بقية الأسهم');const waitList=el('ul');waiting.append(summary,waitList);
  desk.append(head,status,grid,waiting,el('p','يُقبل الترشيح بعد اكتمال بوابات المحرك والتوافق الشرعي المسجل في المنصة، وسعر وتحليل حديثين، وسيولة موثقة، وصافي عائد/مخاطرة 2:1 أو أكثر. حد المركز 10%، احتياطي 30%، ومخاطرة حتى 1%. التوافق من قائمة المنصة وليس فحصًا شرعيًا جديدًا.'));
- host.before(desk);
+ const operationsHost=document.getElementById('operations-candidates');
+ if(operationsHost)operationsHost.append(desk);else host.before(desk);
  const homeButton=el('button','ترشيحات الشراء التجريبي');homeButton.type='button';homeButton.id='home-paper-recommendations';
  document.getElementById('home-open-portfolio')?.after(homeButton);
- homeButton.addEventListener('click',()=>{if(typeof switchMainTab==='function')switchMainTab('portfolio');desk.scrollIntoView({block:'start',behavior:'smooth'});});
+ homeButton.addEventListener('click',()=>{if(window.asiriOperations)window.asiriOperations.open('candidates');else{if(typeof switchMainTab==='function')switchMainTab('portfolio');desk.scrollIntoView({block:'start',behavior:'smooth'});}});
  let records=new Map(),busy=false,lastScan=0,scanGeneration=0,disposed=false,errors=new Map();
  function get(symbol){const record=records.get(symbol);if(!record)return null;try{return buildPaperRecommendation(getWallet(),record.analysis,getQuotes().find(q=>q.symbol===symbol),Date.now(),record.fetchedAt)}catch{return null}}
  function render(){
@@ -50,6 +51,8 @@ export function createPaperRecommendationDesk({host,getWallet,getQuotes,onReview
  window.addEventListener('asiri:quotes-rendered',()=>{render();if(!lastScan&&!busy&&getQuotes().length)scan()});
  window.addEventListener('storage',()=>render());
  const timer=setInterval(()=>{if(disposed||document.hidden)return;render();if(desk.getClientRects().length&&Date.now()-lastScan>=120000)scan()},10000);
+ const api=Object.freeze({get,render,scan,snapshot(){const quotes=getQuotes(),wallet=getWallet();return{busy,lastScan,analyzed:records.size,eligible:quotes.filter(q=>q.price>=RECOMMENDATION_RULES.minPrice&&q.price<=RECOMMENDATION_RULES.maxPrice).length,results:quotes.map(q=>{const r=records.get(q.symbol);return buildPaperRecommendation(wallet,r?.analysis,q,Date.now(),r?.fetchedAt)})}},paperOnly:true,dispose(){disposed=true;++scanGeneration;clearInterval(timer)}});
+ window.asiriPaperRecommendations=api;
  if(getQuotes().length)scan();else render();
- return Object.freeze({get,render,scan,paperOnly:true,dispose(){disposed=true;++scanGeneration;clearInterval(timer)}});
+ return api;
 }

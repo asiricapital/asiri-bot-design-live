@@ -62,7 +62,7 @@
     let node;
     while ((node = walker.nextNode())) {
       const parent = node.parentElement;
-      if (!parent || ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName)) continue;
+      if (!parent || parent.closest('[data-asiri-verbatim]') || ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName)) continue;
       nodes.push(node);
     }
     nodes.forEach((textNode) => {
@@ -74,11 +74,12 @@
   function init() {
     document.documentElement.lang = 'ar';
     document.documentElement.dir = 'rtl';
-    document.title = 'ASIRI | غرفة أبحاث السوق';
+    document.title = 'ASIRI | مركز التوصيات والمتابعة';
     document.body?.setAttribute('dir', 'rtl');
     document.body?.classList.add('asiri-arabic-ui');
     localizeTree();
     const observer = new MutationObserver((records) => records.forEach((record) => {
+      if (record.target?.parentElement?.closest('[data-asiri-verbatim]') || record.target?.closest?.('[data-asiri-verbatim]')) return;
       if (record.type === 'characterData' && record.target?.nodeValue) {
         const next = localizeText(record.target.nodeValue);
         if (next !== record.target.nodeValue) record.target.nodeValue = next;

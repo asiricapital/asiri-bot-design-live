@@ -6,9 +6,9 @@ const polish = fs.readFileSync(new URL('./arabic-ui-polish-v1.js', import.meta.u
 const css = fs.readFileSync(new URL('./arabic-ui-polish-v1.css', import.meta.url), 'utf8');
 
 assert.match(html, /<html lang="ar" dir="rtl">/);
-assert.match(html, /<title>ASIRI \| غرفة أبحاث السوق<\/title>/);
+assert.match(html, /<title>ASIRI \| مركز التوصيات والمتابعة<\/title>/);
 assert.match(html, /arabic-ui-polish-v1\.css\?v=1/);
-assert.match(html, /arabic-ui-polish-v1\.js\?v=1/);
+assert.match(html, /arabic-ui-polish-v1\.js\?v=operations-1/);
 assert.match(polish, /document\.documentElement\.lang = 'ar'/);
 assert.match(polish, /document\.documentElement\.dir = 'rtl'/);
 assert.match(polish, /executionAllowed|التنفيذ/);
