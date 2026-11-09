@@ -20,6 +20,10 @@ assert.equal(normalizeSignal({ ...row, text: '🔴 Asiri · تنبيه أمان\
 const test = normalizeSignal({ ...row, text: 'TEST · طلب مراجعة اختباري\nوقف الخسارة: $19.9\nالهدف الأول: $29.13' }, now);
 assert(test.test); assert.equal(test.trackable, false); assert.equal(filterSignals([signal, test]).length, 1);
 assert.equal(normalizeSignal({ ...row, text: 'تقرير الإغلاق\nوقف الخسارة: $10' }, now).kind, 'report');
+for(const heading of ['🌙 Sunday Night Futures Brief — Asiri Capital','📊 Market Close Report — Asiri Capital']){
+  const report=normalizeSignal({...row,text:heading+'\nلا يوجد Golden Alert مؤهل. الحالة READY_FOR_HUMAN_REVIEW غير متحققة.'},now);
+  assert.equal(report.kind,'report');assert.equal(report.trackable,false);
+}
 const arabic = normalizeSignal({ ...row, text: 'Golden Alert\nالسهم: ABC\nوقف الخسارة: $٤٫٥\nالهدف الأول: $٥٫٥\nالهدف الثاني: $٦٫٥' }, now);
 assert.equal(arabic.symbol, 'ABC'); assert.equal(arabic.stop, 4.5); assert.equal(arabic.target1, 5.5); assert.equal(arabic.target2, 6.5);
 assert.equal(normalizeSignal({ ...row, text: row.text.replace('$19.9', '$30') }, now).trackable, false);

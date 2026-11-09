@@ -1,4 +1,4 @@
-import { OPERATIONS_KEY, emptyOperations, parseOperations, normalizeSignals, markSignalRead, startFollowing, closeFollowing, advanceFollowing, trackingQuoteReason, filterSignals } from './operations-model.mjs';
+import { OPERATIONS_KEY, emptyOperations, parseOperations, normalizeSignals, markSignalRead, startFollowing, closeFollowing, advanceFollowing, trackingQuoteReason, filterSignals } from './operations-model.mjs?v=2';
 
 const API = 'https://asiri-bot.onrender.com';
 const $ = id => document.getElementById(id);

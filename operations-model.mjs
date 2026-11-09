@@ -26,10 +26,10 @@ export function normalizeSignal(row, now = Date.now()) {
   if (!Number.isFinite(at) || at > now + 60000) return null;
   const text = row.text.trim(), title = text.split('\n').find(s => s.trim())?.slice(0, 180) || 'رسالة ASIRI';
   const test = /(?:\bTEST\b|اختبار وصول|طلب مراجعة اختباري|رسالة تجريبية|اختبار تنبيه)/i.test(text);
-  const buy = !test && /(?:اقتراح شراء سهم|Golden Alert|READY_FOR_HUMAN_REVIEW|قراءة فنية مكتملة|ترشيح شراء)/i.test(text);
-  // Content takes priority: the legacy feed labels buy messages containing a stop as "stop".
-  const report = !buy && /تقرير|ملخص صحة|Dashboard|ملخص السوق|تقرير الإغلاق/i.test(title);
-  const kind = test ? 'test' : buy ? 'buy' : report ? 'report' : /وقف|هدف|أمان|خروج|حركة|تنبيه|STOP|TARGET/i.test(text) ? 'alert' : 'info';
+  // Report headings take priority over references to opportunities inside a report.
+  const report = /تقرير|ملخص صحة|Dashboard|ملخص السوق|تقرير الإغلاق|\bReport\b|\bBrief\b/i.test(title);
+  const buy = !test && !report && /(?:اقتراح شراء سهم|Golden Alert|READY_FOR_HUMAN_REVIEW|قراءة فنية مكتملة|ترشيح شراء)/i.test(title);
+  const kind = test ? 'test' : report ? 'report' : buy ? 'buy' : /وقف|هدف|أمان|خروج|حركة|تنبيه|STOP|TARGET/i.test(text) ? 'alert' : 'info';
   const labeled = text.match(/(?:السهم\s*[:：]|اقتراح شراء سهم\s*[—–-])\s*\$?([A-Z][A-Z0-9.-]{0,9})\b/)?.[1];
   const supplied = String(row.symbol || '').toUpperCase();
   const symbol = labeled || (symbolPattern.test(supplied) && !['KILL', 'LIVE', 'SAXO', 'ASIRI', 'TEST', 'USD'].includes(supplied) ? supplied : null);
